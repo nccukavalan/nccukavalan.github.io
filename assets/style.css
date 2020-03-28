@@ -1,0 +1,523 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"); @import url("https://pro.fontawesome.com/releases/v5.10.0/css/all.css"); * {
+    box-sizing: border-box;
+}
+
+.fixed-container {
+    position: relative;
+    display: block;
+    position: fixed;
+    top: 2em;
+    right: 2em;
+    padding: 0.5em;
+    height: auto;
+    width: auto;
+    z-index: 0;
+}
+
+.fixed-container:hover {
+    opacity: 1;
+}
+
+.fixed {
+    position: relative;
+    padding: 0.5em;
+    z-index: 101;
+    display: block;
+    opacity: 0.9;
+    color: #000;
+    font-weight: 700;
+}
+
+.bg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: block;
+    height: 100%;
+    width: 100%;
+    z-index: 100;
+    opacity: 0.5;
+}
+
+.fixed:hover {
+    font-weight: 1000;
+}
+
+.fixed:hover ~ .bg {
+    opacity: 1;
+}
+
+.bg:hover {
+    opacity: 1;
+}
+
+div.grid {
+    width: 100%;
+}
+
+table {
+    width: 80%;
+    margin-top: 1em;
+    margin-bottom: 3em;
+    border-collapse: collapse;
+}
+
+tr {
+    height: 3em;
+    line-height: 3em;
+}
+
+tr:nth-child(even) {
+    background-color: #DDD;
+}
+
+tr:nth-child(odd) {
+    background-color: #FFF;
+}
+
+th {
+    background-color: #333;
+    color: #FFF;
+}
+
+tr:hover {
+    background-color: #FFC;
+    font-weight: 700;
+}
+
+td {
+    width: 25%;
+    text-align: center;
+}
+
+body {
+    background-color: #EEE;
+    margin: 2em;
+}
+
+p {
+    margin-block-start: 0;
+    margin-block-end: 0;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+}
+
+section {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.radio>label {
+    font-size: 2em;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+a {
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+input {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+input[type="button"] {
+    border: 1px #999 solid;
+    line-height: 100%;
+}
+
+input[type="radio"] {
+    display: inline;
+    height: 2em;
+    width: 2em;
+}
+
+input[type="number"] {
+    width: 5em;
+}
+
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -moz-appearance: textfield;
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+button {
+    border: 1px #999 solid;
+    line-height: 100%;
+    text-align: center;
+    cursor: pointer;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-row-gap: 0.5em;
+}
+
+.row {
+    display: grid;
+    grid-template-rows: 3em;
+    grid-template-columns: repeat(6, 1fr);
+    align-items: center;
+}
+
+label {
+    text-align: right;
+    margin-right: 10px;
+}
+
+.infoIn {
+    text-align: left;
+    border: 1px #999 solid;
+    padding: 0.5em;
+    font-size: 1.2em;
+    border-radius: 0.2em;
+    grid-column: 2 / 5;
+}
+
+.radio {
+    grid-column: 2 / 7;
+    align-items: center;
+}
+
+.title {
+    width: 100%;
+    padding: 10px;
+    border-top: 1px #999 solid;
+    border-bottom: 1px #999 solid;
+    font-size: 2em;
+    margin-top: 0.8em;
+    margin-bottom: 0.5em;
+}
+
+.dec, .inc, .remove, .quantity {
+    text-align: center;
+}
+
+.dec, .inc {
+    width: 40px;
+    font-size: 0.9em;
+}
+
+.dec {
+    border-radius: 1em 0 0 1em;
+}
+
+.inc {
+    border-radius: 0 1em 1em 0;
+}
+
+.remove {
+    margin-left: 5px;
+    padding-left: -5px;
+    border-radius: 0.2em;
+    width: 30px;
+    background-color: #F99;
+}
+
+.quantity {
+    height: 100%;
+    border: 1px #999 solid;
+    font-size: 1.2em;
+}
+
+.order {
+    height: 2em;
+    display: flex;
+    margin: 10px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    width: 14em;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    border-left: 1px #999 solid;
+    border-right: 1px #999 solid;
+}
+
+.pic {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    background-color: #999;
+    width: 100%;
+    height: 150px;
+}
+
+.goods {
+    margin: 10px;
+    margin-bottom: 0;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.price {
+    margin: 10px;
+    margin-bottom: 0;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    font-size: 1.2em;
+}
+
+span.priceText::before {
+    content: '$';
+}
+
+select.chosen-select {
+    grid-column: 2 / 5;
+}
+
+#totalText {
+    margin-left: 1em;
+    font-size: 0.5em;
+    font-weight: 700;
+}
+
+/*CSS drop-down list*/
+/* @group Base */
+.chosen-container {
+    grid-column: 2 / 5;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 1.2em;
+    /*整個欄位內的font-size*/
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.chosen-container * {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.chosen-container .chosen-drop {
+    position: absolute;
+    top: 100%;
+    z-index: 1000;
+    width: 100%;
+    border: 1px solid #aaa;
+    /*下拉選單邊框*/
+    border-top: 0;
+    background: #ccc;
+    /*下拉選單色彩*/
+    -webkit-box-shadow: 0 4px 5px rgba(0, 0, 0, 0.15);
+    /*下拉選單陰影*/
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.15);
+    /*下拉選單陰影*/
+    clip: rect(0, 0, 0, 0);
+    -webkit-clip-path: inset(100% 100%);
+    clip-path: inset(100% 100%);
+}
+
+.chosen-container.chosen-with-drop .chosen-drop {
+    clip: auto;
+    -webkit-clip-path: none;
+    clip-path: none;
+}
+
+.chosen-container a {
+    cursor: pointer;
+}
+
+/* @end */
+/* @group Single Chosen */
+.chosen-container-single .chosen-single {
+    /*選擇欄位*/
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding: 0 0 0 8px;
+    height: 100%;
+    /*!!!!!欄位高度!!!!!!*/
+    border: 1px solid #aaa;
+    /*!!!!!欄位邊框!!!!!!*/
+    border-radius: 5px;
+    background-color: #fff;
+    padding: 0.5em;
+    background-clip: padding-box;
+    color: #333;
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 24px;
+    /*選擇框內字體高度*/
+}
+
+.chosen-container-single .chosen-default {
+    color: #777;
+    /*選擇框內(placeholder)字體顏色*/
+}
+
+.chosen-container-single .chosen-single span {
+    display: block;
+    overflow: hidden;
+    margin-right: 26px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chosen-container-single .chosen-single div {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: block;
+    height: 100%;
+}
+
+.chosen-container-single .chosen-single div b {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.chosen-container-single .chosen-search {
+    position: relative;
+    z-index: 1010;
+    margin: 0;
+    padding: 3px 4px;
+    white-space: nowrap;
+}
+
+.chosen-container-single .chosen-search input[type="text"] {
+    /*搜尋框*/
+    margin: 1px 0;
+    padding: 4px 20px 4px 5px;
+    width: 100%;
+    height: auto;
+    outline: 0;
+    border: 1px solid #aaa;
+    font-size: 1em;
+    line-height: normal;
+    border-radius: 3px;
+}
+
+.chosen-search input[readonly] {
+    display: none;
+}
+
+.chosen-container-single .chosen-drop {
+    margin-top: -1px;
+    border-radius: 0 0 4px 4px;
+    background-clip: padding-box;
+}
+
+/* @group Results */
+.chosen-container .chosen-results {
+    color: #333;
+    /*選項文字顏色*/
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0 4px 4px 0;
+    padding: 0 0 0 4px;
+    max-height: 12em;
+    /*下拉式選單最大高度*/
+    -webkit-overflow-scrolling: touch;
+}
+
+.chosen-container .chosen-results li {
+    display: none;
+    margin: 0;
+    padding: 5px 6px;
+    list-style: none;
+    line-height: 1em;
+    /*選項行高*/
+    word-wrap: break-word;
+    /*選項是否分行*/
+    -webkit-touch-callout: none;
+}
+
+.chosen-container .chosen-results li.active-result {
+    /*有效項目*/
+    display: list-item;
+    cursor: pointer;
+}
+
+.chosen-container .chosen-results li.disabled-result {
+    /*禁用項目*/
+    display: list-item;
+    color: #bbb;
+    cursor: default;
+}
+
+.chosen-container .chosen-results li.highlighted {
+    /*hovering的項目*/
+    background-color: #666;
+    color: #fff;
+}
+
+.chosen-container .chosen-results li.no-results {
+    /*搜尋無結果*/
+    color: #FFF;
+    /*no-results color*/
+    display: list-item;
+    background: #EB7A77;
+    /*no-results background*/
+}
+
+.chosen-container .chosen-results li em {
+    /*匹配字眼*/
+    font-style: normal;
+    //text-decoration: underline;
+    font-weight: 1000;
+}
+
+/*CSS drop-down list END*/
+/*validate*/
+.container .messages {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.row .messages {
+    grid-column: 5 / 7;
+}
+
+.row .radio + .messages {
+    grid-column: 2 / 7;
+    margin-bottom: 5px;
+}
+
+.help-block.error {
+    /*錯誤提示文字*/
+    margin-left: 5px;
+    color: #F00;
+    font-size: 0.8em;
+}
+
+.has-success {
+    /*正確欄位*/
+    background-color: #CFC;
+}
+
+.has-error {
+    /*錯誤欄位*/
+    background-color: #FCC;
+}

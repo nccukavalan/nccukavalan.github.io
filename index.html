@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <title>測試用-蘭陽週預購表單</title>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <!--inner link-->
+        <link rel="stylesheet" type="text/css" href="assets/style.css"/>
+        <script src="assets/script.js"></script>
+        <noscript>
+            <div class="noscript">
+                很抱歉，請開啟Javascript才能正常填寫並送出預購表單！<br>
+                政大蘭友會感謝您的支持與配合
+                <style type="text/css">
+                    body>*:not(.noscript) {
+                        display: none;
+                    }
+
+                    .noscript {
+                        position: fixed;
+                        top: 0px;
+                        left: 0px;
+                        z-index: 3000;
+                        height: 100%;
+                        width: 100%;
+                        background-color: #CC3333;
+                        color: #FFF;
+                        padding: 3em;
+                        overflow: hidden;
+                        line-height: 2em;
+                        font-size: 1.2em;
+                    }
+                </style>
+            </div>
+        </noscript>
+    </head>
+    <body>
+        <h1>測試用-蘭陽週預購表單</h1>
+        <span>我只是個介紹文字</span>
+        <div class="fixed-container">
+            <a id="fixed" class="fixed" href="#cart"></a>
+            <a id="bg" class="bg" href="#cart"></a>
+        </div>
+
+        <form action="" id="form" method="post" name="form" novalidate>
+            <section id="info">
+                <p class="title">買家基本資料</p>
+                <div class="grid">
+                    <div class="row">
+                        <label for="name">姓名</label>
+                        <input class="infoIn" name="name" type="text" id="name" placeholder="你的名字" autofocus="">
+                        <div class="messages"></div>
+                    </div>
+                    <div class="row">
+                        <label for="studentID">學號</label>
+                        <input class="infoIn" name="studentID" type="text" id="studentID" placeholder="你的學號，例如">
+                        <div class="messages"></div>
+                    </div>
+                    <div class="row">
+                        <label for="department">系級</label>
+                        <select class="chosen-select" name="department" id="department" tabindex="-1" data-placeholder="選擇系所">
+                            <option value=""></option>
+                            <!--系所區-->
+                        </select>
+                        <div class="messages"></div>
+                    </div>
+                    <div class="row">
+                        <label for="grade"></label>
+                        <select class="chosen-select" name="grade" id="grade" tabindex="-1" data-placeholder="選擇年級">
+                            <option value=""></option>
+                            <option value="1-一年級">一年級</option>
+                            <option value="2-二年級">二年級</option>
+                            <option value="3-三年級">三年級</option>
+                            <option value="4-四年級">四年級</option>
+                            <option value="5-五年級">五年級</option>
+                            <option value="6-六年級">六年級</option>
+                            <option value="7-七年級">七年級</option>
+                        </select>
+                        <div class="messages"></div>
+                    </div>
+                    <div class="row">
+                        <label for="phoneNumber">聯絡手機</label>
+                        <input class="infoIn" name="phoneNumber" type="text" id="phoneNumber" placeholder="手機號碼，例如">
+                        <div class="messages"></div>
+                    </div>
+                    <div class="row">
+                        <label for="email">聯絡 E-mail</label>
+                        <input class="infoIn" name="email" type="text" id="email" placeholder="E-mail，例如">
+                        <div class="messages"></div>
+                    </div>
+                    <div class="row">
+                        <label>
+                            預計<br>取貨日期
+                        
+                        </label>
+                        <div class="radio">
+                            <input name="date" type="radio" value="2020-5-6 (三)" id="d0506">
+                            <label for="d0506">5月6日（三）</label>
+                            <input name="date" type="radio" value="2020-5-7 (四)" id="d0507">
+                            <label for="d0507">5月7日（四）</label>
+                        </div>
+                        <div class="messages"></div>
+                    </div>
+                </div>
+            </section>
+            <!--商品區-->
+            <!--Cart-->
+        </form>
+    </body>
+</html>
