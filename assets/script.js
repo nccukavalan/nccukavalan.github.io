@@ -388,11 +388,11 @@ function sendMail(dict) {
 
     Email.send({
         Host: "smtp.gmail.com",
-        Username: "johnny12399@gmail.com",
-        Password: "rcmwhdhyjrxmmjvi",
+        Username: "nccukavalan2.0@gmail.com",
+        Password: "qvygrpxtuogyhruk",
         To: dict['email'],
         //email
-        From: "johnny12399+kw@gmail.com",
+        From: "nccukavalan2.0@gmail.com",
         Subject: "⚠️⚠️重要通知⚠️⚠️蘭陽週商品確認信及取貨通知",
         Body: mailBody,
     }).then(message=>{
@@ -409,11 +409,11 @@ function sendMail(dict) {
 
     Email.send({
         Host: "smtp.gmail.com",
-        Username: "johnny12399@gmail.com",
-        Password: "rcmwhdhyjrxmmjvi",
-        To: "108306033@nccu.edu.tw",
+        Username: "nccukavalan2.0@gmail.com",
+        Password: "qvygrpxtuogyhruk",
+        To: "nccukavalan2.0@gmail.com",
         //email
-        From: "johnny12399+kw@gmail.com",
+        From: "nccukavalan2.0@gmail.com",
         Subject: "有人前來光顧蘭陽週預購了！",
         Body: mailBodyCopy,
     }).then(message=>{
