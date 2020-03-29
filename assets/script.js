@@ -1,19 +1,3 @@
-//jquery
-document.write('<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>');
-
-//帶搜尋欄選單插件
-document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>');
-
-//表單驗證插件
-document.write('<script src="https://validatejs.org/validate.js"></script>');
-document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>');
-
-//時間處理插件
-document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>');
-
-//mail
-document.write('<script src="https://smtpjs.com/v3/smtp.js"></script>');
-
 // create the the drop-down list
 $(function() {
     //load the drop-down list
@@ -56,7 +40,7 @@ $(function() {
         preventSubmit();
 
         $(".click-able").click(function(ev) {
-            clicked(this);
+            clicked(this, items);
         });
 
         addCart();
@@ -119,8 +103,8 @@ function addCart() {
         p.innerHTML = '購物車<span id="totalText"></span>';
 
     var table = document.createElement('table');
-        table.id = 'cart';
-        table.innerHTML = '<tr><th>商品</th><th>價格</th><th>數量</th><th>小計</th></tr>'
+        table.id = 'cartTable';
+        table.innerHTML = '<tbody></tbody>';
 
     section.appendChild(p);
     section.appendChild(table);
@@ -132,6 +116,7 @@ function addCart() {
 
 //即時消費情形
 function status() {
+
     var orders = document.querySelectorAll(".order")
     var total = 0;
 
@@ -167,8 +152,9 @@ function status() {
     orderDict['total'] = total;
     orderDict['outputText'] = output;
 
-    var table = document.querySelector("table#cart");
-        table.innerHTML = '<tr><th>商品</th><th>價格</th><th>數量</th><th>小計</th></tr>';
+    var table = document.querySelector("table#cartTable");
+    var tbody = document.querySelector("tbody");
+        tbody.innerHTML = '<tr><th>商品</th><th>價格</th><th>數量</th><th>小計</th></tr>';
 
     //shopping cart
 
@@ -176,7 +162,7 @@ function status() {
     for (var order in orderDict) {
         if (index >= Object.keys(orderDict).length - 2) {
             if (index == Object.keys(orderDict).length - 2) {
-                table.innerHTML += '<tr><td>總計</td><td></td><td></td><td>$' + toCurrency(orderDict['total']) + '</td></tr>';
+                tbody.innerHTML += '<tr><td>總計</td><td></td><td></td><td>$' + toCurrency(orderDict['total']) + '</td></tr>';
             } else {//console.log(orderDict[order]);
             }
         } else {
@@ -186,28 +172,49 @@ function status() {
                 tr.innerHTML += '<td>$' + toCurrency(orderDict[order]['price']) + '</td>';
                 tr.innerHTML += '<td>' + orderDict[order]['quantity'] + '</td>';
                 tr.innerHTML += '<td>$' + toCurrency(orderDict[order]['subtotal']) + '</td>';
-                table.appendChild(tr);
+                tbody.appendChild(tr);
             }
         }
 
         index++;
     }
 
+    table.innerHTML = '';
+    table.appendChild(tbody);
+
     var totalText = '$' + toCurrency(orderDict['total']);
 
-    //document.querySelector("#totalText").innerHTML = '您目前消費金額：' + totalText;
-
-
     var fixed = document.querySelector("#fixed");
-        fixed.textContent = totalText + '｜點我跳到結帳區';
+        fixed.textContent = totalText;
 
     var fixedContainer = document.querySelector(".fixed-container");
     var bg = document.querySelector(".bg");
 
-    if (orderDict['total'] == 0) {
-        bg.style.backgroundColor = '#FCC';
-    } else {
+    var sectionProductsList = document.querySelectorAll('.sectionProductsList');
+
+    var fixedSectionsList = document.querySelector("#fixedSectionsList");
+        fixedSectionsList.innerHTML = '';
+
+    var li = document.createElement("li");
+        li.innerHTML = '<a class="bg" href="#info" style="background-color:#EEE">買家基本資料</a>';
+    fixedSectionsList.appendChild(li);
+
+    for (var i = 0; i < sectionProductsList.length; i++) {
+            var li = document.createElement("li");
+                li.innerHTML = '<a class="bg" href="#'+ sectionProductsList[i].id +'" style="background-color:#EEE">' + sectionProductsList[i].id.substring(8) + '</a>';
+            fixedSectionsList.appendChild(li);
+        }
+
+   if (orderDict['total'] > 0) {
         bg.style.backgroundColor = '#CFC';
+        for (var i = 0; i < sectionProductsList.length; i++) {
+            sectionProductsList[i].style.backgroundColor = "";
+        }
+    } else {
+        bg.style.backgroundColor = '#FCC';
+        for (var i = 0; i < sectionProductsList.length; i++) {
+            sectionProductsList[i].style.backgroundColor = "#FCC";
+        }
     }
 
     return orderDict;
@@ -487,12 +494,15 @@ function setValidateConstraints(items) {
         productName = "quantity-".concat(items[i].merchant).concat("-").concat(items[i].product);
         constraints[productName] = {
             presence: {
-                message: "的數量不能留空！",
+                message: "的訂購數量\n不能留空！",
             },
             numericality: {
                 onlyInteger: true,
                 greaterThanOrEqualTo: 0,
-                message: "的訂購數量\n只能是大於0的整數！",
+                lessThanOrEqualTo: 20,
+                notInteger: "的訂購數量\n只能是整數！",
+                notGreaterThanOrEqualTo: "的訂購數量\n不能為負！",
+                notLessThanOrEqualTo: "的訂購數量\n已達上限！如需要訂購更多請向我們洽詢",
             },
         }
     }
@@ -560,83 +570,6 @@ function vaild(items) {
             }
         }
 
-        // Updates the inputs with the validation errors
-        function showIsErrors(form, errors) {
-            // We loop through all the inputs and show the errors for that input
-            _.each(form.querySelectorAll("input[name], select[name]"), function(input) {
-                // Since the errors can be null if no errors were found we need to handle that
-                var e = errors && errors[input.name];
-                showIsErrorsForInput(input, e);
-            });
-        }
-
-        // Shows the errors for a specific input
-        function showIsErrorsForInput(input, errors) {
-
-            var messagesClassName = ".messages";
-
-            // This is the root of the input
-            if (input.parentNode.className == "order") {
-                var formGroup = input.parentNode.parentNode;
-            } else if (input.parentNode.className == "radio") {
-                var formGroup = input.parentNode.parentNode;
-            } else {
-                var formGroup = input.parentNode;
-            }
-
-            var messages = formGroup.querySelector(messagesClassName);
-            // First we remove any old messages and resets the classes
-            resetFormGroup(formGroup);
-
-            // If we have errors
-            if (errors) {
-                // we first mark the group has having errors
-                formGroup.classList.add("has-error");
-                // then we append all the errors
-                _.each(errors, function(error) {
-                    addError(messages, error);
-                });
-            } else {
-                // otherwise we simply mark it as success
-                if (formGroup != form) {
-                    formGroup.classList.add("has-success");
-                }
-            }
-
-        }
-
-        // Recusively finds the closest parent that has the specified class
-        function closestParent(child, className) {
-            if (!child || child == document) {
-                return null;
-            }
-            if (child.classList.contains(className)) {
-                return child;
-            } else {
-                return closestParent(child.parentNode, className);
-            }
-        }
-
-        function resetFormGroup(formGroup) {
-            // Remove the success and error classes
-            formGroup.classList.remove("has-error");
-            formGroup.classList.remove("has-success");
-            // and remove any old messages
-            _.each(formGroup.querySelectorAll(".help-block.error"), function(el) {
-                el.parentNode.removeChild(el);
-            });
-        }
-
-        // Adds the specified error with the following markup
-        // <p class="help-block error">[message]</p>
-        function addError(messages, error) {
-            var block = document.createElement("p");
-            block.classList.add("help-block");
-            block.classList.add("error");
-            block.innerText = error;
-            messages.appendChild(block);
-        }
-
         function doError(message) {
             //表單驗證失敗
             alert(message);
@@ -645,6 +578,7 @@ function vaild(items) {
         function doSuccess(message) {
             submitForm(items);
         }
+
     }
     )();
     //最後的括號是必要且不可刪除的
@@ -652,6 +586,68 @@ function vaild(items) {
     * validate.js end
     * 表單驗證區結束
     */
+}
+
+// Updates the inputs with the validation errors
+function showIsErrors(form, errors) {
+    // We loop through all the inputs and show the errors for that input
+    _.each(form.querySelectorAll("input[name], select[name]"), function(input) {
+        // Since the errors can be null if no errors were found we need to handle that
+        var e = errors && errors[input.name];
+        showIsErrorsForInput(input, e);
+    });
+}
+
+// Shows the errors for a specific input
+function showIsErrorsForInput(input, errors) {
+
+    var messagesClassName = ".messages";
+
+    // This is the root of the input
+    if (input.parentNode.className == "order" || input.parentNode.className == "radio") {
+        var formGroup = input.parentNode.parentNode;
+    } else {
+        var formGroup = input.parentNode;
+    }
+
+    var messages = formGroup.querySelector(messagesClassName);
+    // First we remove any old messages and resets the classes
+    resetFormGroup(formGroup);
+
+    // If we have errors
+    if (errors) {
+        // we first mark the group has having errors
+        formGroup.classList.add("has-error");
+        // then we append all the errors
+        _.each(errors, function(error) {
+            addError(messages, error);
+        });
+    } else {
+        // otherwise we simply mark it as success
+        if (formGroup != form) {
+            formGroup.classList.add("has-success");
+        }
+    }
+}
+
+function resetFormGroup(formGroup) {
+    // Remove the success and error classes
+    formGroup.classList.remove("has-error");
+    formGroup.classList.remove("has-success");
+    // and remove any old messages
+    _.each(formGroup.querySelectorAll(".help-block.error"), function(el) {
+        el.parentNode.removeChild(el);
+    });
+}
+
+// Adds the specified error with the following markup
+// <p class="help-block error">[message]</p>
+function addError(messages, error) {
+    var block = document.createElement("p");
+    block.classList.add("help-block");
+    block.classList.add("error");
+    block.innerText = error;
+    messages.appendChild(block);
 }
 
 //千分位
@@ -662,12 +658,18 @@ function toCurrency(num) {
 }
 
 //when the count input was clicked
-function clicked(item) {
+function clicked(item, items) {
     var quantity = item.parentElement.childNodes[2];
+
+    var formIdName = "#form";
+    var form = document.querySelector(formIdName);
+
     //onclick
     if (item.classList[1] == "inc") {
         if (parseInt(quantity.value) < 0) {
             quantity.value = 1;
+        } else if (parseInt(quantity.value) >= 21) {
+            quantity.value = 21;
         } else if (quantity.value == "") {
             quantity.value = 1;
         } else {
@@ -678,19 +680,33 @@ function clicked(item) {
     if (item.classList[1] == "dec") {
         if (parseInt(quantity.value) >= 1) {
             quantity.value = parseInt(quantity.value) - 1;
-        } else if (quantity.value == "") {
+        } else if (quantity.value == "" || parseInt(quantity.value) < 0) {
             quantity.value = 0;
         }
         status();
     }
     if (item.classList[1] == "remove") {
-        if (quantity.value == "") {
-            quantity.value = 0;
-        } else {
-            quantity.value = 0;
-        }
+        quantity.value = 0;
         status();
     }
+
+    item.addEventListener("click", function(ev) {
+        var errors = validate(form, setValidateConstraints(items)) || {};
+        showIsErrorsForInput(this, errors['quantity-' + this.parentNode.id]);
+        status();
+    });
+
+    item.addEventListener("focus", function(ev) {
+        var errors = validate(form, setValidateConstraints(items)) || {};
+        showIsErrorsForInput(this, errors['quantity-' + this.parentNode.id]);
+        status();
+    });
+
+    item.addEventListener("blur", function(ev) {
+        var errors = validate(form, setValidateConstraints(items)) || {};
+        showIsErrorsForInput(this, errors['quantity-' + this.parentNode.id]);
+        status();
+    });
 }
 
 //Section of Merchant of product list
@@ -708,6 +724,7 @@ function addProductsList(items) {
         }
         //addTitle
         var section = document.createElement("section");
+        section.className = "sectionProductsList";
         section.id = "section-".concat(items[i].merchant);
         section.innerHTML = '<p class="title">'.concat(items[i].merchant).concat('</p>');
         //append

@@ -3,53 +3,127 @@
 }
 
 .fixed-container {
-    position: relative;
-    display: block;
+    height: auto;
     position: fixed;
     top: 2em;
     right: 2em;
-    padding: 0.5em;
-    height: auto;
-    width: auto;
     z-index: 0;
 }
 
-.fixed-container:hover {
-    opacity: 1;
+.fixed-container * {
+    text-align: center;
 }
 
-.fixed {
-    position: relative;
+.cart-fixed {
     padding: 0.5em;
-    z-index: 101;
+}
+
+.cart-fixed > .fixed {
+    padding: 0.5em;
     display: block;
     opacity: 0.9;
     color: #000;
     font-weight: 700;
 }
 
-.bg {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: block;
-    height: 100%;
-    width: 100%;
-    z-index: 100;
-    opacity: 0.5;
-}
-
-.fixed:hover {
+.cart-fixed .fixed:hover {
     font-weight: 1000;
+    opacity: 1;
 }
 
-.fixed:hover ~ .bg {
+.cart-fixed:hover .fixed {
+    font-weight: 1000;
     opacity: 1;
+}
+
+.cart-fixed:hover .bg {
+    border: 1px rgba(0, 0, 0, 0.75) solid;
+}
+
+.cart-fixed:hover #fixed::after {
+    content: '｜點我跳到結帳區';
+}
+
+#fixed:hover::after {
+    content: '｜點我跳到結帳區';
+}
+
+ul, li {
+    list-style-type: none;
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.section-fixed {
+    padding: 0.5em;
+    margin-top: -0.5em;
+}
+
+.section-fixed:hover {
+    opacity: 1;
+    border-radius: 0.5em 0.5em 0 0;
+}
+
+.section-fixed:hover ul li {
+    opacity: 1;
+    border-radius: 0.5em 0.5em 0 0;
+}
+
+.section-fixed li > ul {
+    display: none;
+}
+
+.section-fixed li > ul:hover {
+    display: block;
+    position: relative;
+    right: 0em;
+}
+
+.section-fixed:hover li > ul {
+    display: block;
+    position: relative;
+    right: 0em;
+}
+
+.section-fixed > ul > .fixed {
+    display: block;
+    padding: 0.5em;
+    opacity: 0.9;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.9em;
+}
+
+.section-fixed > ul > li a {
+    display: block;
+    padding: 0.5em;
+    opacity: 0.9;
+    color: #000;
+    font-weight: 700;
+    border-radius: 0;
+}
+
+.section-fixed > ul > li > ul > li:nth-last-child(1) a {
+    border-radius: 0 0 0.5em 0.5em;
+}
+
+.section-fixed .bg {
+    background-color: #CCC;
+}
+
+.bg {
+    border: 1px rgba(0, 0, 0, 0.25) solid;
+    border-radius: 0.5em;
+    box-shadow: 1px 1px 1px 1px #CCC;
 }
 
 .bg:hover {
     opacity: 1;
+    border: 1px rgba(0, 0, 0, 0.75) solid;
 }
+
+/*test*/
 
 div.grid {
     width: 100%;
@@ -86,7 +160,7 @@ tr:hover {
 }
 
 td {
-    width: 25%;
+    width: 20%;
     text-align: center;
 }
 

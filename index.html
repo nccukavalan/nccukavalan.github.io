@@ -3,7 +3,17 @@
     <head>
         <meta charset="UTF-8">
         <title>測試用-蘭陽週預購表單</title>
+        <!--jquery-->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <!--帶搜尋欄選單插件-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
+        <!--表單驗證插件-->
+         <script src="https://validatejs.org/validate.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+        <!--時間處理插件-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+        <!--mail-->
+        <script src="https://smtpjs.com/v3/smtp.js"></script>
         <!--inner link-->
         <link rel="stylesheet" type="text/css" href="assets/style.css"/>
         <script src="assets/script.js"></script>
@@ -38,10 +48,23 @@
         <h1>測試用-蘭陽週預購表單</h1>
         <span>我只是個介紹文字</span>
         <div class="fixed-container">
-            <a id="fixed" class="fixed" href="#cart"></a>
-            <a id="bg" class="bg" href="#cart"></a>
+            <div class="cart-fixed">
+                <a id="fixed" class="fixed bg" href="#cart"></a>
+            </div>
+            <div class="section-fixed">
+                <ul>
+                    <li class="fixed bg">
+                        目錄
+                    </li>
+                    <li>
+                        <ul class="fixed" id="fixedSectionsList">
+                            <!--sections li-->
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
-
+        
         <form action="" id="form" method="post" name="form" novalidate>
             <section id="info">
                 <p class="title">買家基本資料</p>
