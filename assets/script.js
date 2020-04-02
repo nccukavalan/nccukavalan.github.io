@@ -34,18 +34,23 @@ $(function() {
 
         //add the element
         addProductsList(items);
+        createFixedElement();
         vaild(items);
 
-        //Listener
-        preventSubmit();
+        addCartSection(items);
 
+        //Listener
+        $("input").keydown(function(ev) {
+            if (ev.which == 13) {
+                ev.preventDefault();
+            }
+        });
         $(".click-able").click(function(ev) {
             clicked(this, items);
         });
-
-        addCart();
-
-        status();
+        $(".cartBtn").click(function(ev) {
+            clicked(this, items);
+        });
     });
 });
 
@@ -72,6 +77,70 @@ function loadSelectChosen() {
     });
 }
 
+function createFixedElement() {
+    var fixedContainer = document.querySelector(".fixed-container");
+
+    var sectionProductsList = document.querySelectorAll('.sectionProductsList');
+
+    var fixedSectionsList = document.querySelector("#fixedSectionsList");
+        fixedSectionsList.innerHTML = '';
+
+    var li = document.createElement("li");
+        li.innerHTML = '<a class="bg" href="#info" style="background-color:#EEE">買家基本資料</a>';
+    fixedSectionsList.appendChild(li);
+
+    for (var i = 0; i < sectionProductsList.length; i++) {
+            var li = document.createElement("li");
+                li.innerHTML = '<a class="bg" href="#'+ sectionProductsList[i].id +'" style="background-color:#EEE">' + sectionProductsList[i].id.substring(8) + '</a>';
+            fixedSectionsList.appendChild(li);
+        }
+}
+
+function addCartSection(items) {
+    var section = document.createElement('section');
+        section.id = 'cart';
+
+    var p = document.createElement('p');
+        p.className = 'title';
+        p.innerHTML = '購物車';
+
+    var table = document.createElement('table');
+        table.id = 'cartTable';
+
+    var tbody = document.createElement("tbody");
+        tbody.innerHTML = '<tr id="tr-title"><th>商品</th><th>價格</th><th>數量</th><th>修改</th><th>小計</th></tr>';
+
+    for (var i = 0; i < items.length; i++) {
+        var order = items[i].merchant + '-' + items[i].product;
+        var tr = document.createElement("tr");
+            tr.id = 'tr-' + order;
+            tr.innerHTML += '<td>' + order + '</td>';
+            tr.innerHTML += '<td>$' + toCurrency(items[i].price) + '</td>';
+            tr.innerHTML += '<td>' + 0 + '</td>';
+
+            var td = document.createElement("td");
+                td.innerHTML += '<button type="button" class="cartBtn dec" name="' + order + '"><i class="fas fa-minus"></i></button>'
+                td.innerHTML += '<button type="button" class="cartBtn inc" name="' + order + '"><i class="fas fa-plus"></i></button>'
+                td.innerHTML += '<button type="button" class="cartBtn remove" name="' + order + '"><i class="fas fa-trash-alt"></i></button>'
+            tr.appendChild(td);
+
+            tr.innerHTML += '<td>$' + toCurrency(0) + '</td>';
+            tr.className = 'tr-hide'
+        tbody.appendChild(tr);
+    }
+
+    tbody.innerHTML += '<tr id="tr-total"><td>總計</td><td></td><td></td><td></td><td>$' + toCurrency(0) + '</td></tr>';
+
+    table.appendChild(tbody);
+
+    section.appendChild(p);
+    section.appendChild(table);
+    
+    section.appendChild(createSubmitButton());
+
+    document.querySelector("form").appendChild(section);
+}
+
 //create submit button
 function createSubmitButton() {
     var submit = document.createElement("button");
@@ -80,38 +149,6 @@ function createSubmitButton() {
     submit.textContent = "送出".concat("!!測試中-之後移到最下面!!");
     submit.value = submit.textContent;
     return submit;
-}
-
-// prevent Default Submit in enter key
-function preventSubmit() {
-    $("input").keydown(function(ev) {
-        if (ev.which == 13) {
-            ev.preventDefault();
-        }
-    });
-    $(".click-able").click(function(ev) {
-        ev.preventDefault();
-    });
-}
-
-function addCart() {
-    var section = document.createElement('section');
-        section.id = 'cart';
-
-    var p = document.createElement('p');
-        p.className = 'title';
-        p.innerHTML = '購物車<span id="totalText"></span>';
-
-    var table = document.createElement('table');
-        table.id = 'cartTable';
-        table.innerHTML = '<tbody></tbody>';
-
-    section.appendChild(p);
-    section.appendChild(table);
-    
-    section.appendChild(createSubmitButton());
-
-    document.querySelector("form").appendChild(section);
 }
 
 //即時消費情形
@@ -134,7 +171,6 @@ function status() {
         //message
         if (subtotal > 0) {
             output += "「" + productName + " ($" + toCurrency(price) + ")」購買" + quantity + "件，小計" + toCurrency(subtotal) + "元\n";
-
         }
 
         //json
@@ -152,58 +188,42 @@ function status() {
     orderDict['total'] = total;
     orderDict['outputText'] = output;
 
-    var table = document.querySelector("table#cartTable");
-    var tbody = document.querySelector("tbody");
-        tbody.innerHTML = '<tr><th>商品</th><th>價格</th><th>數量</th><th>小計</th></tr>';
+    updateFixedElement(orderDict);
 
-    //shopping cart
+    updateCart(orderDict);
 
+    return orderDict;
+}
+
+function updateCart(orderDict) {
     var index = 0;
     for (var order in orderDict) {
+        var tr = document.getElementById("tr-" + order);
         if (index >= Object.keys(orderDict).length - 2) {
             if (index == Object.keys(orderDict).length - 2) {
-                tbody.innerHTML += '<tr><td>總計</td><td></td><td></td><td>$' + toCurrency(orderDict['total']) + '</td></tr>';
-            } else {//console.log(orderDict[order]);
+                tr.childNodes[4].textContent = '$' + toCurrency(orderDict['total']);
             }
         } else {
+            tr.childNodes[0].textContent = order;
+            tr.childNodes[1].textContent = '$' + toCurrency(orderDict[order]['price']);
+            tr.childNodes[2].textContent = orderDict[order]['quantity'];
+            tr.childNodes[4].textContent = '$' + toCurrency(orderDict[order]['subtotal']);
             if (orderDict[order]['subtotal'] > 0) {
-                var tr = document.createElement("tr");
-                tr.innerHTML += '<td>' + order + '</td>';
-                tr.innerHTML += '<td>$' + toCurrency(orderDict[order]['price']) + '</td>';
-                tr.innerHTML += '<td>' + orderDict[order]['quantity'] + '</td>';
-                tr.innerHTML += '<td>$' + toCurrency(orderDict[order]['subtotal']) + '</td>';
-                tbody.appendChild(tr);
+                tr.className = 'tr-show';
+            } else {
+                tr.className = 'tr-hide'
             }
         }
-
         index++;
     }
+}
 
-    table.innerHTML = '';
-    table.appendChild(tbody);
-
-    var totalText = '$' + toCurrency(orderDict['total']);
-
-    var fixed = document.querySelector("#fixed");
-        fixed.textContent = totalText;
-
-    var fixedContainer = document.querySelector(".fixed-container");
+function updateFixedElement(orderDict) {
     var bg = document.querySelector(".bg");
-
     var sectionProductsList = document.querySelectorAll('.sectionProductsList');
 
-    var fixedSectionsList = document.querySelector("#fixedSectionsList");
-        fixedSectionsList.innerHTML = '';
-
-    var li = document.createElement("li");
-        li.innerHTML = '<a class="bg" href="#info" style="background-color:#EEE">買家基本資料</a>';
-    fixedSectionsList.appendChild(li);
-
-    for (var i = 0; i < sectionProductsList.length; i++) {
-            var li = document.createElement("li");
-                li.innerHTML = '<a class="bg" href="#'+ sectionProductsList[i].id +'" style="background-color:#EEE">' + sectionProductsList[i].id.substring(8) + '</a>';
-            fixedSectionsList.appendChild(li);
-        }
+    var fixed = document.querySelector("#fixed");
+        fixed.textContent = '$' + toCurrency(orderDict['total']);
 
    if (orderDict['total'] > 0) {
         bg.style.backgroundColor = '#CFC';
@@ -216,8 +236,6 @@ function status() {
             sectionProductsList[i].style.backgroundColor = "#FCC";
         }
     }
-
-    return orderDict;
 }
 
 //action for submit the form
@@ -494,15 +512,15 @@ function setValidateConstraints(items) {
         productName = "quantity-".concat(items[i].merchant).concat("-").concat(items[i].product);
         constraints[productName] = {
             presence: {
-                message: "的訂購數量\n不能留空！",
+                message: "的訂購數量不能留空！",
             },
             numericality: {
                 onlyInteger: true,
                 greaterThanOrEqualTo: 0,
                 lessThanOrEqualTo: 20,
-                notInteger: "的訂購數量\n只能是整數！",
-                notGreaterThanOrEqualTo: "的訂購數量\n不能為負！",
-                notLessThanOrEqualTo: "的訂購數量\n已達上限！如需要訂購更多請向我們洽詢",
+                notInteger: "的訂購數量只能是整數！",
+                notGreaterThanOrEqualTo: "的訂購數量不能為負！",
+                notLessThanOrEqualTo: "的訂購數量已達本表單上限！如需要訂購更多請直接向我們洽詢！",
             },
         }
     }
@@ -604,10 +622,15 @@ function showIsErrorsForInput(input, errors) {
     var messagesClassName = ".messages";
 
     // This is the root of the input
-    if (input.parentNode.className == "order" || input.parentNode.className == "radio") {
-        var formGroup = input.parentNode.parentNode;
-    } else {
-        var formGroup = input.parentNode;
+    var formGroup = findParentNode(input);
+
+    function findParentNode(node) {
+        var node = node.parentNode;
+        if (node.classList.contains("formRow") || node.classList.contains("container")) {
+            return node;
+        } else {
+            return findParentNode(node);
+        }
     }
 
     var messages = formGroup.querySelector(messagesClassName);
@@ -659,10 +682,11 @@ function toCurrency(num) {
 
 //when the count input was clicked
 function clicked(item, items) {
-    var quantity = item.parentElement.childNodes[2];
-
-    var formIdName = "#form";
-    var form = document.querySelector(formIdName);
+    if (item.classList[0] == "click-able") {
+        var quantity = item.parentElement.childNodes[2];
+    } else {
+        var quantity = document.querySelector('[name="quantity-' + item.name + '"]');
+    }
 
     //onclick
     if (item.classList[1] == "inc") {
@@ -692,19 +716,19 @@ function clicked(item, items) {
 
     item.addEventListener("click", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
-        showIsErrorsForInput(this, errors['quantity-' + this.parentNode.id]);
+        showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
         status();
     });
 
     item.addEventListener("focus", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
-        showIsErrorsForInput(this, errors['quantity-' + this.parentNode.id]);
+        showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
         status();
     });
 
     item.addEventListener("blur", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
-        showIsErrorsForInput(this, errors['quantity-' + this.parentNode.id]);
+        showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
         status();
     });
 }
@@ -769,16 +793,16 @@ function addEachProduct(items, index) {
     order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + productWholeName + '" value="' + inputPrice + '">';
 
     //dec btn
-    order.innerHTML += '<button class="click-able dec"><i class="fas fa-minus"></i></button>';
+    order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
 
     //quantity input
-    order.innerHTML += '<input class="quantity" type="number" size="1" name="quantity-' + productWholeName + '" value="0" min="0">';
+    order.innerHTML += '<input class="quantity" type="number" name="quantity-' + productWholeName + '" value="0" min="0">';
 
     //inc btn
-    order.innerHTML += '<button class="click-able inc"><i class="fas fa-plus"></i></button>';
+    order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
 
     //remove btn
-    order.innerHTML += '<button class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
+    order.innerHTML += '<button type="button" class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
 
     container.appendChild(order);
 

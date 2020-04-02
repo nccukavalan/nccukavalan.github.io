@@ -1,4 +1,6 @@
-@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"); @import url("https://pro.fontawesome.com/releases/v5.10.0/css/all.css"); * {
+@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
+@import url("https://pro.fontawesome.com/releases/v5.10.0/css/all.css");
+* {
     box-sizing: border-box;
 }
 
@@ -18,7 +20,7 @@
     padding: 0.5em;
 }
 
-.cart-fixed > .fixed {
+.cart-fixed>.fixed {
     padding: 0.5em;
     display: block;
     opacity: 0.9;
@@ -36,6 +38,10 @@
     opacity: 1;
 }
 
+.cart-fixed .bg {
+    box-shadow: 1px 1px 1px 1px #CCC;
+}
+
 .cart-fixed:hover .bg {
     border: 1px rgba(0, 0, 0, 0.75) solid;
 }
@@ -48,7 +54,8 @@
     content: '｜點我跳到結帳區';
 }
 
-ul, li {
+ul,
+li {
     list-style-type: none;
     display: block;
     margin: 0;
@@ -70,23 +77,28 @@ ul, li {
     border-radius: 0.5em 0.5em 0 0;
 }
 
-.section-fixed li > ul {
+.section-fixed>ul {
+    box-shadow: 1px 1px 1px 1px #CCC;
+    border-radius: 0.5em;
+}
+
+.section-fixed li>ul {
     display: none;
 }
 
-.section-fixed li > ul:hover {
+.section-fixed li>ul:hover {
     display: block;
     position: relative;
     right: 0em;
 }
 
-.section-fixed:hover li > ul {
+.section-fixed:hover li>ul {
     display: block;
     position: relative;
     right: 0em;
 }
 
-.section-fixed > ul > .fixed {
+.section-fixed>ul>.fixed {
     display: block;
     padding: 0.5em;
     opacity: 0.9;
@@ -95,7 +107,7 @@ ul, li {
     font-size: 0.9em;
 }
 
-.section-fixed > ul > li a {
+.section-fixed>ul>li a {
     display: block;
     padding: 0.5em;
     opacity: 0.9;
@@ -104,7 +116,7 @@ ul, li {
     border-radius: 0;
 }
 
-.section-fixed > ul > li > ul > li:nth-last-child(1) a {
+.section-fixed>ul>li>ul>li:nth-last-child(1) a {
     border-radius: 0 0 0.5em 0.5em;
 }
 
@@ -115,7 +127,6 @@ ul, li {
 .bg {
     border: 1px rgba(0, 0, 0, 0.25) solid;
     border-radius: 0.5em;
-    box-shadow: 1px 1px 1px 1px #CCC;
 }
 
 .bg:hover {
@@ -141,12 +152,16 @@ tr {
     line-height: 3em;
 }
 
-tr:nth-child(even) {
+tr:nth-of-type(even) {
     background-color: #DDD;
 }
 
-tr:nth-child(odd) {
+tr:nth-of-type(odd) {
     background-color: #FFF;
+}
+
+tr.tr-hide {
+    display: none;
 }
 
 th {
@@ -185,15 +200,6 @@ section {
     align-items: center;
 }
 
-.radio>label {
-    font-size: 2em;
-}
-
-img {
-    width: 100%;
-    height: 100%;
-}
-
 a {
     text-decoration: none;
     font-size: 0.9em;
@@ -208,171 +214,268 @@ input {
     flex-direction: row;
 }
 
-input[type="button"] {
-    border: 1px #999 solid;
-    line-height: 100%;
-}
-
-input[type="radio"] {
-    display: inline;
-    height: 2em;
-    width: 2em;
-}
-
-input[type="number"] {
-    width: 5em;
-}
-
-input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
-    -moz-appearance: textfield;
-    -webkit-appearance: none;
-    margin: 0;
+.title {
+    width: 100%;
+    font-size: 2em;
+    margin-top: 0.8em;
+    margin-bottom: 0.5em;
+    padding: 10px;
+    border-top: 1px #999 solid;
+    border-bottom: 1px #999 solid;
 }
 
 button {
-    border: 1px #999 solid;
     line-height: 100%;
     text-align: center;
     cursor: pointer;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-row-gap: 0.5em;
+
+
+
+@media (min-width: 768px) {
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-row-gap: 0.5em;
+    }
+
+    .grid .formRow {
+        display: grid;
+        grid-template-rows: 3em;
+        grid-template-columns: repeat(6, 1fr);
+        align-items: center; /*交叉軸-V*/
+    }
+
+    .grid .formRow .infoIn {
+        grid-column: 2 / 5;
+    }
+
+    .grid .formRow select.chosen-select {
+        grid-column: 2 / 5;
+    }
+
+    .grid .formRow .radio {
+        display: flex;
+        grid-column: 2 / 7;
+    }
+
+    /*validate - form info row*/
+    .grid .formRow .infoIn + .messages,
+    .grid .formRow .chosen-container + .messages {
+        grid-column: 5 / 7;
+    }
+
+    .grid .formRow .radio + .messages {
+        grid-column: 2 / 7;
+    }
+
+    .grid .formRow label {
+        text-align: right;
+        margin-right: 0.75em;
+    }
+
+    .grid .formRow .help-block.error {
+        margin-left: 0.4em;
+    }
 }
 
-.row {
-    display: grid;
-    grid-template-rows: 3em;
-    grid-template-columns: repeat(6, 1fr);
-    align-items: center;
+@media (max-width: 768px) {
+    .grid {
+        display: flex;
+        justify-content: center; /*主軸-H*/
+        flex-direction: column;
+    }
+
+    .grid * {
+        width: 100%;
+    }
+
+    .grid .formRow {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /*主軸-H*/
+        align-items: center; /*交叉軸-V*/
+        padding: 0.25em 0 0.25em;
+        margin: 0.25em 0 0.25em;
+    }
+
+    .grid .formRow .radio {
+        display: flex;
+        flex-direction: row;
+    }
+
+    /*validate - form info row*/
+    .grid .formRow .infoIn + .messages,
+    .grid .formRow .chosen-container + .messages {
+        align-items: center; /*交叉軸-V*/
+    }
+
+    .grid .formRow .radio + .messages {
+        align-items: center; /*交叉軸-V*/
+    }
+
+    .grid .formRow label {
+        padding-left: 0.5em;
+        margin-bottom: 0.5em;
+        width: 100%;
+    }
+
+    .grid .formRow .help-block.error {
+        padding-left: 0.5em;
+        margin-top: 0.5em;
+    }
 }
 
-label {
-    text-align: right;
-    margin-right: 10px;
-}
 
-.infoIn {
+
+
+
+.formRow .infoIn {
     text-align: left;
-    border: 1px #999 solid;
+    border: 0.05em #999 solid;
     padding: 0.5em;
     font-size: 1.2em;
     border-radius: 0.2em;
-    grid-column: 2 / 5;
 }
 
-.radio {
-    grid-column: 2 / 7;
+.formRow .radio {
     align-items: center;
 }
 
-.title {
-    width: 100%;
-    padding: 10px;
-    border-top: 1px #999 solid;
-    border-bottom: 1px #999 solid;
+.formRow .radio label {
     font-size: 2em;
-    margin-top: 0.8em;
-    margin-bottom: 0.5em;
 }
 
-.dec, .inc, .remove, .quantity {
+.formRow .radio input[type="radio"] {
+    display: inline;
+    height: 2em;
+    width: 2em;
+}
+
+
+
+/*product container*/
+.container {
+    display: flex;
+    justify-content: center; /*主軸-H*/
+    flex-wrap: wrap;
+    margin-bottom: 1.5em;
+    border-left: 0.05em #999 solid;
+    border-right: 0.05em #999 solid;
+    width: 14em;
+}
+
+.container > * {
+    justify-content: center; /*主軸-H*/
+    width: 100%;
+    margin: 0.5em 0.5em 0;
+}
+
+.container > *:nth-last-child(1) {
+    margin: 0.5em;
+}
+
+.container .pic {
+    height: 10em;
+}
+
+.container .pic img {
+    width: 100%;
+    height: 100%;
+}
+
+.container .goods, .price {
+    text-align: center;
+    overflow: hidden;
+}
+
+.container .goods {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.container .price {
+    font-size: 1.2em;
+}
+
+.container .price .priceText::before {
+    content: '$';
+}
+
+.container .order {
+    display: flex;
+    height: 2em;
+}
+
+.container .order > * {
+    border: 0.05em #999 solid;
+}
+
+.container .order * {
     text-align: center;
 }
 
-.dec, .inc {
-    width: 40px;
-    font-size: 0.9em;
-}
-
-.dec {
-    border-radius: 1em 0 0 1em;
-}
-
-.inc {
-    border-radius: 0 1em 1em 0;
-}
-
-.remove {
-    margin-left: 5px;
-    padding-left: -5px;
-    border-radius: 0.2em;
-    width: 30px;
-    background-color: #F99;
-}
-
-.quantity {
+.container .order .quantity {
     height: 100%;
+    width: 4em;
+    margin: 0;
     border: 1px #999 solid;
     font-size: 1.2em;
 }
 
-.order {
-    height: 2em;
-    display: flex;
-    margin: 10px;
+.container .order .quantity[type="number"] {
+    -moz-appearance: textfield;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    width: 14em;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    border-left: 1px #999 solid;
-    border-right: 1px #999 solid;
+.container .order .quantity[type=number]::-webkit-inner-spin-button,
+.container .order .quantity[type=number]::-webkit-outer-spin-button {
+    -moz-appearance: textfield;
+    -webkit-appearance: none;
 }
 
-.pic {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
-    background-color: #999;
-    width: 100%;
-    height: 150px;
+.container .order .dec, .inc {
+    width: 3em;
+    font-size: 0.8em;
 }
 
-.goods {
-    margin: 10px;
-    margin-bottom: 0;
-    width: 100%;
-    text-align: center;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+.container .order .dec {
+    border-radius: 3em 0 0 3em;
 }
 
-.price {
-    margin: 10px;
-    margin-bottom: 0;
-    width: 100%;
-    text-align: center;
-    overflow: hidden;
-    font-size: 1.2em;
+.container .order .inc {
+    border-radius: 0 3em 3em 0;
 }
 
-span.priceText::before {
-    content: '$';
+.container .order .remove {
+    margin-left: 0.4em;
+    border-radius: 0.2em;
+    width: 2em;
+    background-color: #F99;
 }
 
-select.chosen-select {
-    grid-column: 2 / 5;
+/* products quantity */
+/*validate text*/
+.help-block.error {
+    /*錯誤提示文字*/
+    color: #F00;
+    font-size: 0.8em;
 }
 
-#totalText {
-    margin-left: 1em;
-    font-size: 0.5em;
-    font-weight: 700;
+.has-success {
+    /*正確欄位*/
+    background-color: #CFC;
+}
+
+.has-error {
+    /*錯誤欄位*/
+    background-color: #FCC;
 }
 
 /*CSS drop-down list*/
+
 /* @group Base */
+
 .chosen-container {
     grid-column: 2 / 5;
     position: relative;
@@ -421,7 +524,9 @@ select.chosen-select {
 }
 
 /* @end */
+
 /* @group Single Chosen */
+
 .chosen-container-single .chosen-single {
     /*選擇欄位*/
     position: relative;
@@ -502,6 +607,7 @@ select.chosen-select {
 }
 
 /* @group Results */
+
 .chosen-container .chosen-results {
     color: #333;
     /*選項文字顏色*/
@@ -558,40 +664,5 @@ select.chosen-select {
 .chosen-container .chosen-results li em {
     /*匹配字眼*/
     font-style: normal;
-    //text-decoration: underline;
     font-weight: 1000;
-}
-
-/*CSS drop-down list END*/
-/*validate*/
-.container .messages {
-    display: flex;
-    justify-content: center;
-    text-align: center;
-}
-
-.row .messages {
-    grid-column: 5 / 7;
-}
-
-.row .radio + .messages {
-    grid-column: 2 / 7;
-    margin-bottom: 5px;
-}
-
-.help-block.error {
-    /*錯誤提示文字*/
-    margin-left: 5px;
-    color: #F00;
-    font-size: 0.8em;
-}
-
-.has-success {
-    /*正確欄位*/
-    background-color: #CFC;
-}
-
-.has-error {
-    /*錯誤欄位*/
-    background-color: #FCC;
 }
