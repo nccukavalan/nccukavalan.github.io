@@ -4,181 +4,7 @@
     box-sizing: border-box;
 }
 
-.fixed-container {
-    height: auto;
-    position: fixed;
-    top: 2em;
-    right: 2em;
-    z-index: 0;
-}
-
-.fixed-container * {
-    text-align: center;
-}
-
-.cart-fixed {
-    padding: 0.5em;
-}
-
-.cart-fixed>.fixed {
-    padding: 0.5em;
-    display: block;
-    opacity: 0.9;
-    color: #000;
-    font-weight: 700;
-}
-
-.cart-fixed .fixed:hover {
-    font-weight: 1000;
-    opacity: 1;
-}
-
-.cart-fixed:hover .fixed {
-    font-weight: 1000;
-    opacity: 1;
-}
-
-.cart-fixed .bg {
-    box-shadow: 1px 1px 1px 1px #CCC;
-}
-
-.cart-fixed:hover .bg {
-    border: 1px rgba(0, 0, 0, 0.75) solid;
-}
-
-.cart-fixed:hover #fixed::after {
-    content: '｜點我跳到結帳區';
-}
-
-#fixed:hover::after {
-    content: '｜點我跳到結帳區';
-}
-
-ul,
-li {
-    list-style-type: none;
-    display: block;
-    margin: 0;
-    padding: 0;
-}
-
-.section-fixed {
-    padding: 0.5em;
-    margin-top: -0.5em;
-}
-
-.section-fixed:hover {
-    opacity: 1;
-    border-radius: 0.5em 0.5em 0 0;
-}
-
-.section-fixed:hover ul li {
-    opacity: 1;
-    border-radius: 0.5em 0.5em 0 0;
-}
-
-.section-fixed>ul {
-    box-shadow: 1px 1px 1px 1px #CCC;
-    border-radius: 0.5em;
-}
-
-.section-fixed li>ul {
-    display: none;
-}
-
-.section-fixed li>ul:hover {
-    display: block;
-    position: relative;
-    right: 0em;
-}
-
-.section-fixed:hover li>ul {
-    display: block;
-    position: relative;
-    right: 0em;
-}
-
-.section-fixed>ul>.fixed {
-    display: block;
-    padding: 0.5em;
-    opacity: 0.9;
-    color: #000;
-    font-weight: 700;
-    font-size: 0.9em;
-}
-
-.section-fixed>ul>li a {
-    display: block;
-    padding: 0.5em;
-    opacity: 0.9;
-    color: #000;
-    font-weight: 700;
-    border-radius: 0;
-}
-
-.section-fixed>ul>li>ul>li:nth-last-child(1) a {
-    border-radius: 0 0 0.5em 0.5em;
-}
-
-.section-fixed .bg {
-    background-color: #CCC;
-}
-
-.bg {
-    border: 1px rgba(0, 0, 0, 0.25) solid;
-    border-radius: 0.5em;
-}
-
-.bg:hover {
-    opacity: 1;
-    border: 1px rgba(0, 0, 0, 0.75) solid;
-}
-
-/*test*/
-
-div.grid {
-    width: 100%;
-}
-
-table {
-    width: 80%;
-    margin-top: 1em;
-    margin-bottom: 3em;
-    border-collapse: collapse;
-}
-
-tr {
-    height: 3em;
-    line-height: 3em;
-}
-
-tr:nth-of-type(even) {
-    background-color: #DDD;
-}
-
-tr:nth-of-type(odd) {
-    background-color: #FFF;
-}
-
-tr.tr-hide {
-    display: none;
-}
-
-th {
-    background-color: #333;
-    color: #FFF;
-}
-
-tr:hover {
-    background-color: #FFC;
-    font-weight: 700;
-}
-
-td {
-    width: 20%;
-    text-align: center;
-}
-
+/*main*/
 body {
     background-color: #EEE;
     margin: 2em;
@@ -193,11 +19,10 @@ p {
 
 section {
     display: flex;
+    flex-direction: row;
+    align-items: center;
     flex-wrap: wrap;
     width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
 }
 
 a {
@@ -231,9 +56,11 @@ button {
 }
 
 
+.grid {
+    width: 100%;
+}
 
-
-@media (min-width: 768px) {
+@media only screen and (min-width: 768px) {
     .grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -278,9 +105,22 @@ button {
     .grid .formRow .help-block.error {
         margin-left: 0.4em;
     }
+
+    .section-fixed li>ul {
+        display: none;
+    }
+
+    .section-fixed:hover ul li {
+        opacity: 1;
+        border-radius: 0.5em 0.5em 0 0;
+    }
+
+    section {
+        justify-content: center;
+    }
 }
 
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     .grid {
         display: flex;
         justify-content: center; /*主軸-H*/
@@ -302,7 +142,7 @@ button {
 
     .grid .formRow .radio {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
     }
 
     /*validate - form info row*/
@@ -325,11 +165,19 @@ button {
         padding-left: 0.5em;
         margin-top: 0.5em;
     }
+
+    .grid .formRow .radioRow {
+        margin-top: 0.5em;
+    }
+
+    .section-fixed ul li {
+        border-radius: 0.5em 0.5em 0 0;
+    }
+    
+    section {
+        justify-content: flex-start;
+    }
 }
-
-
-
-
 
 .formRow .infoIn {
     text-align: left;
@@ -352,8 +200,6 @@ button {
     height: 2em;
     width: 2em;
 }
-
-
 
 /*product container*/
 .container {
@@ -472,6 +318,169 @@ button {
     background-color: #FCC;
 }
 
+/*cart table*/
+table {
+    width: 80%;
+    margin-top: 1em;
+    margin-bottom: 3em;
+    border-collapse: collapse;
+}
+
+tr {
+    height: 3em;
+    line-height: 3em;
+}
+
+tr:nth-of-type(even) {
+    background-color: #DDD;
+}
+
+tr:nth-of-type(odd) {
+    background-color: #FFF;
+}
+
+tr.tr-hide {
+    display: none;
+}
+
+th {
+    background-color: #333;
+    color: #FFF;
+}
+
+tr:hover {
+    background-color: #FFC;
+    font-weight: 700;
+}
+
+td {
+    width: 20%;
+    text-align: center;
+}
+
+
+/*fixed items*/
+.fixed-container {
+    height: auto;
+    position: fixed;
+    top: 2em;
+    right: 2em;
+    z-index: 100;
+}
+
+.fixed-container * {
+    text-align: center;
+}
+
+.cart-fixed {
+    padding: 0.5em;
+}
+
+.cart-fixed>.fixed {
+    padding: 0.5em;
+    display: block;
+    opacity: 0.9;
+    color: #000;
+    font-weight: 700;
+}
+
+.cart-fixed .fixed:hover {
+    font-weight: 1000;
+    opacity: 1;
+}
+
+.cart-fixed:hover .fixed {
+    font-weight: 1000;
+    opacity: 1;
+}
+
+.cart-fixed .bg {
+    box-shadow: 1px 1px 1px 1px #CCC;
+}
+
+.cart-fixed:hover .bg {
+    border: 1px rgba(0, 0, 0, 0.75) solid;
+}
+
+.cart-fixed:hover #fixed::after {
+    content: '｜點我跳到結帳區';
+}
+
+#fixed:hover::after {
+    content: '｜點我跳到結帳區';
+}
+
+ul,
+li {
+    list-style-type: none;
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.section-fixed {
+    padding: 0.5em;
+    margin-top: -0.5em;
+}
+
+.section-fixed:hover {
+    opacity: 1;
+    border-radius: 0.5em 0.5em 0 0;
+}
+
+.section-fixed>ul {
+    box-shadow: 1px 1px 1px 1px #CCC;
+    border-radius: 0.5em;
+}
+
+.section-fixed li>ul:hover {
+    display: block;
+    position: relative;
+    right: 0em;
+}
+
+.section-fixed:hover li>ul {
+    display: block;
+    position: relative;
+    right: 0em;
+}
+
+.section-fixed>ul>.fixed {
+    display: block;
+    padding: 0.5em;
+    opacity: 0.9;
+    color: #000;
+    font-weight: 700;
+    font-size: 0.9em;
+}
+
+.section-fixed>ul>li a {
+    display: block;
+    padding: 0.5em;
+    opacity: 0.9;
+    color: #000;
+    font-weight: 700;
+    border-radius: 0;
+}
+
+.section-fixed>ul>li>ul>li:nth-last-child(1) a {
+    border-radius: 0 0 0.5em 0.5em;
+}
+
+.section-fixed .bg {
+    background-color: #CCC;
+}
+
+.bg {
+    border: 1px rgba(0, 0, 0, 0.25) solid;
+    border-radius: 0.5em;
+}
+
+.bg:hover {
+    opacity: 1;
+    border: 1px rgba(0, 0, 0, 0.75) solid;
+}
+
 /*CSS drop-down list*/
 
 /* @group Base */
@@ -497,7 +506,7 @@ button {
 .chosen-container .chosen-drop {
     position: absolute;
     top: 100%;
-    z-index: 1000;
+    z-index: 10;
     width: 100%;
     border: 1px solid #aaa;
     /*下拉選單邊框*/
@@ -577,7 +586,7 @@ button {
 
 .chosen-container-single .chosen-search {
     position: relative;
-    z-index: 1010;
+    z-index: 20;
     margin: 0;
     padding: 3px 4px;
     white-space: nowrap;
