@@ -46,26 +46,32 @@
         </noscript>
     </head>
     <body>
-        <h1>測試用-蘭陽週預購表單</h1>
-        <span>我只是個介紹文字</span>
-        <div class="fixed-container">
-            <div class="cart-fixed">
-                <a id="fixed" class="fixed bg" href="#cart">$0</a>
+        <header>
+            <div class="header">
+                <h1>測試用-蘭陽週預購表單</h1>
+                <button type="button" id="navBtn"><i class="fas fa-bars"></i></button>
+                <nav class="fixed-container">
+                    <ul>
+                        <li class="cart-fixed">
+                            <a id="fixed" class="fixed bg" href="#cart">$0</a>
+                        </li>
+                        <li class="section-fixed">
+                            <ul>
+                                <li class="fixed bg">
+                                    目錄
+                                </li>
+                                <li>
+                                    <ul class="fixed" id="fixedSectionsList">
+                                        <!--sections li-->
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-            <div class="section-fixed">
-                <ul>
-                    <li class="fixed bg">
-                        目錄
-                    </li>
-                    <li>
-                        <ul class="fixed" id="fixedSectionsList">
-                            <!--sections li-->
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        
+            <span>我只是個介紹文字</span>
+        </header>
         <form action="" id="form" method="post" name="form" novalidate>
             <section id="info">
                 <p class="title">買家基本資料</p>

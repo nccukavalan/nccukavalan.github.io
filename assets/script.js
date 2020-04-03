@@ -51,6 +51,21 @@ $(function() {
         $(".cartBtn").click(function(ev) {
             clicked(this, items);
         });
+        $("#navBtn").click(function(ev) {
+            if (this.classList.contains("active")) {
+                this.classList.remove("active");
+                document.querySelector("nav").classList.remove("active");
+            } else {
+                this.classList.add("active");
+                document.querySelector("nav").classList.add("active");
+                $(document).on('click', function(ev) {
+                    document.querySelector("#navBtn").classList.remove("active");
+                    document.querySelector("nav").classList.remove("active");
+                    $("body").off('click');
+                });
+                ev.stopPropagation();
+            }
+        });
     });
 });
 
@@ -86,12 +101,12 @@ function createFixedElement() {
         fixedSectionsList.innerHTML = '';
 
     var li = document.createElement("li");
-        li.innerHTML = '<a class="bg" href="#info" style="background-color:#EEE">買家基本資料</a>';
+        li.innerHTML = '<a class="bg" href="#info">買家基本資料</a>';
     fixedSectionsList.appendChild(li);
 
     for (var i = 0; i < sectionProductsList.length; i++) {
             var li = document.createElement("li");
-                li.innerHTML = '<a class="bg" href="#'+ sectionProductsList[i].id +'" style="background-color:#EEE">' + sectionProductsList[i].id.substring(8) + '</a>';
+                li.innerHTML = '<a class="bg" href="#'+ sectionProductsList[i].id +'">' + sectionProductsList[i].id.substring(8) + '</a>';
             fixedSectionsList.appendChild(li);
         }
 }

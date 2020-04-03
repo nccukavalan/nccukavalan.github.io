@@ -169,10 +169,6 @@ button {
     .grid .formRow .radioRow {
         margin-top: 0.5em;
     }
-
-    .section-fixed ul li {
-        border-radius: 0.5em 0.5em 0 0;
-    }
     
     section {
         justify-content: flex-start;
@@ -358,58 +354,7 @@ td {
     text-align: center;
 }
 
-
-/*fixed items*/
-.fixed-container {
-    height: auto;
-    position: fixed;
-    top: 2em;
-    right: 2em;
-    z-index: 100;
-}
-
-.fixed-container * {
-    text-align: center;
-}
-
-.cart-fixed {
-    padding: 0.5em;
-}
-
-.cart-fixed>.fixed {
-    padding: 0.5em;
-    display: block;
-    opacity: 0.9;
-    color: #000;
-    font-weight: 700;
-}
-
-.cart-fixed .fixed:hover {
-    font-weight: 1000;
-    opacity: 1;
-}
-
-.cart-fixed:hover .fixed {
-    font-weight: 1000;
-    opacity: 1;
-}
-
-.cart-fixed .bg {
-    box-shadow: 1px 1px 1px 1px #CCC;
-}
-
-.cart-fixed:hover .bg {
-    border: 1px rgba(0, 0, 0, 0.75) solid;
-}
-
-.cart-fixed:hover #fixed::after {
-    content: '｜點我跳到結帳區';
-}
-
-#fixed:hover::after {
-    content: '｜點我跳到結帳區';
-}
-
+    /*fixed items*/
 ul,
 li {
     list-style-type: none;
@@ -418,68 +363,253 @@ li {
     padding: 0;
 }
 
-.section-fixed {
-    padding: 0.5em;
-    margin-top: -0.5em;
+@media only screen and (min-width: 768px) {
+    /*fixed items*/
+    .fixed-container {
+        height: auto;
+        position: fixed;
+        top: 2em;
+        right: 2em;
+        z-index: 100;
+    }
+
+    .fixed-container * {
+        text-align: center;
+    }
+
+    .cart-fixed {
+        padding: 0.5em;
+    }
+
+    .cart-fixed>.fixed {
+        padding: 0.5em;
+        display: block;
+        opacity: 0.9;
+        color: #000;
+        font-weight: 700;
+    }
+
+    .cart-fixed .fixed:hover {
+        font-weight: 1000;
+        opacity: 1;
+    }
+
+    .cart-fixed:hover .fixed {
+        font-weight: 1000;
+        opacity: 1;
+    }
+
+    .cart-fixed .bg {
+        box-shadow: 1px 1px 1px 1px #CCC;
+    }
+
+    .cart-fixed:hover .bg {
+        border: 1px rgba(0, 0, 0, 0.75) solid;
+    }
+
+    .cart-fixed:hover #fixed::after {
+        content: '｜點我跳到結帳區';
+    }
+
+    #fixed:hover::after {
+        content: '｜點我跳到結帳區';
+    }
+
+    .section-fixed {
+        padding: 0.5em;
+        margin-top: -0.5em;
+    }
+
+    .section-fixed:hover {
+        opacity: 1;
+        border-radius: 0.5em 0.5em 0 0;
+    }
+
+    .section-fixed>ul {
+        box-shadow: 1px 1px 1px 1px #CCC;
+        border-radius: 0.5em;
+    }
+
+    .section-fixed li>ul:hover {
+        display: block;
+        position: relative;
+        right: 0em;
+    }
+
+    .section-fixed:hover li>ul {
+        display: block;
+        position: relative;
+        right: 0em;
+    }
+
+    .section-fixed>ul>.fixed {
+        display: block;
+        padding: 0.5em;
+        opacity: 0.9;
+        color: #000;
+        font-weight: 700;
+        font-size: 0.9em;
+    }
+
+    .section-fixed>ul>li a {
+        display: block;
+        padding: 0.5em;
+        opacity: 0.9;
+        color: #000;
+        font-weight: 700;
+        border-radius: 0;
+    }
+
+    .section-fixed>ul>li>ul>li:nth-last-child(1) a {
+        border-radius: 0 0 0.5em 0.5em;
+    }
+
+    .section-fixed li.bg {
+        background-color: #CCC;
+    }
+
+    .section-fixed li li li a.bg {
+        background-color: #EEE
+    }
+
+    .bg {
+        border: 1px rgba(0, 0, 0, 0.25) solid;
+        border-radius: 0.5em;
+    }
+
+    .bg:hover {
+        opacity: 1;
+        border: 1px rgba(0, 0, 0, 0.75) solid;
+    }
+
+    button#navBtn {
+        display: none;
+    }
 }
 
-.section-fixed:hover {
-    opacity: 1;
-    border-radius: 0.5em 0.5em 0 0;
+@media only screen and (max-width: 768px) {
+    .header {
+        position: fixed;
+        z-index: 1000;
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
+
+    h1 {
+        margin: 0;
+        background-color: #FFF;
+        padding: 1em;
+        font-size: 2em;
+        line-height: 1;
+    }
+
+    button#navBtn {
+        position: fixed;
+        top: 1.5em;
+        right: 2em;
+        height: 3em;
+        width: 3em;
+        border: 0.05em #CCC solid;
+        background-color: #EEE;
+        text-align: center;
+        border-radius: 0.2em;
+    }
+
+    button#navBtn.active {
+        background-color: #CFC;
+    }
+
+    nav {
+        display: none;
+        position: fixed;
+        width: 100%;
+    }
+
+    nav.active {
+        display: block;
+    }
+
+    nav * {
+        width: 100%;
+    }
+
+    nav li {
+        display: flex;
+        background-color: #CCC;
+    }
+
+    nav li:hover {
+        background-color: #FFC;
+    }
+
+    nav li.bg {
+        display: none;
+    }
+
+    nav a {
+        color: #000;
+        padding-left: 1em;
+        height: 2.4em;
+        line-height: 2.4em;
+        width: 100%;
+        font-size: 1.2em;
+    }
+
+    nav a:hover {
+        font-weight: 700;
+    }
+
+    /*
+    nav {
+        position: absolute;
+        top: 2em;
+        right: 2em;
+        border: 0.05em #000 solid;
+        background-color: #CCC;
+        width: 3em;
+        height: 3em;
+    }
+
+    nav > ul {
+        display: none;
+    }
+
+    nav:hover > ul {
+        position: absolute;
+        display: block;
+        top: 2.95em;
+        right: -0.05em;
+        width: 10em;
+    }
+
+    nav li {
+        position: relative;
+        display: block;
+        right: 0;
+        height: 2em;
+    }
+
+
+    nav > ul > li > ul > li:nth-child(1) {
+        display: none;
+    }
+
+    nav > ul > li:nth-child(1),
+    nav > ul > li > ul > li li {
+        border: 0.05em #000 solid;
+        background-color: #CCC;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    */
+
+    body.nav-active {
+        width: 60%;
+    }
 }
 
-.section-fixed>ul {
-    box-shadow: 1px 1px 1px 1px #CCC;
-    border-radius: 0.5em;
-}
-
-.section-fixed li>ul:hover {
-    display: block;
-    position: relative;
-    right: 0em;
-}
-
-.section-fixed:hover li>ul {
-    display: block;
-    position: relative;
-    right: 0em;
-}
-
-.section-fixed>ul>.fixed {
-    display: block;
-    padding: 0.5em;
-    opacity: 0.9;
-    color: #000;
-    font-weight: 700;
-    font-size: 0.9em;
-}
-
-.section-fixed>ul>li a {
-    display: block;
-    padding: 0.5em;
-    opacity: 0.9;
-    color: #000;
-    font-weight: 700;
-    border-radius: 0;
-}
-
-.section-fixed>ul>li>ul>li:nth-last-child(1) a {
-    border-radius: 0 0 0.5em 0.5em;
-}
-
-.section-fixed .bg {
-    background-color: #CCC;
-}
-
-.bg {
-    border: 1px rgba(0, 0, 0, 0.25) solid;
-    border-radius: 0.5em;
-}
-
-.bg:hover {
-    opacity: 1;
-    border: 1px rgba(0, 0, 0, 0.75) solid;
-}
 
 /*CSS drop-down list*/
 
