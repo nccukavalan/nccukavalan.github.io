@@ -499,17 +499,19 @@ li {
     h1 {
         margin: 0;
         background-color: #FFF;
-        padding: 1em;
-        font-size: 2em;
-        line-height: 1;
+        padding-top: calc(1em / 1.5);
+        padding-bottom: calc(1em / 1.5);
+        padding-left: calc(2em / 1.5);
+        font-size: calc(1em * 1.5);
+        line-height: calc(2em / 1.5);
     }
 
     button#navBtn {
         position: fixed;
-        top: 1.5em;
+        top: 1em;
         right: 2em;
-        height: 3em;
-        width: 3em;
+        height: 2em;
+        width: 2em;
         border: 0.05em #CCC solid;
         background-color: #EEE;
         text-align: center;
@@ -517,7 +519,8 @@ li {
     }
 
     button#navBtn.active {
-        background-color: #CFC;
+        background-color: #333;
+        color: #FFF;
     }
 
     nav {
@@ -540,7 +543,7 @@ li {
     }
 
     nav li:hover {
-        background-color: #FFC;
+        background-color: #333;
     }
 
     nav li.bg {
@@ -549,64 +552,16 @@ li {
 
     nav a {
         color: #000;
-        padding-left: 1em;
-        height: 2.4em;
-        line-height: 2.4em;
+        padding-left: calc(2em / 1);
+        height: calc(2em / 1);
         width: 100%;
-        font-size: 1.2em;
+        line-height: calc(2em / 1);
+        font-size: calc(1em * 1);
     }
 
     nav a:hover {
+        color: #FFF;
         font-weight: 700;
-    }
-
-    /*
-    nav {
-        position: absolute;
-        top: 2em;
-        right: 2em;
-        border: 0.05em #000 solid;
-        background-color: #CCC;
-        width: 3em;
-        height: 3em;
-    }
-
-    nav > ul {
-        display: none;
-    }
-
-    nav:hover > ul {
-        position: absolute;
-        display: block;
-        top: 2.95em;
-        right: -0.05em;
-        width: 10em;
-    }
-
-    nav li {
-        position: relative;
-        display: block;
-        right: 0;
-        height: 2em;
-    }
-
-
-    nav > ul > li > ul > li:nth-child(1) {
-        display: none;
-    }
-
-    nav > ul > li:nth-child(1),
-    nav > ul > li > ul > li li {
-        border: 0.05em #000 solid;
-        background-color: #CCC;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    */
-
-    body.nav-active {
-        width: 60%;
     }
 }
 
