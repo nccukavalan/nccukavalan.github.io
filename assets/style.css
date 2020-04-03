@@ -20,9 +20,14 @@ p {
 section {
     display: flex;
     flex-direction: row;
+    justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     width: 100%;
+}
+
+section#cart {
+    flex-direction: column;
 }
 
 a {
@@ -50,14 +55,52 @@ input {
 }
 
 button {
+    display: flex;
+    justify-content: center; /*主軸-H*/
+    align-items: center; /*交叉軸-V*/
     line-height: 100%;
     text-align: center;
     cursor: pointer;
 }
 
+button#submit {
+    width: 10em;
+    height: 3em;
+    border-radius: 1.5em;
+    border: 0.2em #999 solid;
+    background-color: #CCC;
+    box-shadow: 1px 1px 1px 1px #CCC;
+    color: #555;
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+button#submit:hover {
+    border: 0.05em #999 solid;
+    background-color: #666;
+    color: #FFF;
+    box-shadow: 0 0 0 0 #FFF;
+}
+
+button.dateBtn {
+    border: 0.05em #CCC solid;
+    background-color: #EEE;
+    text-align: center;
+    border-radius: 0.2em;
+}
+
+button.dateBtn.active {
+    background-color: #333;
+    color: #FFF;
+}
 
 .grid {
     width: 100%;
+    margin-bottom: 0.5em;
+}
+
+input.hide {
+    display: none;
 }
 
 @media only screen and (min-width: 768px) {
@@ -83,18 +126,12 @@ button {
     }
 
     .grid .formRow .radio {
-        display: flex;
-        grid-column: 2 / 7;
+        grid-column: 2 / 5;
     }
 
     /*validate - form info row*/
-    .grid .formRow .infoIn + .messages,
-    .grid .formRow .chosen-container + .messages {
+    .grid .formRow .messages {
         grid-column: 5 / 7;
-    }
-
-    .grid .formRow .radio + .messages {
-        grid-column: 2 / 7;
     }
 
     .grid .formRow label {
@@ -115,12 +152,17 @@ button {
         border-radius: 0.5em 0.5em 0 0;
     }
 
-    section {
-        justify-content: center;
+    table {
+        width: 80%;
     }
 }
 
 @media only screen and (max-width: 768px) {
+    main {
+        margin-top: 6em;
+        margin-bottom: 8em;
+    }
+
     .grid {
         display: flex;
         justify-content: center; /*主軸-H*/
@@ -136,7 +178,7 @@ button {
         flex-direction: column;
         justify-content: center; /*主軸-H*/
         align-items: center; /*交叉軸-V*/
-        padding: 0.25em 0 0.25em;
+        padding: 0.25em;
         margin: 0.25em 0 0.25em;
     }
 
@@ -147,10 +189,7 @@ button {
 
     /*validate - form info row*/
     .grid .formRow .infoIn + .messages,
-    .grid .formRow .chosen-container + .messages {
-        align-items: center; /*交叉軸-V*/
-    }
-
+    .grid .formRow .chosen-container + .messages,
     .grid .formRow .radio + .messages {
         align-items: center; /*交叉軸-V*/
     }
@@ -166,12 +205,8 @@ button {
         margin-top: 0.5em;
     }
 
-    .grid .formRow .radioRow {
-        margin-top: 0.5em;
-    }
-    
-    section {
-        justify-content: flex-start;
+    table {
+        width: 100%;
     }
 }
 
@@ -183,18 +218,17 @@ button {
     border-radius: 0.2em;
 }
 
-.formRow .radio {
-    align-items: center;
+.grid .formRow .radioRow {
+    display: flex;
+    flex-direction: row;
 }
 
-.formRow .radio label {
-    font-size: 2em;
-}
-
-.formRow .radio input[type="radio"] {
-    display: inline;
-    height: 2em;
-    width: 2em;
+.grid .formRow .radioRow button.dateBtn {
+    width: 100%;
+    border: 0.05em #999 solid;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    font-size: 1.2em;
 }
 
 /*product container*/
@@ -270,13 +304,14 @@ button {
     -moz-appearance: textfield;
 }
 
-.container .order .quantity[type=number]::-webkit-inner-spin-button,
-.container .order .quantity[type=number]::-webkit-outer-spin-button {
+.container .order .quantity[type="number"]::-webkit-inner-spin-button,
+.container .order .quantity[type="number"]::-webkit-outer-spin-button {
     -moz-appearance: textfield;
     -webkit-appearance: none;
 }
 
-.container .order .dec, .inc {
+.container .order .dec,
+.container .order .inc {
     width: 3em;
     font-size: 0.8em;
 }
@@ -316,7 +351,6 @@ button {
 
 /*cart table*/
 table {
-    width: 80%;
     margin-top: 1em;
     margin-bottom: 3em;
     border-collapse: collapse;
@@ -354,6 +388,30 @@ td {
     text-align: center;
 }
 
+tr td div {
+    height: 3em;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+tr td div > * {
+    height: 100%;
+    width: 100%;
+    border: 0.05em #999 solid;
+    border-radius: 0.2em;
+}
+
+tr td div .remove {
+    background-color: #F99;
+}
+
+.dateBtn:hover, .dec:hover, .inc:hover {
+    background-color: #666;
+    color: #FFF;
+}
+
     /*fixed items*/
 ul,
 li {
@@ -361,6 +419,14 @@ li {
     display: block;
     margin: 0;
     padding: 0;
+}
+
+.cart-fixed:hover #fixed::after {
+    content: '｜點我跳到結帳區';
+}
+
+#fixed:hover::after {
+    content: '｜點我跳到結帳區';
 }
 
 @media only screen and (min-width: 768px) {
@@ -405,14 +471,6 @@ li {
 
     .cart-fixed:hover .bg {
         border: 1px rgba(0, 0, 0, 0.75) solid;
-    }
-
-    .cart-fixed:hover #fixed::after {
-        content: '｜點我跳到結帳區';
-    }
-
-    #fixed:hover::after {
-        content: '｜點我跳到結帳區';
     }
 
     .section-fixed {
@@ -468,8 +526,8 @@ li {
         background-color: #CCC;
     }
 
-    .section-fixed li li li a.bg {
-        background-color: #EEE
+    .section-fixed li li a.bg {
+        background-color: #DDD;
     }
 
     .bg {
@@ -542,10 +600,6 @@ li {
         background-color: #CCC;
     }
 
-    nav li:hover {
-        background-color: #333;
-    }
-
     nav li.bg {
         display: none;
     }
@@ -559,12 +613,24 @@ li {
         font-size: calc(1em * 1);
     }
 
+    nav li:hover {
+        background-color: #333;
+    }
+
     nav a:hover {
         color: #FFF;
         font-weight: 700;
     }
-}
 
+    nav li:hover > a[href="#cart"] {
+        background-color: #999;
+    }
+
+    nav a[href="#cart"]:hover {
+        color: #000;
+        font-weight: 700;
+    }
+}
 
 /*CSS drop-down list*/
 

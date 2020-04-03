@@ -39,6 +39,11 @@ $(function() {
 
         addCartSection(items);
 
+        /*會員驗證*/
+        $('[name="studentID"]').blur(function(ev) {
+            console.log(this);
+        });
+
         //Listener
         $("input").keydown(function(ev) {
             if (ev.which == 13) {
@@ -65,6 +70,30 @@ $(function() {
                 });
                 ev.stopPropagation();
             }
+        });
+        $("button.dateBtn").focus(function(ev) {
+            var errors = validate(form, setValidateConstraints(items)) || {};
+            showIsErrorsForInput(this, errors['date']);
+        });
+        $("button.dateBtn").blur(function(ev) {
+            var errors = validate(form, setValidateConstraints(items)) || {};
+            showIsErrorsForInput(this, errors['date']);
+        });
+        $("button.dateBtn").click(function(ev) {
+            var dateBtns = this.parentNode.childNodes;
+            for (var i = 0; i < dateBtns.length; i++) {
+                if (dateBtns[i].nodeName != "#text") {
+                    if (dateBtns[i] == this) {
+                        dateBtns[i].classList.add("active");
+                        var option = document.querySelector('input[value="' + dateBtns[i].value + '"]');
+                        $(option).prop('checked', 'true');
+                    } else {
+                        dateBtns[i].classList.remove("active");
+                    }
+                }
+            }
+            var errors = validate(form, setValidateConstraints(items)) || {};
+            showIsErrorsForInput(this, errors['date']);
         });
     });
 });
@@ -134,9 +163,11 @@ function addCartSection(items) {
             tr.innerHTML += '<td>' + 0 + '</td>';
 
             var td = document.createElement("td");
-                td.innerHTML += '<button type="button" class="cartBtn dec" name="' + order + '"><i class="fas fa-minus"></i></button>'
-                td.innerHTML += '<button type="button" class="cartBtn inc" name="' + order + '"><i class="fas fa-plus"></i></button>'
-                td.innerHTML += '<button type="button" class="cartBtn remove" name="' + order + '"><i class="fas fa-trash-alt"></i></button>'
+            var div = document.createElement("div");
+                div.innerHTML += '<button type="button" class="cartBtn dec" name="' + order + '"><i class="fas fa-minus"></i></button>'
+                div.innerHTML += '<button type="button" class="cartBtn inc" name="' + order + '"><i class="fas fa-plus"></i></button>'
+                div.innerHTML += '<button type="button" class="cartBtn remove" name="' + order + '"><i class="fas fa-trash-alt"></i></button>'
+            td.appendChild(div);
             tr.appendChild(td);
 
             tr.innerHTML += '<td>$' + toCurrency(0) + '</td>';
@@ -161,7 +192,7 @@ function createSubmitButton() {
     var submit = document.createElement("button");
     submit.type = "submit";
     submit.id = "submit";
-    submit.textContent = "送出".concat("!!測試中-之後移到最下面!!");
+    submit.textContent = "結帳";
     submit.value = submit.textContent;
     return submit;
 }
@@ -290,7 +321,7 @@ function submitForm(items) {
     var time = function() {
         var selected;
         $('[name="date"]').each(function() {
-            if ($(this).prop('checked') === true)
+            if ($(this).prop("checked") === true)
                 selected = $(this).val();
         });
         if (!selected) {
@@ -518,7 +549,7 @@ function setValidateConstraints(items) {
         },
         date: {
             presence: {
-                message: "不能留空！難道你不來取貨嗎？",
+                message: "不能留空！\n難道你不來取貨嗎？",
             },
         },
     };
@@ -561,25 +592,29 @@ function vaild(items) {
         // Hook up the inputs to validate on the fly
         var inputs = document.querySelectorAll("input, textarea, select, .dec, .inc, .remove")
         for (var i = 0; i < inputs.length; ++i) {
-            inputs.item(i).addEventListener("change", function(ev) {
-                var errors = validate(form, setValidateConstraints(items)) || {};
-                showIsErrorsForInput(this, errors[this.name]);
-                status();
-            });
             inputs.item(i).addEventListener("input", function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
                 showIsErrorsForInput(this, errors[this.name]);
                 status();
+                if (this.classList.contains("quantity")) {
+                    removeEachEmpty(this);
+                }
             });
             inputs.item(i).addEventListener("blur", function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
                 showIsErrorsForInput(this, errors[this.name]);
                 status();
+                if (this.classList.contains("quantity")) {
+                    removeEachEmpty(this);
+                }
             });
             inputs.item(i).addEventListener("click", function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
                 showIsErrorsForInput(this, errors[this.name]);
                 status();
+                if (this.classList.contains("quantity")) {
+                    removeEachEmpty(this);
+                }
             });
             $(".chosen-select").change(function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
@@ -605,6 +640,13 @@ function vaild(items) {
 
         function doError(message) {
             //表單驗證失敗
+            var inputs = ($('.quantity'))
+            for (var i = 0; i < inputs.length; i++) {
+                if ($(inputs[i]).val() == 0) {
+                    var formGroup = findParentNode(inputs[i]);
+                    resetFormGroup(formGroup);
+                }
+            }
             alert(message);
         }
 
@@ -631,6 +673,15 @@ function showIsErrors(form, errors) {
     });
 }
 
+function findParentNode(node) {
+    var node = node.parentNode;
+    if (node.classList.contains("formRow") || node.classList.contains("container")) {
+        return node;
+    } else {
+        return findParentNode(node);
+    }
+}
+
 // Shows the errors for a specific input
 function showIsErrorsForInput(input, errors) {
 
@@ -638,15 +689,6 @@ function showIsErrorsForInput(input, errors) {
 
     // This is the root of the input
     var formGroup = findParentNode(input);
-
-    function findParentNode(node) {
-        var node = node.parentNode;
-        if (node.classList.contains("formRow") || node.classList.contains("container")) {
-            return node;
-        } else {
-            return findParentNode(node);
-        }
-    }
 
     var messages = formGroup.querySelector(messagesClassName);
     // First we remove any old messages and resets the classes
@@ -715,6 +757,7 @@ function clicked(item, items) {
             quantity.value = parseInt(quantity.value) + 1;
         }
         status();
+        removeEachEmpty(quantity);
     }
     if (item.classList[1] == "dec") {
         if (parseInt(quantity.value) >= 1) {
@@ -723,29 +766,38 @@ function clicked(item, items) {
             quantity.value = 0;
         }
         status();
+        removeEachEmpty(quantity);
     }
     if (item.classList[1] == "remove") {
         quantity.value = 0;
         status();
+        removeEachEmpty(quantity);
     }
-
     item.addEventListener("click", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
         showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
         status();
+        removeEachEmpty(quantity);
     });
-
     item.addEventListener("focus", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
         showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
         status();
+        removeEachEmpty(quantity);
     });
-
     item.addEventListener("blur", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
         showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
         status();
+        removeEachEmpty(quantity);
     });
+
+}
+
+function removeEachEmpty(item) {
+    if (item.value == 0) {
+        resetFormGroup(findParentNode(item));
+    }
 }
 
 //Section of Merchant of product list
