@@ -105,7 +105,43 @@ input.hide {
     display: none;
 }
 
+button[disabled] {
+    background-color: #EEE;
+    text-decoration: line-through;
+}
+
+button[disabled]::after {
+    content: '（不支援）';
+    color: #F00;
+}
+
+#fulfilled {
+    margin-left:2em;
+    font-size: 0.6em;
+    line-height: 1.5em;
+}
+
+#fulfilled.fulfilled {
+    color: #393;
+}
+
+#fulfilled > em,
+#totalFixed > em {
+    font-style: normal;
+    font-size: 1.2em;
+    font-weight: 1000;
+    color: #C33;
+}
+
+#totalFixed > em {
+    font-size: 1em;
+}
+
 @media only screen and (min-width: 768px) {
+    #fulfilled {
+        display: none;
+    }
+
     .grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -161,8 +197,8 @@ input.hide {
 
 @media only screen and (max-width: 768px) {
     main {
-        margin-top: 6em;
-        margin-bottom: 8em;
+        margin-top: 8em;
+        margin-bottom: 10em;
     }
 
     .grid {
@@ -430,11 +466,11 @@ li {
     padding: 0;
 }
 
-.cart-fixed:hover #fixed::after {
+.cart-fixed:hover #totalFixed::after {
     content: '｜點我跳到結帳區';
 }
 
-#fixed:hover::after {
+#totalFixed:hover::after {
     content: '｜點我跳到結帳區';
 }
 

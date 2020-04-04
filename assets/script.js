@@ -27,6 +27,8 @@ $(function() {
             item.product = d[i].gsx$product.$t;
             item.price = d[i].gsx$price.$t;
             item.priceMember = d[i].gsx$pricemember.$t;
+            item.d1 = d[i].gsx$d1.$t;
+            item.d2 = d[i].gsx$d2.$t;
             item.link = d[i].gsx$link.$t;
             item.pic = d[i].gsx$pic.$t;
             items.push(item);
@@ -110,8 +112,10 @@ $(function() {
                 var value = $(item).val();
                 var massage = item.nextElementSibling;
                 if (members.indexOf(value) != -1) {
-                    memberPrice(items);
-                    massage.innerHTML = '<p class="help-block error memberText">您為本會會員，享有優惠折扣！</p>'
+                    if (!massage.innerHTML) {
+                        massage.innerHTML = '<p class="help-block error memberText">您為本會會員，享有優惠折扣！</p>';
+                        memberPrice(items);
+                    }
                 } else {
                     normalPrice(items);
                 }
@@ -248,17 +252,16 @@ function createSubmitButton() {
 //即時消費情形
 function status() {
 
-    var orders = document.querySelectorAll(".order")
+    var orders = document.querySelectorAll(".order");
     var total = 0;
 
     var output = "";
     var orderDict = {};
 
     for (var i = 0; i < orders.length; i++) {
-
         var productName = orders[i].id;
-        var price = orders[i].childNodes[0].value;
-        var quantity = orders[i].childNodes[2].value;
+        var price = orders[i].parentNode.querySelector('.priceValue').value;
+        var quantity = orders[i].parentNode.querySelector('.quantity').value;
         var subtotal = price * quantity;
         total += subtotal;
 
@@ -313,11 +316,11 @@ function updateCart(orderDict) {
 }
 
 function updateFixedElement(orderDict) {
-    var bg = document.querySelector(".bg");
+    var bg = document.querySelector("a.bg");
     var sectionProductsList = document.querySelectorAll('.sectionProductsList');
 
-    var fixed = document.querySelector("#fixed");
-        fixed.textContent = '$' + toCurrency(orderDict['total']);
+    /*滿額門檻*/
+    var fulfilledPrice = 500;
 
    if (orderDict['total'] > 0) {
         bg.style.backgroundColor = '#CFC';
@@ -330,6 +333,28 @@ function updateFixedElement(orderDict) {
             sectionProductsList[i].style.backgroundColor = "#FCC";
         }
     }
+
+    var totalFixed = document.querySelector("#totalFixed");
+        totalFixedText = '你已消費&nbsp;$'+ toCurrency(orderDict['total']);
+        if (orderDict['total'] > fulfilledPrice) {
+            totalFixedText += '，可以參加滿額抽獎！'
+        } else if (orderDict['total'] > 0) {
+            totalFixedText += '，再加&nbsp;<em>$'+ toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
+        }
+        totalFixed.innerHTML = totalFixedText;
+
+    var fulfilled = document.querySelector("#fulfilled");
+        fulfilledText = '<br>你已消費&nbsp;$'+ toCurrency(orderDict['total']);
+        if (orderDict['total'] > fulfilledPrice) {
+            fulfilledText += '，可以參加滿額抽獎！'
+            fulfilled.classList.add('fulfilled');
+        } else if (orderDict['total'] > 0) {
+            fulfilledText += '，再加&nbsp;<em>$'+ toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
+            fulfilled.classList.remove('fulfilled');
+        } else {
+            fulfilled.classList.remove('fulfilled');
+        }
+        fulfilled.innerHTML = fulfilledText;
 }
 
 //action for submit the form
@@ -552,52 +577,56 @@ function setValidateConstraints(items) {
     var constraints = {
         name: {
             presence: {
-                message: "不能留空！\n難道你是無名氏逆？",
+                message: "^姓名不能留空！\n難道你是無名氏逆？",
             },
             format: {
                 pattern: "^([A-Za-z ,-]|[\u4E00-\u9FFF．]|[^\x00-\xFF]])+$",
-                message: "的輸入格式無效！\n你的名字沒這麼奇怪吧？（如果這確實是你的真名，請立刻和我們聯絡）",
+                message: "^姓名的輸入格式無效！\n你的名字沒這麼奇怪吧？（如果這確實是你的真名，請立刻和我們聯絡）",
             }
         },
         studentID: {
             presence: {
-                message: "不能留空！",
+                message: "^學號不能留空！",
             },
             format: {
                 pattern: "(^10[0-8][0-9]{6}$|^999999999$)",
-                message: "的輸入格式無效！\n（嘗試填寫此欄卻失敗者，請輸入9個9並立刻和我們聯絡，訂單方會成立）",
+                message: "^學號的輸入格式無效！\n（嘗試填寫此欄卻失敗者，請輸入9個9並立刻和我們聯絡，訂單方會成立）",
             }
         },
         department: {
             presence: {
-                message: "不能留空！\n（無適當選項可選者，請選擇XXX並立刻和我們聯絡，訂單方會成立）",
+                message: "^系所不能留空！\n（無適當選項可選者，請選擇XXX並立刻和我們聯絡，訂單方會成立）",
             },
         },
         grade: {
             presence: {
-                message: "不能留空！\n（無適當選項可選者，請立刻和我們聯絡）",
+                message: "^年級不能留空！\n（無適當選項可選者，請立刻和我們聯絡）",
             },
         },
         phoneNumber: {
             presence: {
-                message: "不能留空！\n我們需要和你聯絡及確認訂單！",
+                message: "^手機號碼不能留空！\n我們需要和你聯絡及確認訂單！",
             },
             format: {
                 pattern: "^09[0-9]{8}$",
-                message: "欄位請輸入臺灣的手機門號，無需加入符號",
+                message: "^請輸入臺灣的手機門號，無需加入符號",
             }
         },
         email: {
             presence: {
-                message: "不能留空！\n我們需要和你聯絡及確認訂單！",
+                message: "^email不能留空！\n我們需要和你聯絡及確認訂單！",
             },
             email: {
-                message: "的輸入格式無效！",
+                message: "^email的格式無效！",
             },
         },
         date: {
             presence: {
-                message: "不能留空！\n難道你不來取貨嗎？",
+                message: "^日期不能留空！\n難道你不來取貨嗎？",
+            },
+            exclusion: {
+              within: [],
+              message: "^您所選購的商品不支援此日期！",
             },
         },
     };
@@ -606,16 +635,56 @@ function setValidateConstraints(items) {
         productName = "quantity-".concat(items[i].merchant).concat("-").concat(items[i].product);
         constraints[productName] = {
             presence: {
-                message: "的訂購數量不能留空！",
+                message: "^數量不能留空！",
             },
             numericality: {
                 onlyInteger: true,
                 greaterThanOrEqualTo: 0,
                 lessThanOrEqualTo: 20,
-                notInteger: "的訂購數量只能是整數！",
-                notGreaterThanOrEqualTo: "的訂購數量不能為負！",
-                notLessThanOrEqualTo: "的訂購數量已達本表單上限！如需要訂購更多請直接向我們洽詢！",
+                notInteger: "^數量只能是整數！",
+                notGreaterThanOrEqualTo: "^數量不能為負！",
+                notLessThanOrEqualTo: "^數量已達本表單上限！如需要訂購更多請直接向我們洽詢！",
             },
+        }
+    }
+
+    var orders = document.querySelectorAll(".order");
+    var d1Total = true;
+    var d2Total = true;
+
+    for (var i = 0; i < orders.length; i++) {
+        var quantity = orders[i].parentNode.querySelector('.quantity').value;
+        var d1 = orders[i].parentNode.querySelector('.d1').value;
+        if (d1 * quantity < 0) {
+            d1Total = false;
+        }
+        var d2 = orders[i].parentNode.querySelector('.d2').value;
+        if (d2 * quantity < 0) {
+            d2Total = false;
+        }
+    }
+
+    var within = constraints['date']['exclusion']['within'];
+    if (d1Total == false) {
+        within.push('2020-5-6 (三)');
+    }
+    if (d2Total == false) {
+        within.push('2020-5-7 (四)');
+    }
+
+    var dateBtns = $("button.dateBtn");
+    for (var i = 0; i < dateBtns.length; i++) {
+        var option = document.querySelector('input[value="' + dateBtns[i].value + '"]');
+        if (dateBtns[i].nodeName != "#text") {
+            if (within.indexOf(dateBtns[i].value) == 0) {
+                dateBtns[i].classList.remove("active");
+                $(option).prop('checked', '');
+                dateBtns[i].disabled = "disabled";
+                $(option).prop('disabled', 'disabled');
+            } else {
+                dateBtns[i].disabled = "";
+                $(option).prop('disabled', '');
+            }
         }
     }
 
@@ -643,6 +712,7 @@ function vaild(items) {
             inputs.item(i).addEventListener("input", function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
                 showIsErrorsForInput(this, errors[this.name]);
+                updateDate(items);
                 status();
                 if (this.classList.contains("quantity")) {
                     removeEachEmpty(this);
@@ -651,6 +721,7 @@ function vaild(items) {
             inputs.item(i).addEventListener("blur", function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
                 showIsErrorsForInput(this, errors[this.name]);
+                updateDate(items);
                 status();
                 if (this.classList.contains("quantity")) {
                     removeEachEmpty(this);
@@ -659,6 +730,7 @@ function vaild(items) {
             inputs.item(i).addEventListener("click", function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
                 showIsErrorsForInput(this, errors[this.name]);
+                updateDate(items);
                 status();
                 if (this.classList.contains("quantity")) {
                     removeEachEmpty(this);
@@ -667,6 +739,7 @@ function vaild(items) {
             $(".chosen-select").change(function(ev) {
                 var errors = validate(form, setValidateConstraints(items)) || {};
                 showIsErrorsForInput(this, errors[this.name]);
+                updateDate(items);
             });
         }
 
@@ -788,7 +861,7 @@ function toCurrency(num) {
 //when the count input was clicked
 function clicked(item, items) {
     if (item.classList[0] == "click-able") {
-        var quantity = item.parentElement.childNodes[2];
+        var quantity = item.parentElement.querySelector('.quantity');
     } else {
         var quantity = document.querySelector('[name="quantity-' + item.name + '"]');
     }
@@ -797,15 +870,15 @@ function clicked(item, items) {
     if (item.classList[1] == "inc") {
         if (parseInt(quantity.value) < 0) {
             quantity.value = 1;
-        } else if (parseInt(quantity.value) >= 21) {
+        } else if (parseInt(quantity.value) >= 20 && item.classList[0] == "click-able") {
+            quantity.value = 20;
+        } else if (parseInt(quantity.value) >= 21 && item.classList[0] == "click-able") {
             quantity.value = 21;
         } else if (quantity.value == "") {
             quantity.value = 1;
         } else {
             quantity.value = parseInt(quantity.value) + 1;
         }
-        status();
-        removeEachEmpty(quantity);
     }
     if (item.classList[1] == "dec") {
         if (parseInt(quantity.value) >= 1) {
@@ -813,37 +886,46 @@ function clicked(item, items) {
         } else if (quantity.value == "" || parseInt(quantity.value) < 0) {
             quantity.value = 0;
         }
-        status();
-        removeEachEmpty(quantity);
     }
     if (item.classList[1] == "remove") {
         quantity.value = 0;
-        status();
-        removeEachEmpty(quantity);
     }
+    status();
+    removeEachEmpty(quantity);
+
     item.addEventListener("click", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
         showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
+        updateDate(items);
         status();
         removeEachEmpty(quantity);
     });
     item.addEventListener("focus", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
         showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
+        updateDate(items);
         status();
         removeEachEmpty(quantity);
     });
     item.addEventListener("blur", function(ev) {
         var errors = validate(form, setValidateConstraints(items)) || {};
         showIsErrorsForInput(quantity, errors['quantity-' + quantity.parentNode.id]);
+        updateDate(items);
         status();
         removeEachEmpty(quantity);
     });
+}
 
+function updateDate(items) {
+    var date = document.querySelectorAll('input[name="date"]');
+    for (var i = 0; i < date.length; i++) {
+        var errors = validate(date[i], setValidateConstraints(items)) || {};
+        showIsErrorsForInput(date[i], errors['date']);
+    }
 }
 
 function removeEachEmpty(item) {
-    if (item.value == 0) {
+    if (item.value === '0') {
         resetFormGroup(findParentNode(item));
     }
 }
@@ -883,41 +965,49 @@ function addEachProduct(items, index) {
     var inputProduct = items[index].product;
     var inputLink = items[index].link;
     var inputPrice = items[index].price;
+    var d1 = items[index].d1;
+    var d2 = items[index].d2;
 
     var productWholeName = inputMerchant.concat("-").concat(inputProduct);
 
     //container
     var container = document.createElement("div");
-    container.className = "container";
-    container.id = "container-".concat(inputMerchant).concat("-").concat(inputProduct);
+        container.className = "container";
+        container.id = "container-".concat(inputMerchant).concat("-").concat(inputProduct);
 
-    //pic
-    container.innerHTML += '<div class="pic"><img src="' + inputPic + '"></div>'
+        //pic
+        container.innerHTML += '<div class="pic"><img src="' + inputPic + '"></div>'
 
-    //products name with link
-    container.innerHTML += '<div class="goods"><a href="' + inputLink + '" target="' + (inputLink != "#" ? '_blank' : '') + '">' + inputProduct + '</div>'
+        //products name with link
+        container.innerHTML += '<div class="goods"><a href="' + inputLink + '" target="' + (inputLink != "#" ? '_blank' : '') + '">' + inputProduct + '</div>'
 
-    //products price
-    container.innerHTML += '<div class="price"><span class="priceText">' + toCurrency(inputPrice) + '</span></div>'
+        //products price
+        container.innerHTML += '<div class="price"><span class="priceText">' + toCurrency(inputPrice) + '</span></div>'
 
     //products quantity
     var order = document.createElement("div");
-    order.className = "order";
-    order.id = productWholeName;
-    //quantity input
-    order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + productWholeName + '" value="' + inputPrice + '">';
+        order.className = "order";
+        order.id = productWholeName;
 
-    //dec btn
-    order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
+        //quantity input
+        order.innerHTML += '<input class="d1" type="hidden" name="d1-' + productWholeName + '" value="' + d1 + '">';
+        //quantity input
+        order.innerHTML += '<input class="d2" type="hidden" name="d2-' + productWholeName + '" value="' + d2 + '">';
 
-    //quantity input
-    order.innerHTML += '<input class="quantity" type="number" name="quantity-' + productWholeName + '" value="0" min="0">';
+        //quantity input
+        order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + productWholeName + '" value="' + inputPrice + '">';
 
-    //inc btn
-    order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
+        //dec btn
+        order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
 
-    //remove btn
-    order.innerHTML += '<button type="button" class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
+        //quantity input
+        order.innerHTML += '<input class="quantity" type="number" name="quantity-' + productWholeName + '" value="0" min="0">';
+
+        //inc btn
+        order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
+
+        //remove btn
+        order.innerHTML += '<button type="button" class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
 
     container.appendChild(order);
 
