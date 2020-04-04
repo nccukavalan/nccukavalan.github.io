@@ -26,6 +26,7 @@ $(function() {
             item.merchant = d[i].gsx$merchant.$t;
             item.product = d[i].gsx$product.$t;
             item.price = d[i].gsx$price.$t;
+            item.priceMember = d[i].gsx$pricemember.$t;
             item.link = d[i].gsx$link.$t;
             item.pic = d[i].gsx$pic.$t;
             items.push(item);
@@ -38,11 +39,6 @@ $(function() {
         vaild(items);
 
         addCartSection(items);
-
-        /*會員驗證*/
-        $('[name="studentID"]').blur(function(ev) {
-            console.log(this);
-        });
 
         //Listener
         $("input").keydown(function(ev) {
@@ -95,6 +91,58 @@ $(function() {
             var errors = validate(form, setValidateConstraints(items)) || {};
             showIsErrorsForInput(this, errors['date']);
         });
+
+        $.get("https://spreadsheets.google.com/feeds/list/13UKJAUXn74UbfgUhyL2d1da6Fr9z11W_FCzui2k8_88/1/public/values?alt=json", function(data) {
+            var d = data.feed.entry;
+            var members = [];
+            for (var i in d) {
+                members[i] = d[i].gsx$member.$t;
+            }
+
+            $('[name="studentID"]').on('blur', function(ev) {
+                isMember(this, items);
+            });
+            $('[name="studentID"]').on('input', function(ev) {
+                isMember(this, items);
+            });
+
+            function isMember(item, items) {
+                var value = $(item).val();
+                var massage = item.nextElementSibling;
+                if (members.indexOf(value) != -1) {
+                    memberPrice(items);
+                    massage.innerHTML = '<p class="help-block error memberText">您為本會會員，享有優惠折扣！</p>'
+                } else {
+                    normalPrice(items);
+                }
+                status();
+
+                function memberPrice(items) {
+                    for (var i = 0; i < items.length; i++) {
+                        var id = "container-" + items[i].merchant + "-" + items[i].product;
+                        var container = document.getElementById(id);
+                        var priceText = container.querySelector('.priceText');
+                        priceText.textContent = items[i].priceMember;
+                        var priceValue = container.querySelector('.priceValue');
+                        priceValue.value = items[i].priceMember;
+                    }
+                }
+
+                function normalPrice(items) {
+                    for (var i = 0; i < items.length; i++) {
+                        var id = "container-" + items[i].merchant + "-" + items[i].product;
+                        var container = document.getElementById(id);
+                        var priceText = container.querySelector('.priceText');
+                        priceText.textContent = items[i].price;
+                        var priceValue = container.querySelector('.priceValue');
+                        priceValue.value = items[i].price;
+                    }
+                }
+            }
+            
+        });
+
+
     });
 });
 
