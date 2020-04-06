@@ -1,6 +1,4 @@
-@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
-@import url("https://pro.fontawesome.com/releases/v5.10.0/css/all.css");
-* {
+@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"); @import url("https://pro.fontawesome.com/releases/v5.10.0/css/all.css"); * {
     box-sizing: border-box;
 }
 
@@ -56,8 +54,10 @@ input {
 
 button {
     display: flex;
-    justify-content: center; /*主軸-H*/
-    align-items: center; /*交叉軸-V*/
+    justify-content: center;
+    /*主軸-H*/
+    align-items: center;
+    /*交叉軸-V*/
     line-height: 100%;
     text-align: center;
     cursor: pointer;
@@ -116,7 +116,7 @@ button[disabled]::after {
 }
 
 #fulfilled {
-    margin-left:2em;
+    margin-left: 2em;
     font-size: 0.6em;
     line-height: 1.5em;
 }
@@ -125,15 +125,14 @@ button[disabled]::after {
     color: #393;
 }
 
-#fulfilled > em,
-#totalFixed > em {
+#fulfilled>em, #totalFixed>em {
     font-style: normal;
     font-size: 1.2em;
     font-weight: 1000;
     color: #C33;
 }
 
-#totalFixed > em {
+#totalFixed>em {
     font-size: 1em;
 }
 
@@ -152,7 +151,8 @@ button[disabled]::after {
         display: grid;
         grid-template-rows: 3em;
         grid-template-columns: repeat(6, 1fr);
-        align-items: center; /*交叉軸-V*/
+        align-items: center;
+        /*交叉軸-V*/
     }
 
     .grid .formRow .infoIn {
@@ -203,7 +203,8 @@ button[disabled]::after {
 
     .grid {
         display: flex;
-        justify-content: center; /*主軸-H*/
+        justify-content: center;
+        /*主軸-H*/
         flex-direction: column;
     }
 
@@ -214,8 +215,10 @@ button[disabled]::after {
     .grid .formRow {
         display: flex;
         flex-direction: column;
-        justify-content: center; /*主軸-H*/
-        align-items: center; /*交叉軸-V*/
+        justify-content: center;
+        /*主軸-H*/
+        align-items: center;
+        /*交叉軸-V*/
         padding: 0.25em;
         margin: 0.25em 0 0.25em;
     }
@@ -226,10 +229,9 @@ button[disabled]::after {
     }
 
     /*validate - form info row*/
-    .grid .formRow .infoIn + .messages,
-    .grid .formRow .chosen-container + .messages,
-    .grid .formRow .radio + .messages {
-        align-items: center; /*交叉軸-V*/
+    .grid .formRow .infoIn+.messages, .grid .formRow .chosen-container+.messages, .grid .formRow .radio+.messages {
+        align-items: center;
+        /*交叉軸-V*/
     }
 
     .grid .formRow label {
@@ -272,7 +274,8 @@ button[disabled]::after {
 /*product container*/
 .container {
     display: flex;
-    justify-content: center; /*主軸-H*/
+    justify-content: center;
+    /*主軸-H*/
     flex-wrap: wrap;
     margin-bottom: 1.5em;
     border-left: 0.05em #999 solid;
@@ -280,13 +283,14 @@ button[disabled]::after {
     width: 14em;
 }
 
-.container > * {
-    justify-content: center; /*主軸-H*/
+.container>* {
+    justify-content: center;
+    /*主軸-H*/
     width: 100%;
     margin: 0.5em 0.5em 0;
 }
 
-.container > *:nth-last-child(1) {
+.container>*:nth-last-child(1) {
     margin: 0.5em;
 }
 
@@ -322,7 +326,7 @@ button[disabled]::after {
     height: 2em;
 }
 
-.container .order > * {
+.container .order>* {
     border: 0.05em #999 solid;
 }
 
@@ -342,14 +346,12 @@ button[disabled]::after {
     -moz-appearance: textfield;
 }
 
-.container .order .quantity[type="number"]::-webkit-inner-spin-button,
-.container .order .quantity[type="number"]::-webkit-outer-spin-button {
+.container .order .quantity[type="number"]::-webkit-inner-spin-button, .container .order .quantity[type="number"]::-webkit-outer-spin-button {
     -moz-appearance: textfield;
     -webkit-appearance: none;
 }
 
-.container .order .dec,
-.container .order .inc {
+.container .order .dec, .container .order .inc {
     width: 3em;
     font-size: 0.8em;
 }
@@ -377,6 +379,7 @@ button[disabled]::after {
     font-size: 0.8em;
     font-weight: 500;
 }
+
 .help-block.error.memberText {
     color: #060;
 }
@@ -439,7 +442,7 @@ tr td div {
     align-items: center;
 }
 
-tr td div > * {
+tr td div>* {
     display: flex;
     height: 100%;
     width: 100%;
@@ -457,9 +460,8 @@ tr td div .remove {
     box-shadow: 0 0 0 0 #FFF;
 }
 
-    /*fixed items*/
-ul,
-li {
+/*fixed items*/
+ul, li {
     list-style-type: none;
     display: block;
     margin: 0;
@@ -475,8 +477,7 @@ li {
 }
 
 @media only screen and (min-width: 768px) {
-    /*fixed items*/
-    .fixed-container {
+    /*fixed items*/ .fixed-container {
         height: auto;
         position: fixed;
         top: 2em;
@@ -667,7 +668,7 @@ li {
         font-weight: 700;
     }
 
-    nav li:hover > a[href="#cart"] {
+    nav li:hover>a[href="#cart"] {
         background-color: #999;
     }
 
@@ -678,9 +679,7 @@ li {
 }
 
 /*CSS drop-down list*/
-
 /* @group Base */
-
 .chosen-container {
     grid-column: 2 / 5;
     position: relative;
@@ -729,9 +728,7 @@ li {
 }
 
 /* @end */
-
 /* @group Single Chosen */
-
 .chosen-container-single .chosen-single {
     /*選擇欄位*/
     position: relative;
@@ -812,7 +809,6 @@ li {
 }
 
 /* @group Results */
-
 .chosen-container .chosen-results {
     color: #333;
     /*選項文字顏色*/
