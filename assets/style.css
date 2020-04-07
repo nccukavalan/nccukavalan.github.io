@@ -19,13 +19,15 @@ section {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
     width: 100%;
 }
 
 section#cart {
     flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 a {
@@ -105,12 +107,12 @@ input.hide {
     display: none;
 }
 
-button[disabled] {
+.radioRow > button[disabled] {
     background-color: #EEE;
     text-decoration: line-through;
 }
 
-button[disabled]::after {
+.radioRow > button[disabled]::after {
     content: '（不支援）';
     color: #F00;
 }
@@ -321,20 +323,46 @@ button[disabled]::after {
     content: '$';
 }
 
-.container .order {
+.container .orderContainer .meta {
     display: flex;
-    height: 2em;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border: 0;
+    width: 100%;
+    margin-bottom: 0.5em;
 }
 
-.container .order>* {
+.container .orderContainer .meta > * {
+    font-size: 0.75em;
+    height: 3em;
+    width: 100%;
+    background-color: #9F9;
+    border: 1px #999 solid;
+    border-radius: 0.2em;
+    color: #000;
+    cursor: default;
+}
+
+.container .orderContainer .meta .disabled {
+    background-color: #F99;
+}
+
+.container .orderContainer .order {
+    display: flex;
+    flex-wrap: wrap;
+    height: 2em
+}
+
+.container .orderContainer .order > * {
     border: 0.05em #999 solid;
 }
 
-.container .order * {
+.container .orderContainer .order * {
     text-align: center;
 }
 
-.container .order .quantity {
+.container .orderContainer .order .quantity {
     height: 100%;
     width: 4em;
     margin: 0;
@@ -342,29 +370,29 @@ button[disabled]::after {
     font-size: 1.2em;
 }
 
-.container .order .quantity[type="number"] {
+.container .orderContainer .order .quantity[type="number"] {
     -moz-appearance: textfield;
 }
 
-.container .order .quantity[type="number"]::-webkit-inner-spin-button, .container .order .quantity[type="number"]::-webkit-outer-spin-button {
+.container .orderContainer .order .quantity[type="number"]::-webkit-inner-spin-button, .container .orderContainer .order .quantity[type="number"]::-webkit-outer-spin-button {
     -moz-appearance: textfield;
     -webkit-appearance: none;
 }
 
-.container .order .dec, .container .order .inc {
+.container .orderContainer .order .dec, .container .orderContainer .order .inc {
     width: 3em;
     font-size: 0.8em;
 }
 
-.container .order .dec {
+.container .orderContainer .order .dec {
     border-radius: 3em 0 0 3em;
 }
 
-.container .order .inc {
+.container .orderContainer .order .inc {
     border-radius: 0 3em 3em 0;
 }
 
-.container .order .remove {
+.container .orderContainer .order .remove {
     margin-left: 0.4em;
     border-radius: 0.2em;
     width: 2em;

@@ -28,6 +28,7 @@ $(function() {
             item.priceMember = d[i].gsx$pricemember.$t;
             item.d1 = d[i].gsx$d1.$t;
             item.d2 = d[i].gsx$d2.$t;
+            item.upperLimit = d[i].gsx$upperlimit.$t;
             item.link = d[i].gsx$link.$t;
             item.pic = d[i].gsx$pic.$t;
             items.push(item);
@@ -74,9 +75,11 @@ $(function() {
             }
             $('[name="studentID"]').on('blur', function(ev) {
                 isMember(this, items);
+                status();
             });
             $('[name="studentID"]').on('input', function(ev) {
                 isMember(this, items);
+                status();
             });
 
             function isMember(item, items) {
@@ -141,6 +144,7 @@ $(function() {
         });
     });
 });
+
 //即時消費情形
 function status() {
     var orders = document.querySelectorAll(".order");
@@ -149,8 +153,8 @@ function status() {
     var orderDict = {};
     for (var i = 0; i < orders.length; i++) {
         var productName = orders[i].id;
-        var price = orders[i].parentNode.querySelector('.priceValue').value;
-        var quantity = orders[i].parentNode.querySelector('.quantity').value;
+        var price = orders[i].parentNode.parentNode.querySelector('.priceValue').value;
+        var quantity = orders[i].parentNode.parentNode.querySelector('.quantity').value;
         var subtotal = price * quantity;
         total += subtotal;
         //message
@@ -169,27 +173,89 @@ function status() {
     //json
     orderDict['total'] = total;
     orderDict['outputText'] = output;
-    updateFixedElement(orderDict);
+    /*滿額門檻*/
+    var fulfilledPrice = 500;
+    //更新
+    updateFixedElement(orderDict, fulfilledPrice);
     updateCart(orderDict);
     return orderDict;
+}
+
+function updateCart(orderDict) {
+    var index = 0;
+    for (var order in orderDict) {
+        var tr = document.getElementById("tr-" + order);
+        if (index >= Object.keys(orderDict).length - 2) {
+            if (index == Object.keys(orderDict).length - 2) {
+                tr.childNodes[4].textContent = '$' + toCurrency(orderDict['total']);
+            }
+        } else {
+            tr.childNodes[0].textContent = order;
+            tr.childNodes[1].textContent = '$' + toCurrency(orderDict[order]['price']);
+            tr.childNodes[2].textContent = orderDict[order]['quantity'];
+            tr.childNodes[4].textContent = '$' + toCurrency(orderDict[order]['subtotal']);
+            if (orderDict[order]['subtotal'] > 0) {
+                tr.className = 'tr-show';
+            } else {
+                tr.className = 'tr-hide'
+            }
+        }
+        index++;
+    }
+}
+
+function updateFixedElement(orderDict, fulfilledPrice) {
+    var bg = document.querySelector("a.bg");
+    var sectionProductsList = document.querySelectorAll('.sectionProductsList');
+    if (orderDict['total'] > 0) {
+        bg.style.backgroundColor = '#CFC';
+        for (var i = 0; i < sectionProductsList.length; i++) {
+            sectionProductsList[i].style.backgroundColor = "";
+        }
+    } else {
+        bg.style.backgroundColor = '#FCC';
+        for (var i = 0; i < sectionProductsList.length; i++) {
+            sectionProductsList[i].style.backgroundColor = "#FCC";
+        }
+    }
+    var totalFixed = document.querySelector("#totalFixed");
+    totalFixedText = '你已消費&nbsp;$' + toCurrency(orderDict['total']);
+    if (orderDict['total'] > fulfilledPrice) {
+        totalFixedText += '，可以參加滿額抽獎！'
+    } else if (orderDict['total'] > 0) {
+        totalFixedText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
+    }
+    totalFixed.innerHTML = totalFixedText;
+    var fulfilled = document.querySelector("#fulfilled");
+    fulfilledText = '<br>你已消費&nbsp;$' + toCurrency(orderDict['total']);
+    if (orderDict['total'] > fulfilledPrice) {
+        fulfilledText += '，可以參加滿額抽獎！'
+        fulfilled.classList.add('fulfilled');
+    } else if (orderDict['total'] > 0) {
+        fulfilledText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
+        fulfilled.classList.remove('fulfilled');
+    } else {
+        fulfilled.classList.remove('fulfilled');
+    }
+    fulfilled.innerHTML = fulfilledText;
 }
 
 function dayAvailable() {
     var orders = document.querySelectorAll(".order");
     var d1Total = true;
     for (var i = 0; i < orders.length; i++) {
-        var quantity = orders[i].parentNode.querySelector('.quantity').value;
-        var d1 = orders[i].parentNode.querySelector('.d1').value;
-        if (d1 * quantity < 0) {
+        var quantity = orders[i].parentNode.parentNode.querySelector('.quantity').value;
+        var d1 = orders[i].parentNode.parentNode.querySelector('.d1').value;
+        if (d1 * Math.abs(quantity) < 0) {
             d1Total = false;
             break;
         }
     }
     var d2Total = true;
     for (var i = 0; i < orders.length; i++) {
-        var quantity = orders[i].parentNode.querySelector('.quantity').value;
-        var d2 = orders[i].parentNode.querySelector('.d2').value;
-        if (d2 * quantity < 0) {
+        var quantity = orders[i].parentNode.parentNode.querySelector('.quantity').value;
+        var d2 = orders[i].parentNode.parentNode.querySelector('.d2').value;
+        if (d2 * Math.abs(quantity) < 0) {
             d2Total = false;
             break;
         }
@@ -202,7 +268,7 @@ function dayAvailable() {
         date: {
             exclusion: {
                 within: [],
-                message: "^您所選購的商品不支援此日期！",
+                message: "^您所選購的商品當中\n含有無法在 %{value} 取貨的品項！",
             },
         }
     };
@@ -240,67 +306,6 @@ function dayAvailable() {
     }
 }
 
-function updateCart(orderDict) {
-    var index = 0;
-    for (var order in orderDict) {
-        var tr = document.getElementById("tr-" + order);
-        if (index >= Object.keys(orderDict).length - 2) {
-            if (index == Object.keys(orderDict).length - 2) {
-                tr.childNodes[4].textContent = '$' + toCurrency(orderDict['total']);
-            }
-        } else {
-            tr.childNodes[0].textContent = order;
-            tr.childNodes[1].textContent = '$' + toCurrency(orderDict[order]['price']);
-            tr.childNodes[2].textContent = orderDict[order]['quantity'];
-            tr.childNodes[4].textContent = '$' + toCurrency(orderDict[order]['subtotal']);
-            if (orderDict[order]['subtotal'] > 0) {
-                tr.className = 'tr-show';
-            } else {
-                tr.className = 'tr-hide'
-            }
-        }
-        index++;
-    }
-}
-
-function updateFixedElement(orderDict) {
-    var bg = document.querySelector("a.bg");
-    var sectionProductsList = document.querySelectorAll('.sectionProductsList');
-    /*滿額門檻*/
-    var fulfilledPrice = 500;
-    if (orderDict['total'] > 0) {
-        bg.style.backgroundColor = '#CFC';
-        for (var i = 0; i < sectionProductsList.length; i++) {
-            sectionProductsList[i].style.backgroundColor = "";
-        }
-    } else {
-        bg.style.backgroundColor = '#FCC';
-        for (var i = 0; i < sectionProductsList.length; i++) {
-            sectionProductsList[i].style.backgroundColor = "#FCC";
-        }
-    }
-    var totalFixed = document.querySelector("#totalFixed");
-    totalFixedText = '你已消費&nbsp;$' + toCurrency(orderDict['total']);
-    if (orderDict['total'] > fulfilledPrice) {
-        totalFixedText += '，可以參加滿額抽獎！'
-    } else if (orderDict['total'] > 0) {
-        totalFixedText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
-    }
-    totalFixed.innerHTML = totalFixedText;
-    var fulfilled = document.querySelector("#fulfilled");
-    fulfilledText = '<br>你已消費&nbsp;$' + toCurrency(orderDict['total']);
-    if (orderDict['total'] > fulfilledPrice) {
-        fulfilledText += '，可以參加滿額抽獎！'
-        fulfilled.classList.add('fulfilled');
-    } else if (orderDict['total'] > 0) {
-        fulfilledText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
-        fulfilled.classList.remove('fulfilled');
-    } else {
-        fulfilled.classList.remove('fulfilled');
-    }
-    fulfilled.innerHTML = fulfilledText;
-}
-
 function vaild(item) {
     var form = document.querySelector('#form');
     status();
@@ -311,7 +316,7 @@ function vaild(item) {
         removeEachEmpty(item);
     }
     if ('date' in errors) {
-        if (errors['date'] == constraints['date']['exclusion']['message'].substring(1)) {
+        if (errors['date'][0].substring(0, 2) == constraints['date']['exclusion']['message'].substring(1, 3)) {
             showIsErrorsForInput(document.querySelector('.radio'), errors['date']);
         }
     } else {
@@ -449,18 +454,20 @@ function removeEachEmpty(item) {
 //when the count input was clicked
 function clicked(item, items) {
     if (item.classList[0] == "click-able") {
-        var quantity = item.parentElement.querySelector('.quantity');
+        var quantity = item.parentNode.parentNode.querySelector('.quantity');
     } else {
         var quantity = document.querySelector('[name="quantity-' + item.name + '"]');
     }
+    var upperLimit = parseInt(quantity.parentNode.parentNode.querySelector('.upperLimit').value);
+
     //onclick
     if (item.classList[1] == "inc") {
         if (parseInt(quantity.value) < 0) {
             quantity.value = 1;
-        } else if (parseInt(quantity.value) >= 20 && item.classList[0] != "click-able") {
-            quantity.value = 20;
-        } else if (parseInt(quantity.value) >= 21 && item.classList[0] == "click-able") {
-            quantity.value = 21;
+        } else if (parseInt(quantity.value) >= upperLimit && item.classList[0] != "click-able") {
+            quantity.value = upperLimit;
+        } else if (parseInt(quantity.value) >= (upperLimit + 1) && item.classList[0] == "click-able") {
+            quantity.value = upperLimit + 1;
         } else if (quantity.value == "") {
             quantity.value = 1;
         } else {
@@ -469,7 +476,11 @@ function clicked(item, items) {
     }
     if (item.classList[1] == "dec") {
         if (parseInt(quantity.value) >= 1) {
-            quantity.value = parseInt(quantity.value) - 1;
+            if (parseInt(quantity.value) >= (upperLimit + 1)) {
+                quantity.value = upperLimit;
+            } else {
+                quantity.value = parseInt(quantity.value) - 1;
+            }
         } else if (quantity.value == "" || parseInt(quantity.value) < 0) {
             quantity.value = 0;
         }
@@ -678,79 +689,78 @@ var constraints = {
     // These are the constraints used to validate the form
     name: {
         presence: {
-            message: "^姓名不能留空！\n難道你是無名氏逆？",
+            message: "^您必須填寫姓名！\n難道你是無名氏逆？",
         },
         format: {
             pattern: "^([A-Za-z ,-]|[\u4E00-\u9FFF．]|[^\x00-\xFF]])+$",
-            message: "^姓名的輸入格式無效！\n你的名字沒這麼奇怪吧？（如果這確實是你的真名，請立刻和我們聯絡）",
+            message: "^您填寫的姓名格式無效！\n你的名字沒這麼奇怪吧？（如果這確實是你的真名，請立刻和我們聯絡）",
         }
     },
     studentID: {
         presence: {
-            message: "^學號不能留空！",
+            message: "^您必須填寫政大學號！",
         },
         format: {
             pattern: "(^10[0-8][0-9]{6}$|^999999999$)",
-            message: "^學號的輸入格式無效！\n（嘗試填寫此欄卻失敗者，請輸入9個9並立刻和我們聯絡，訂單方會成立）",
+            message: "^您填寫的政大學號格式無效！\n（嘗試填寫此欄卻失敗者，請輸入9個9並立刻和我們聯絡，訂單方會成立）",
         }
     },
     department: {
         presence: {
-            message: "^系所不能留空！\n（無適當選項可選者，請選擇XXX並立刻和我們聯絡，訂單方會成立）",
+            message: "^您必須填寫系所！\n（無適當選項可選者，請選擇XXX並立刻和我們聯絡，訂單方會成立）",
         },
     },
     grade: {
         presence: {
-            message: "^年級不能留空！\n（無適當選項可選者，請立刻和我們聯絡）",
+            message: "^您必須填寫年級！\n（無適當選項可選者，請立刻和我們聯絡）",
         },
     },
     phoneNumber: {
         presence: {
-            message: "^手機號碼不能留空！\n我們需要和你聯絡及確認訂單！",
+            message: "^您必須填寫手機號碼！\n我們需要和你聯絡及確認訂單！",
         },
         format: {
             pattern: "^09[0-9]{8}$",
-            message: "^請輸入臺灣的手機門號，無需加入符號",
+            message: "^您必須填寫臺灣的手機門號！（無需加入符號）",
         }
     },
     email: {
         presence: {
-            message: "^email不能留空！\n我們需要和你聯絡及確認訂單！",
+            message: "^您必須填寫 E-mail！\n我們需要和你聯絡及確認訂單！",
         },
         email: {
-            message: "^email的格式無效！",
+            message: "^您填寫的 E-mail 的格式無效！",
         },
     },
     date: {
         presence: {
-            message: "^日期不能留空！\n難道你不來取貨嗎？",
+            message: "^您必須填寫日期！\n難道你不來取貨嗎？",
         },
         exclusion: {
-            within: [],
-            message: "^您所選購的商品不支援此日期！",
         },
     },
 };
 
 function addProductConstraints(items) {
-    var productConstraints = {
-        presence: {
-            message: "^數量不能留空！",
-        },
-        numericality: {
-            onlyInteger: true,
-            greaterThanOrEqualTo: 0,
-            lessThanOrEqualTo: 20,
-            notInteger: "^數量只能是整數！",
-            notGreaterThanOrEqualTo: "^數量不能為負！",
-            notLessThanOrEqualTo: "^數量已達本表單上限！如需要訂購更多請直接向我們洽詢！",
-        },
-    };
     for (var i = 0; i < items.length; i++) {
-        productName = "quantity-".concat(items[i].merchant).concat("-").concat(items[i].product);
+        var productConstraints = {
+            presence: {
+                message: "^您必須填寫此品項的購買數量！",
+            },
+            numericality: {
+                onlyInteger: true,
+                greaterThanOrEqualTo: 0,
+                lessThanOrEqualTo: parseInt(items[i].upperLimit),
+                notInteger: "^此品項購買數量只能是正整數！",
+                notGreaterThanOrEqualTo: "^此品項購買數量只能是正整數！",
+                notLessThanOrEqualTo: "^此品項購買數量已達本表單上限！如需訂購更多請直接向我們洽詢！",
+            },
+        };
+        var productName = 'quantity-' + items[i].merchant + '-' + items[i].product;
         constraints[productName] = productConstraints;
     }
 }
+
 //千分位
 function toCurrency(num) {
     var parts = num.toString().split('.');
@@ -873,6 +883,7 @@ function addEachProduct(items, index) {
     var inputPrice = items[index].price;
     var d1 = items[index].d1;
     var d2 = items[index].d2;
+    var upperLimit = items[index].upperLimit;
     var productWholeName = inputMerchant.concat("-").concat(inputProduct);
     //container
     var container = document.createElement("div");
@@ -885,24 +896,32 @@ function addEachProduct(items, index) {
     //products price
     container.innerHTML += '<div class="price"><span class="priceText">' + toCurrency(inputPrice) + '</span></div>'
     //products quantity
+    var orderContainer = document.createElement("div");
+        orderContainer.className = "orderContainer";
+
+    var meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML += '<button class="d1' + (d1 < 0 ? ' disabled' : '') + '" type="" name="d1-' + productWholeName + '" value="' + d1 + '" disabled="disabled">5月6日<br>取貨</button>';
+        meta.innerHTML += '<button class="d2' + (d2 < 0 ? ' disabled' : '') + '" type="" name="d2-' + productWholeName + '" value="' + d2 + '" disabled="disabled">5月7日<br>取貨</button>';
+        meta.innerHTML += '<button class="upperLimit" type="" name="price-' + productWholeName + '" value="' + upperLimit + '" disabled="disabled">上限：' + upperLimit + '</button>';
+
     var order = document.createElement("div");
-    order.className = "order";
-    order.id = productWholeName;
-    //quantity input
-    order.innerHTML += '<input class="d1" type="hidden" name="d1-' + productWholeName + '" value="' + d1 + '">';
-    //quantity input
-    order.innerHTML += '<input class="d2" type="hidden" name="d2-' + productWholeName + '" value="' + d2 + '">';
-    //quantity input
-    order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + productWholeName + '" value="' + inputPrice + '">';
-    //dec btn
-    order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
-    //quantity input
-    order.innerHTML += '<input class="quantity" type="number" name="quantity-' + productWholeName + '" value="0" min="0">';
-    //inc btn
-    order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
-    //remove btn
-    order.innerHTML += '<button type="button" class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
-    container.appendChild(order);
+        order.className = "order";
+        order.id = productWholeName;
+        order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + productWholeName + '" value="' + inputPrice + '">';
+        //dec btn
+        order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
+        //quantity input
+        order.innerHTML += '<input class="quantity" type="number" name="quantity-' + productWholeName + '" value="0" min="0">';
+        //inc btn
+        order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
+        //remove btn
+        order.innerHTML += '<button type="button" class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
+        
+    orderContainer.appendChild(meta);
+    orderContainer.appendChild(order);
+
+    container.appendChild(orderContainer);
     container.innerHTML += '<div class="messages"></div>'
     return container;
 }
