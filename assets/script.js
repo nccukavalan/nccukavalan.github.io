@@ -1,7 +1,95 @@
-// create the the drop-down list
 $(function() {
+    $.when(
+        $.get("https://spreadsheets.google.com/feeds/list/1ZBvqBmEYO8D8f3CxoVZMVjBbbOGqLfDQuAkDJxneTsg/1/public/values?alt=json")
+    ).then(function(data) {
+        var d = data.feed.entry;
+        var settings = {};
+        for (var i in d) {
+            settings[d[i].gsx$key.$t] = d[i].gsx$value.$t;
+            if (d[i].gsx$key.$t == "pickUpDay") {
+                settings[d[i].gsx$key.$t] = d[i].gsx$value.$t.split(', ');
+            }
+        }
+
+        var timer = setInterval(function() {
+            var now = moment().valueOf();
+            var timerText = document.querySelector('.timer');
+                timerText.innerHTML = ''
+
+            var y = settings['openYear'];
+            var m = settings['openMonth'];
+            var d = settings['openDay'];
+            //var d = 1;
+            var openTime = moment([y, m - 1, d]);
+
+            var openDiff = diff(openTime);
+
+            var y = settings['closeYear'];
+            var m = settings['closeMonth'];
+            var d = settings['closeDay'];
+            //var d = 8;
+            var closeTime = moment([y, m - 1, d + 1]);
+
+            var closeDiff = diff(closeTime);
+
+            if (openDiff['diff'] <= 0 && closeDiff['diff'] > 0 ) {
+                checkTimesUp(openDiff['diff']);
+
+                function checkTimesUp(openDiff) {
+                    if(openDiff < 0){
+                        main();
+                        clearInterval(timer);
+                    }
+                }
+
+            }
+
+            if (openDiff['diff'] > 0) {
+                timerText.innerHTML += '<p>距離預購開始還有' + openDiff['text'] + '！</p>';
+            } else {
+                timerText.innerHTML += '<p>真可惜，你晚了' + closeDiff['text'] + '才來！</p>';
+            }
+
+            function diff(t) {
+                var timeStart = moment().valueOf();
+                var timeEnd = t.valueOf();
+                var diff = moment.duration(timeEnd - timeStart);
+
+                var d = Math.abs(diff.days());
+                var h = Math.abs(diff.hours());
+                var m = Math.abs(diff.minutes());
+                var s = Math.abs(diff.seconds());
+
+                var diffText = ''
+                    if ((d) != 0) {
+                        diffText += d;
+                        diffText += '天';
+                    }
+                    if ((d + h) != 0) {
+                        diffText += h;
+                        diffText += '小時';
+                    }
+                    if ((d + h + m) != 0) {
+                        diffText += m;
+                        diffText += '分';
+                    }
+                    if ((d + h + m + s) != 0) {
+                        diffText += s;
+                        diffText += '秒';
+                    }
+                return {'diff': diff, 'text': diffText};
+            }
+        },'1000');
+    //main();
+
+    var pickUpDay = settings['pickUpDay'];
+
+function main() {
+    document.querySelector('.wrapper').classList.add('hide');
+    console.log(settings);
+
     //load the drop-down list
-    $.get("https://spreadsheets.google.com/feeds/list/13Sd4GBenMwijWjADGO_loLWk8sXf5_BACam5mGzd878/1/public/values?alt=json", function(data) {
+    $.get("https://spreadsheets.google.com/feeds/list/" + settings['departmentsList'] + "/1/public/values?alt=json", function(data) {
         var d = data.feed.entry;
         var depList = [];
         for (var i in d) {
@@ -12,12 +100,13 @@ $(function() {
             depList.push(dep);
         }
         //console.table(depList);
+        // create the the drop-down list
         setDepFragment(depList);
         //load chosen.jquery when the drop-down list were done
         loadSelectChosen();
     });
     //create product list and items set
-    $.get("https://spreadsheets.google.com/feeds/list/115PPsgx0--jvrpV-JIekfH5IR-JbKCNuCDXbYODslVk/1/public/values?alt=json", function(data) {
+    $.get("https://spreadsheets.google.com/feeds/list/" + settings['productsList'] + "/1/public/values?alt=json", function(data) {
         var d = data.feed.entry;
         var items = [];
         for (var i in d) {
@@ -67,7 +156,7 @@ $(function() {
                 ev.stopPropagation();
             }
         });
-        $.get("https://spreadsheets.google.com/feeds/list/13UKJAUXn74UbfgUhyL2d1da6Fr9z11W_FCzui2k8_88/1/public/values?alt=json", function(data) {
+        $.get("https://spreadsheets.google.com/feeds/list/" + settings['memberList'] + "/1/public/values?alt=json", function(data) {
             var d = data.feed.entry;
             var members = [];
             for (var i in d) {
@@ -143,7 +232,7 @@ $(function() {
             }
         });
     });
-});
+}
 
 //即時消費情形
 function status() {
@@ -174,7 +263,7 @@ function status() {
     orderDict['total'] = total;
     orderDict['outputText'] = output;
     /*滿額門檻*/
-    var fulfilledPrice = 500;
+    var fulfilledPrice = settings['fulfilledPrice'];
     //更新
     updateFixedElement(orderDict, fulfilledPrice);
     updateCart(orderDict);
@@ -578,6 +667,7 @@ function submitForm(items) {
 }
 //寄信+跳轉
 function sendMail(dict) {
+
     var mailBody = '<div style="margin:1em; padding:1em; background-color: #FFD;">';
         mailBody += '<p>';
         mailBody += dict['department'].substring(4) + dict['grade'].substring(2) + '<br />';
@@ -619,11 +709,7 @@ function sendMail(dict) {
         mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
         mailBody += '</p>';
         mailBody += '<p style="font-size: 0.75em;">';
-        mailBody += '以上資訊為本表單系統自動填入<br />';
-        mailBody += '訂單概以後台紀錄為準<br />';
-        mailBody += '若同學有發現錯誤歡迎回信或私訊粉專告知<br />';
-        mailBody += '⚠️當天若有同學忘記取貨，會有友會人員電話通知<br />';
-        mailBody += '⚠️欲變更或取消訂單請在預購截止前向我們聯絡，如有惡意棄單將公告於交流版<br />';
+        mailBody += settings['mailBodyNotice'];
         mailBody += '</p>';
         mailBody += '<p style="font-size: 1em;">';
         mailBody += '蘭陽週團隊感謝您訂購'
@@ -631,10 +717,7 @@ function sendMail(dict) {
         mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
         mailBody += '</p>';
         mailBody += '<p>';
-        mailBody += '國立政治大學蘭友會<br />';
-        mailBody += '地址｜台北市文山區指南路二段64號<br />';
-        mailBody += '信箱｜nccukavalan2.0@gmail.com<br />';
-        mailBody += '粉專｜fb.me/nccukavalan';
+        mailBody += settings['mailBodyInfo'];
         mailBody += '</p>';
         mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
         mailBody += '</p>';
@@ -642,14 +725,15 @@ function sendMail(dict) {
         mailBody += '您的訂單已於&nbsp;' + dict['timestamp'] + '&nbsp;送出';
         mailBody += '</p>';
         mailBody += '</div>';
+
     Email.send({
-        Host: "smtp.gmail.com",
-        Username: "nccukavalan2.0@gmail.com",
-        Password: "qvygrpxtuogyhruk",
+        Host: settings['emailHost'],
+        Username: settings['emailUsername'],
+        Password: settings['emailPassword'],
         To: dict['email'],
         //email
-        From: "國立政治大學蘭友會<nccukavalan2.0@gmail.com>",
-        Subject: "⚠️⚠️重要通知⚠️⚠️蘭陽週商品確認信及取貨通知",
+        From: settings['emailFrom'],
+        Subject: settings['mailSubjectForCustomer'],
         Body: mailBody,
     }).then(function(message) {
         if (message != "OK") {
@@ -663,13 +747,13 @@ function sendMail(dict) {
         mailBodyCopy += '</p>';
         mailBodyCopy += mailBody;
     Email.send({
-        Host: "smtp.gmail.com",
-        Username: "nccukavalan2.0@gmail.com",
-        Password: "qvygrpxtuogyhruk",
-        To: "nccukavalan2.0@gmail.com",
+        Host: settings['emailHost'],
+        Username: settings['emailUsername'],
+        Password: settings['emailPassword'],
+        To: settings['emailUsername'],
         //email
-        From: "國立政治大學蘭友會<nccukavalan2.0@gmail.com>",
-        Subject: "有人前來光顧蘭陽週預購了！",
+        From: settings['emailFrom'],
+        Subject: settings['mailSubjectForUs'],
         Body: mailBodyCopy,
     }).then(function(message) {
         if (message != "OK") {
@@ -923,3 +1007,7 @@ function addEachProduct(items, index) {
     container.innerHTML += '<div class="messages"></div>'
     return container;
 }
+
+
+    });
+});
