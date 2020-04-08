@@ -11,6 +11,13 @@ $(function() {
             }
         }
 
+        var title = document.querySelector('title');
+            title.innerHTML = settings['pageTitle'];
+        var titleText = document.querySelector('h1');
+            titleText.innerHTML = settings['pageTitle'] + '<span id="fulfilled"><br>你已消費&nbsp;$0</span>';
+        var intro = document.querySelector('#intro');
+            intro.innerHTML = settings['intro'];
+
         var timer = setInterval(function() {
             var now = moment().valueOf();
             var timerText = document.querySelector('.timer');
@@ -19,7 +26,7 @@ $(function() {
             var y = settings['openYear'];
             var m = settings['openMonth'];
             var d = settings['openDay'];
-            //var d = 1;
+            var d = 1;
             var openTime = moment([y, m - 1, d]);
 
             var openDiff = diff(openTime);
@@ -86,7 +93,6 @@ $(function() {
 
 function main() {
     document.querySelector('.wrapper').classList.add('hide');
-    console.log(settings);
 
     //load the drop-down list
     $.get("https://spreadsheets.google.com/feeds/list/" + settings['departmentsList'] + "/1/public/values?alt=json", function(data) {
