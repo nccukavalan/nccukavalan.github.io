@@ -574,115 +574,113 @@ function submitForm(items) {
         }
     });
     //finished
-    alert("訂單已送出！確認信已寄至您的電子郵件信箱！");
-    $('[href="assets/style.css"]').removeAttr("href");
-    var mailBody = sendMail(dict);
-    var body = document.querySelector('body')
-    body.innerHTML = mailBody;
+    sendMail(dict);
 }
 //寄信+跳轉
 function sendMail(dict) {
     var mailBody = '<div style="margin:1em; padding:1em; background-color: #FFD;">';
-    mailBody += '<p>';
-    mailBody += dict['department'].substring(4) + dict['grade'].substring(2) + '<br />';
-    mailBody += '<span style="color: #00F; font-weight: 1000; font-size: 1.5em;">' + dict['name'] + '</span>&nbsp;你好';
-    mailBody += '</p>';
-    mailBody += '<p style="border-top: 1px #000 solid; border-bottom: 1px #000 solid; line-height: 2em;">';
-    mailBody += '您在本次蘭陽週預購之商品訂單如下'
-    mailBody += '</p>';
-    //shopping cart
-    var index = 0;
-    for (var order in dict['quantity']) {
-        if (index < Object.keys(dict['quantity']).length - 2) {
-            if (dict['quantity'][order]['subtotal'] > 0) {
-                mailBody += '<span style="color: #F00; font-weight: 1000;">';
-                mailBody += dict['quantity'][order]['quantity'];
-                mailBody += '</span>';
-                mailBody += '&nbsp;件';
-                mailBody += '「';
-                mailBody += '<span style="font-weight: 1000;">' + order + '</span>' + '&nbsp;' + '($' + toCurrency(dict['quantity'][order]['price']) + ')';
-                mailBody += '」<br />';
+        mailBody += '<p>';
+        mailBody += dict['department'].substring(4) + dict['grade'].substring(2) + '<br />';
+        mailBody += '<span style="color: #00F; font-weight: 1000; font-size: 1.5em;">' + dict['name'] + '</span>&nbsp;你好';
+        mailBody += '</p>';
+        mailBody += '<p style="border-top: 1px #000 solid; border-bottom: 1px #000 solid; line-height: 2em;">';
+        mailBody += '您在本次蘭陽週預購之商品訂單如下'
+        mailBody += '</p>';
+        //shopping cart
+        var index = 0;
+        for (var order in dict['quantity']) {
+            if (index < Object.keys(dict['quantity']).length - 2) {
+                if (dict['quantity'][order]['subtotal'] > 0) {
+                    mailBody += '<span style="color: #F00; font-weight: 1000;">';
+                    mailBody += dict['quantity'][order]['quantity'];
+                    mailBody += '</span>';
+                    mailBody += '&nbsp;件';
+                    mailBody += '「';
+                    mailBody += '<span style="font-weight: 1000;">' + order + '</span>' + '&nbsp;' + '($' + toCurrency(dict['quantity'][order]['price']) + ')';
+                    mailBody += '」<br />';
+                }
             }
+            index++;
         }
-        index++;
-    }
-    mailBody += '<p style="font-size:1.5em;">';
-    mailBody += '總金額為&nbsp;<span style="color: #F00; font-weight: 1000;">' + toCurrency(dict['total']) + '</span>&nbsp;元';
-    mailBody += '</p>';
-    mailBody += '<p style="border-top: 1px #000 solid; border-bottom: 1px #000 solid; line-height:2em;">';
-    mailBody += "以下為領取人（您）的聯絡資料"
-    mailBody += '</p>';
-    mailBody += '<p>';
-    mailBody += '姓名：<span style="font-weight: 1000;">' + dict['name'] + '</span>' + '<br />';
-    mailBody += '學號：<span style="font-weight: 1000;">' + dict['studentID'] + '</span>' + '<br />';
-    mailBody += '手機：<span style="font-weight: 1000;">' + dict['phoneNumber'] + '</span>' + '<br />';
-    mailBody += '取貨時間：<span style="font-weight: 1000; background-color: #FF0;">' + dict['time'] + '&nbsp;12:00-17:00</span>' + '<br />';
-    mailBody += '取貨地點：<span style="font-weight: 1000; background-color: #FF0;">商院中庭</span>' + '<br />';
-    mailBody += '（時間地點如有變更將在粉絲專頁公布）'
-    mailBody += '</p>';
-    mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
-    mailBody += '</p>';
-    mailBody += '<p style="font-size: 0.75em;">';
-    mailBody += '以上資訊為本表單系統自動填入<br />';
-    mailBody += '訂單概以後台紀錄為準<br />';
-    mailBody += '若同學有發現錯誤歡迎回信或私訊粉專告知<br />';
-    mailBody += '⚠️當天若有同學忘記取貨，會有友會人員電話通知<br />';
-    mailBody += '⚠️欲變更或取消訂單請在預購截止前向我們聯絡，如有惡意棄單將公告於交流版<br />';
-    mailBody += '</p>';
-    mailBody += '<p style="font-size: 1em;">';
-    mailBody += '蘭陽週團隊感謝您訂購'
-    mailBody += '</p>';
-    mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
-    mailBody += '</p>';
-    mailBody += '<p>';
-    mailBody += '國立政治大學蘭友會<br />';
-    mailBody += '地址｜台北市文山區指南路二段64號<br />';
-    mailBody += '信箱｜nccukavalan2.0@gmail.com<br />';
-    mailBody += '粉專｜fb.me/nccukavalan';
-    mailBody += '</p>';
-    mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
-    mailBody += '</p>';
-    mailBody += '<p style="font-size: 0.75em;">';
-    mailBody += '您的訂單已於&nbsp;' + dict['timestamp'] + '&nbsp;送出';
-    mailBody += '</p>';
-    mailBody += '</div>';
+        mailBody += '<p style="font-size:1.5em;">';
+        mailBody += '總金額為&nbsp;<span style="color: #F00; font-weight: 1000;">' + toCurrency(dict['total']) + '</span>&nbsp;元';
+        mailBody += '</p>';
+        mailBody += '<p style="border-top: 1px #000 solid; border-bottom: 1px #000 solid; line-height:2em;">';
+        mailBody += "以下為領取人（您）的聯絡資料"
+        mailBody += '</p>';
+        mailBody += '<p>';
+        mailBody += '姓名：<span style="font-weight: 1000;">' + dict['name'] + '</span>' + '<br />';
+        mailBody += '學號：<span style="font-weight: 1000;">' + dict['studentID'] + '</span>' + '<br />';
+        mailBody += '手機：<span style="font-weight: 1000;">' + dict['phoneNumber'] + '</span>' + '<br />';
+        mailBody += '取貨時間：<span style="font-weight: 1000; background-color: #FF0;">' + dict['time'] + '&nbsp;12:00-17:00</span>' + '<br />';
+        mailBody += '取貨地點：<span style="font-weight: 1000; background-color: #FF0;">商院中庭</span>' + '<br />';
+        mailBody += '（時間地點如有變更將在粉絲專頁公布）'
+        mailBody += '</p>';
+        mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
+        mailBody += '</p>';
+        mailBody += '<p style="font-size: 0.75em;">';
+        mailBody += '以上資訊為本表單系統自動填入<br />';
+        mailBody += '訂單概以後台紀錄為準<br />';
+        mailBody += '若同學有發現錯誤歡迎回信或私訊粉專告知<br />';
+        mailBody += '⚠️當天若有同學忘記取貨，會有友會人員電話通知<br />';
+        mailBody += '⚠️欲變更或取消訂單請在預購截止前向我們聯絡，如有惡意棄單將公告於交流版<br />';
+        mailBody += '</p>';
+        mailBody += '<p style="font-size: 1em;">';
+        mailBody += '蘭陽週團隊感謝您訂購'
+        mailBody += '</p>';
+        mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
+        mailBody += '</p>';
+        mailBody += '<p>';
+        mailBody += '國立政治大學蘭友會<br />';
+        mailBody += '地址｜台北市文山區指南路二段64號<br />';
+        mailBody += '信箱｜nccukavalan2.0@gmail.com<br />';
+        mailBody += '粉專｜fb.me/nccukavalan';
+        mailBody += '</p>';
+        mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
+        mailBody += '</p>';
+        mailBody += '<p style="font-size: 0.75em;">';
+        mailBody += '您的訂單已於&nbsp;' + dict['timestamp'] + '&nbsp;送出';
+        mailBody += '</p>';
+        mailBody += '</div>';
     Email.send({
         Host: "smtp.gmail.com",
         Username: "nccukavalan2.0@gmail.com",
         Password: "qvygrpxtuogyhruk",
         To: dict['email'],
         //email
-        From: "nccukavalan2.0@gmail.com",
+        From: "國立政治大學蘭友會<nccukavalan2.0@gmail.com>",
         Subject: "⚠️⚠️重要通知⚠️⚠️蘭陽週商品確認信及取貨通知",
         Body: mailBody,
-    }).then(message=>{
-        var msg = message;
-        if (msg != "OK") {
-            alert("確認信寄送失敗！請洽蘭友會人員處理");
+    }).then(function(message) {
+        if (message != "OK") {
+            alert("確認信寄送失敗！請洽蘭友會粉絲專頁。");
+        } else {
+            alert("訂單已送出！確認信已寄至您的電子郵件信箱！");
         }
-    }
-    );
-    mailBodyCopy = '<p style="border-top: 1px #000 solid; border-bottom: 1px #000 solid; line-height:2em;">';
-    mailBodyCopy += '⚠️以下是&nbsp;' + dict['name'] + '&nbsp;的消費紀錄⚠️';
-    mailBodyCopy += '</p>';
-    mailBodyCopy += mailBody;
+    });
+    var mailBodyCopy = '<p style="border-top: 1px #000 solid; border-bottom: 1px #000 solid; line-height:2em;">';
+        mailBodyCopy += '⚠️以下是&nbsp;' + dict['name'] + '&nbsp;的消費紀錄⚠️';
+        mailBodyCopy += '</p>';
+        mailBodyCopy += mailBody;
     Email.send({
         Host: "smtp.gmail.com",
         Username: "nccukavalan2.0@gmail.com",
         Password: "qvygrpxtuogyhruk",
         To: "nccukavalan2.0@gmail.com",
         //email
-        From: "nccukavalan2.0@gmail.com",
+        From: "國立政治大學蘭友會<nccukavalan2.0@gmail.com>",
         Subject: "有人前來光顧蘭陽週預購了！",
         Body: mailBodyCopy,
-    }).then(message=>{
-        var msg = message;
-        if (msg != "OK") {
-            alert("確認信寄送失敗！請洽蘭友會人員處理");
+    }).then(function(message) {
+        if (message != "OK") {
+            alert("確認信寄送失敗！請洽蘭友會粉絲專頁。");
+        } else {
+            $('[href="assets/style.css"]').removeAttr("href");
+            var body = document.querySelector('body')
+                body.innerHTML = mailBody;
         }
-    }
-    );
-    return mailBody;
+    });
+    
 }
 /*fixed*/
 var constraints = {
