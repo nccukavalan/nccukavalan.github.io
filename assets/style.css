@@ -1,7 +1,10 @@
-@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"); @import url("https://pro.fontawesome.com/releases/v5.10.0/css/all.css"); * {
+@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
+@import url("https://pro.fontawesome.com/releases/v5.10.0/css/all.css");
+* {
     box-sizing: border-box;
 }
 /*timer*/
+
 div.wrapper {
     z-index: 9999;
     width: 100%;
@@ -10,10 +13,10 @@ div.wrapper {
     left: 0;
     top: 0;
     margin: auto;
-    display:flex;
-    justify-content:center;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    background-color: rgba(0,0,0,.5);
+    background-color: rgba(0, 0, 0, .5);
 }
 div.timer {
     z-index: 9999;
@@ -24,7 +27,7 @@ div.timer {
 }
 div.wrapper.hide {
     z-index: -10000;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(0, 0, 0, 0);
 }
 @media only screen and (min-width: 768px) {
     div.wrapper.hide .timer {
@@ -34,8 +37,8 @@ div.wrapper.hide {
         top: calc(2.5em / 0.9);
         right: calc(10em / 0.9);
         padding: 0.5em;
-        border: 1px #999 solid;
-        box-shadow: 1px 1px 1px 1px #CCC;
+        border: 0.05em #999 solid;
+        box-shadow: 0.05em 0.05em 0.05em 0.05em #CCC;
         border-radius: 0.5em;
         font-size: 0.9em;
     }
@@ -47,26 +50,24 @@ div.wrapper.hide {
         z-index: 10000;
         top: calc(3em / 0.6 / 1.5);
         right: calc(1em / 0.6 / 1.5);
-        background-color: rgba(0,0,0,0);
+        background-color: rgba(0, 0, 0, 0);
         font-size: calc(0.6em * 1.5);
         line-height: 1.5em;
         padding: calc(1em / 0.6 / 1.5);
     }
 }
-
 /*main*/
+
 body {
     background-color: #EEE;
     margin: 2em;
 }
-
 p {
     margin-block-start: 0;
     margin-block-end: 0;
     margin-inline-start: 0;
     margin-inline-end: 0;
 }
-
 footer {
     font-size: 0.8em;
     width: 100%;
@@ -75,13 +76,11 @@ footer {
     padding-bottom: 1em;
     color: #999;
 }
-
 footer a {
     font-size: 1em;
     color: #999;
     text-decoration: underline;
 }
-
 section {
     display: flex;
     flex-direction: row;
@@ -90,18 +89,15 @@ section {
     flex-wrap: wrap;
     width: 100%;
 }
-
 section#cart {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
 }
-
 a {
     text-decoration: none;
     font-size: 0.9em;
 }
-
 input {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -110,17 +106,15 @@ input {
     align-items: center;
     flex-direction: row;
 }
-
 .title {
     width: 100%;
     font-size: 2em;
     margin-top: 0.8em;
     margin-bottom: 0.5em;
     padding: 10px;
-    border-top: 1px #999 solid;
-    border-bottom: 1px #999 solid;
+    border-top: 0.05em #999 solid;
+    border-bottom: 0.05em #999 solid;
 }
-
 button {
     display: flex;
     justify-content: center;
@@ -131,96 +125,80 @@ button {
     text-align: center;
     cursor: pointer;
 }
-
 button#submit {
     width: 10em;
     height: 3em;
     border-radius: 1.5em;
     border: 0.2em #999 solid;
     background-color: #CCC;
-    box-shadow: 1px 1px 1px 1px #CCC;
+    box-shadow: 0.05em 0.05em 0.05em 0.05em #CCC;
     color: #555;
     font-size: 1.2em;
     font-weight: 700;
 }
-
 button#submit:hover {
     border: 0.05em #999 solid;
     background-color: #666;
     color: #FFF;
     box-shadow: 0 0 0 0 #FFF;
 }
-
 button.dateBtn {
     border: 0.05em #CCC solid;
     background-color: #DDD;
     text-align: center;
     border-radius: 0.2em;
-    box-shadow: 1px 1px 1px 1px #CCC;
+    box-shadow: 0.05em 0.05em 0.05em 0.05em #CCC;
 }
-
 button.dateBtn.active {
     background-color: #333;
     color: #FFF;
     box-shadow: 0 0 0 0 #FFF;
 }
-
 .grid {
     width: 100%;
     margin-bottom: 0.5em;
 }
-
 input.hide {
     display: none;
 }
-
-.radioRow > button[disabled] {
+.radioRow>button[disabled] {
     background-color: #EEE;
     text-decoration: line-through;
 }
-
-.radioRow > button[disabled]::after {
+.radioRow>button[disabled]::after {
     content: '（不支援）';
     color: #F00;
 }
-
 #fulfilled {
     margin-left: 2em;
     font-size: 0.6em;
     line-height: 1.5em;
 }
-
 #timer {
     font-size: 0.6em;
     line-height: 1.5em;
 }
-
 #fulfilled.fulfilled {
     color: #393;
 }
-
 #fulfilled>em, #totalFixed>em {
     font-style: normal;
     font-size: 1.2em;
     font-weight: 1000;
     color: #C33;
 }
-
 #totalFixed>em {
     font-size: 1em;
 }
-
 @media only screen and (min-width: 768px) {
     #fulfilled {
         display: none;
     }
-
     .grid {
         display: grid;
         grid-template-columns: 1fr;
         grid-row-gap: 0.5em;
     }
-
     .grid .formRow {
         display: grid;
         grid-template-rows: 3em;
@@ -228,64 +206,51 @@ input.hide {
         align-items: center;
         /*交叉軸-V*/
     }
-
     .grid .formRow .infoIn {
         grid-column: 2 / 5;
     }
-
     .grid .formRow select.chosen-select {
         grid-column: 2 / 5;
     }
-
     .grid .formRow .radio {
         grid-column: 2 / 5;
     }
-
     /*validate - form info row*/
     .grid .formRow .messages {
         grid-column: 5 / 7;
     }
-
     .grid .formRow label {
         text-align: right;
         margin-right: 0.75em;
     }
-
     .grid .formRow .help-block.error {
         margin-left: 0.4em;
     }
-
     .section-fixed li>ul {
         display: none;
     }
-
     .section-fixed:hover ul li {
         opacity: 1;
         border-radius: 0.5em 0.5em 0 0;
     }
-
     table {
         width: 80%;
     }
 }
-
 @media only screen and (max-width: 768px) {
     main {
         margin-top: 8em;
         margin-bottom: 10em;
     }
-
     .grid {
         display: flex;
         justify-content: center;
         /*主軸-H*/
         flex-direction: column;
     }
-
     .grid * {
         width: 100%;
     }
-
     .grid .formRow {
         display: flex;
         flex-direction: column;
@@ -296,34 +261,28 @@ input.hide {
         padding: 0.25em;
         margin: 0.25em 0 0.25em;
     }
-
     .grid .formRow .radio {
         display: flex;
         flex-direction: column;
     }
-
     /*validate - form info row*/
     .grid .formRow .infoIn+.messages, .grid .formRow .chosen-container+.messages, .grid .formRow .radio+.messages {
         align-items: center;
         /*交叉軸-V*/
     }
-
     .grid .formRow label {
         padding-left: 0.5em;
         margin-bottom: 0.5em;
         width: 100%;
     }
-
     .grid .formRow .help-block.error {
         padding-left: 0.5em;
         margin-top: 0.5em;
     }
-
     table {
         width: 100%;
     }
 }
-
 .formRow .infoIn {
     text-align: left;
     border: 0.05em #999 solid;
@@ -331,12 +290,10 @@ input.hide {
     font-size: 1.2em;
     border-radius: 0.2em;
 }
-
 .grid .formRow .radioRow {
     display: flex;
     flex-direction: row;
 }
-
 .grid .formRow .radioRow button.dateBtn {
     width: 100%;
     border: 0.05em #999 solid;
@@ -344,8 +301,8 @@ input.hide {
     border-radius: 0.5em;
     font-size: 1.2em;
 }
-
 /*product container*/
+
 .container {
     display: flex;
     justify-content: center;
@@ -356,45 +313,36 @@ input.hide {
     border-right: 0.05em #999 solid;
     width: 14em;
 }
-
 .container>* {
     justify-content: center;
     /*主軸-H*/
     width: 100%;
     margin: 0.5em 0.5em 0;
 }
-
 .container>*:nth-last-child(1) {
     margin: 0.5em;
 }
-
 .container .pic {
     height: 10em;
 }
-
 .container .pic img {
     width: 100%;
     height: 100%;
 }
-
 .container .goods, .price {
     text-align: center;
     overflow: hidden;
 }
-
 .container .goods {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-
 .container .price {
     font-size: 1.2em;
 }
-
 .container .price .priceText::before {
     content: '$';
 }
-
 .container .orderContainer .meta {
     display: flex;
     flex-direction: row;
@@ -404,130 +352,110 @@ input.hide {
     width: 100%;
     margin-bottom: 0.5em;
 }
-
-.container .orderContainer .meta > * {
+.container .orderContainer .meta>* {
     font-size: 0.75em;
     height: 3em;
     width: 100%;
-    background-color: #9F9;
-    border: 1px #999 solid;
+    background-color: #DFD;
+    border: 0.05em #999 solid;
     border-radius: 0.2em;
     color: #000;
     cursor: default;
 }
-
 .container .orderContainer .meta .disabled {
     background-color: #F99;
 }
-
 .container .orderContainer .order {
     display: flex;
     flex-wrap: wrap;
-    height: 2em
+    height: 2em;
 }
-
-.container .orderContainer .order > * {
+.container .orderContainer .order>* {
     border: 0.05em #999 solid;
 }
-
 .container .orderContainer .order * {
     text-align: center;
 }
-
 .container .orderContainer .order .quantity {
     height: 100%;
     width: 4em;
     margin: 0;
-    border: 1px #999 solid;
+    border: 0.05em #999 solid;
     font-size: 1.2em;
 }
-
 .container .orderContainer .order .quantity[type="number"] {
     -moz-appearance: textfield;
 }
-
 .container .orderContainer .order .quantity[type="number"]::-webkit-inner-spin-button, .container .orderContainer .order .quantity[type="number"]::-webkit-outer-spin-button {
     -moz-appearance: textfield;
     -webkit-appearance: none;
 }
-
 .container .orderContainer .order .dec, .container .orderContainer .order .inc {
     width: 3em;
     font-size: 0.8em;
 }
-
 .container .orderContainer .order .dec {
     border-radius: 3em 0 0 3em;
 }
-
 .container .orderContainer .order .inc {
     border-radius: 0 3em 3em 0;
 }
-
 .container .orderContainer .order .remove {
     margin-left: 0.4em;
     border-radius: 0.2em;
     width: 2em;
     background-color: #F99;
 }
-
 /* products quantity */
+
 /*validate text*/
+
 .help-block.error {
     /*錯誤提示文字*/
     color: #F00;
     font-size: 0.8em;
     font-weight: 500;
 }
-
 .help-block.error.memberText {
     color: #060;
 }
-
 .has-success {
     /*正確欄位*/
     background-color: #CFC;
 }
-
 .has-error {
     /*錯誤欄位*/
     background-color: #FCC;
 }
-
 /*cart table*/
+
 table {
     margin-top: 1em;
     margin-bottom: 3em;
     border-collapse: collapse;
 }
-
 tr {
     height: 3em;
     line-height: 3em;
     border-bottom: 0.05em #999 solid;
     background-color: #FFF;
 }
-
 tr.tr-hide {
     display: none;
 }
-
 th {
     background-color: #333;
     color: #FFF;
 }
-
 tr:hover {
     background-color: #FFC;
     font-weight: 700;
 }
-
 td {
     height: 100%;
     width: 20%;
     text-align: center;
 }
-
 tr td div {
     height: 3em;
     width: 100%;
@@ -535,7 +463,6 @@ tr td div {
     justify-content: center;
     align-items: center;
 }
-
 tr td div>* {
     display: flex;
     height: 100%;
@@ -543,33 +470,28 @@ tr td div>* {
     border: 0.05em #999 solid;
     border-radius: 0.2em;
 }
-
 tr td div .remove {
     background-color: #F99;
 }
-
 .dateBtn:hover, .dec:hover, .inc:hover {
     background-color: #666;
     color: #FFF;
     box-shadow: 0 0 0 0 #FFF;
 }
-
 /*fixed items*/
+
 ul, li {
     list-style-type: none;
     display: block;
     margin: 0;
     padding: 0;
 }
-
 .cart-fixed:hover #totalFixed::after {
     content: '｜點我跳到結帳區';
 }
-
 #totalFixed:hover::after {
     content: '｜點我跳到結帳區';
 }
-
 @media only screen and (min-width: 768px) {
     #timer {
         display: none;
@@ -584,33 +506,18 @@ ul, li {
         right: 2em;
         z-index: 100;
     }
-
     .fixed-container * {
         text-align: center;
     }
-
     .fixed-container .timer-fixed {
         display: flex;
         justify-content: flex-end;
         margin-bottom: -0.5em;
         padding: 0.5em;
-        /*
-        border: 1px rgba(0, 0, 0, 0.25) solid;
-        border-radius: 0.5em;
-        box-shadow: 1px 1px 1px 1px #CCC;
-        opacity: 0.9;
-        color: #000;
-        font-weight: 700;
-        margin-top: 0.5em;
-        margin-left: 0.5em;
-        font-size: 0.9em;
-        */
     }
-
     .cart-fixed {
         padding: 0.5em;
     }
-
     .cart-fixed>.fixed {
         padding: 0.5em;
         display: block;
@@ -618,52 +525,42 @@ ul, li {
         color: #000;
         font-weight: 700;
     }
-
     .cart-fixed .fixed:hover {
         font-weight: 1000;
         opacity: 1;
     }
-
     .cart-fixed:hover .fixed {
         font-weight: 1000;
         opacity: 1;
     }
-
     .cart-fixed .bg {
-        box-shadow: 1px 1px 1px 1px #CCC;
+        box-shadow: 0.05em 0.05em 0.05em 0.05em #CCC;
     }
-
     .cart-fixed:hover .bg {
-        border: 1px rgba(0, 0, 0, 0.75) solid;
+        border: 0.05em rgba(0, 0, 0, 0.75) solid;
     }
-
     .section-fixed {
         padding: 0.5em;
         margin-top: -0.5em;
     }
-
     .section-fixed:hover {
         opacity: 1;
         border-radius: 0.5em 0.5em 0 0;
     }
-
     .section-fixed>ul {
-        box-shadow: 1px 1px 1px 1px #CCC;
+        box-shadow: 0.05em 0.05em 0.05em 0.05em #CCC;
         border-radius: 0.5em;
     }
-
     .section-fixed li>ul:hover {
         display: block;
         position: relative;
         right: 0em;
     }
-
     .section-fixed:hover li>ul {
         display: block;
         position: relative;
         right: 0em;
     }
-
     .section-fixed>ul>.fixed {
         display: block;
         padding: 0.5em;
@@ -672,7 +569,6 @@ ul, li {
         font-weight: 700;
         font-size: 0.9em;
     }
-
     .section-fixed>ul>li a {
         display: block;
         padding: 0.5em;
@@ -681,34 +577,27 @@ ul, li {
         font-weight: 700;
         border-radius: 0;
     }
-
     .section-fixed>ul>li>ul>li:nth-last-child(1) a {
         border-radius: 0 0 0.5em 0.5em;
     }
-
     .section-fixed li.bg {
         background-color: #CCC;
     }
-
     .section-fixed li li a.bg {
         background-color: #DDD;
     }
-
     .bg {
-        border: 1px rgba(0, 0, 0, 0.25) solid;
+        border: 0.05em rgba(0, 0, 0, 0.25) solid;
         border-radius: 0.5em;
     }
-
     .bg:hover {
         opacity: 1;
-        border: 1px rgba(0, 0, 0, 0.75) solid;
+        border: 0.05em rgba(0, 0, 0, 0.75) solid;
     }
-
     button#navBtn {
         display: none;
     }
 }
-
 @media only screen and (max-width: 768px) {
     .header {
         position: fixed;
@@ -717,7 +606,6 @@ ul, li {
         top: 0;
         left: 0;
     }
-
     h1 {
         margin: 0;
         background-color: #FFF;
@@ -732,7 +620,6 @@ ul, li {
         white-space: nowrap;
         text-overflow: ellipsis;
     }
-
     button#navBtn {
         position: fixed;
         top: 1em;
@@ -744,39 +631,31 @@ ul, li {
         text-align: center;
         border-radius: 0.2em;
     }
-
     button#navBtn.active {
         background-color: #333;
         color: #FFF;
     }
-
     nav {
         display: none;
         position: fixed;
         width: 100%;
     }
-
     nav.active {
         display: block;
     }
-
     nav * {
         width: 100%;
     }
-
     nav li {
         display: flex;
         background-color: #CCC;
     }
-
     nav li.bg {
         display: none;
     }
-
     nav .timer-fixed {
         display: none;
     }
-
     nav a {
         color: #000;
         padding-left: calc(2em / 1);
@@ -785,28 +664,25 @@ ul, li {
         line-height: calc(2em / 1);
         font-size: calc(1em * 1);
     }
-
     nav li:hover {
         background-color: #333;
     }
-
     nav a:hover {
         color: #FFF;
         font-weight: 700;
     }
-
     nav li:hover>a[href="#cart"] {
         background-color: #999;
     }
-
     nav a[href="#cart"]:hover {
         color: #000;
         font-weight: 700;
     }
 }
-
 /*CSS drop-down list*/
+
 /* @group Base */
+
 .chosen-container {
     grid-column: 2 / 5;
     position: relative;
@@ -819,18 +695,16 @@ ul, li {
     -ms-user-select: none;
     user-select: none;
 }
-
 .chosen-container * {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
-
 .chosen-container .chosen-drop {
     position: absolute;
     top: 100%;
     z-index: 10;
     width: 100%;
-    border: 1px solid #aaa;
+    border: 0.05em solid #aaa;
     /*下拉選單邊框*/
     border-top: 0;
     background: #ccc;
@@ -843,19 +717,18 @@ ul, li {
     -webkit-clip-path: inset(100% 100%);
     clip-path: inset(100% 100%);
 }
-
 .chosen-container.chosen-with-drop .chosen-drop {
     clip: auto;
     -webkit-clip-path: none;
     clip-path: none;
 }
-
 .chosen-container a {
     cursor: pointer;
 }
-
 /* @end */
+
 /* @group Single Chosen */
+
 .chosen-container-single .chosen-single {
     /*選擇欄位*/
     position: relative;
@@ -864,9 +737,9 @@ ul, li {
     padding: 0 0 0 8px;
     height: 100%;
     /*!!!!!欄位高度!!!!!!*/
-    border: 1px solid #aaa;
+    border: 0.05em solid #aaa;
     /*!!!!!欄位邊框!!!!!!*/
-    border-radius: 5px;
+    border-radius: 0.2em;
     background-color: #fff;
     padding: 0.5em;
     background-clip: padding-box;
@@ -876,12 +749,10 @@ ul, li {
     line-height: 24px;
     /*選擇框內字體高度*/
 }
-
 .chosen-container-single .chosen-default {
     color: #777;
     /*選擇框內(placeholder)字體顏色*/
 }
-
 .chosen-container-single .chosen-single span {
     display: block;
     overflow: hidden;
@@ -889,7 +760,6 @@ ul, li {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 .chosen-container-single .chosen-single div {
     position: absolute;
     top: 0;
@@ -897,13 +767,11 @@ ul, li {
     display: block;
     height: 100%;
 }
-
 .chosen-container-single .chosen-single div b {
     display: block;
     width: 100%;
     height: 100%;
 }
-
 .chosen-container-single .chosen-search {
     position: relative;
     z-index: 20;
@@ -911,31 +779,28 @@ ul, li {
     padding: 3px 4px;
     white-space: nowrap;
 }
-
 .chosen-container-single .chosen-search input[type="text"] {
     /*搜尋框*/
-    margin: 1px 0;
+    margin: 0.05em 0;
     padding: 4px 20px 4px 5px;
     width: 100%;
     height: auto;
     outline: 0;
-    border: 1px solid #aaa;
+    border: 0.05em solid #aaa;
     font-size: 1em;
     line-height: normal;
     border-radius: 3px;
 }
-
 .chosen-search input[readonly] {
     display: none;
 }
-
 .chosen-container-single .chosen-drop {
-    margin-top: -1px;
+    margin-top: -0.05em;
     border-radius: 0 0 4px 4px;
     background-clip: padding-box;
 }
-
 /* @group Results */
+
 .chosen-container .chosen-results {
     color: #333;
     /*選項文字顏色*/
@@ -948,7 +813,6 @@ ul, li {
     /*下拉式選單最大高度*/
     -webkit-overflow-scrolling: touch;
 }
-
 .chosen-container .chosen-results li {
     display: none;
     margin: 0;
@@ -960,26 +824,22 @@ ul, li {
     /*選項是否分行*/
     -webkit-touch-callout: none;
 }
-
 .chosen-container .chosen-results li.active-result {
     /*有效項目*/
     display: list-item;
     cursor: pointer;
 }
-
 .chosen-container .chosen-results li.disabled-result {
     /*禁用項目*/
     display: list-item;
     color: #bbb;
     cursor: default;
 }
-
 .chosen-container .chosen-results li.highlighted {
     /*hovering的項目*/
     background-color: #666;
     color: #fff;
 }
-
 .chosen-container .chosen-results li.no-results {
     /*搜尋無結果*/
     color: #FFF;
@@ -988,7 +848,6 @@ ul, li {
     background: #EB7A77;
     /*no-results background*/
 }
-
 .chosen-container .chosen-results li em {
     /*匹配字眼*/
     font-style: normal;
