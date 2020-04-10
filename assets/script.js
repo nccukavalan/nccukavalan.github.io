@@ -151,7 +151,7 @@ function main(openTime, closeTime) {
             btn.className = 'dateBtn';
             btn.name = 'dateBtn';
             btn.type = 'button';
-            btn.value = dateValue;
+            btn.value = dateValue.replace(/\//g, "-");
             btn.innerHTML = dateBtnText;
 
         radioRow.appendChild(btn);
@@ -166,7 +166,7 @@ function main(openTime, closeTime) {
             input.id = 'd' + (i+1);
             input.name = 'date';
             input.type = 'radio';
-            input.value = dateValue;
+            input.value = dateValue.replace('/', '-').replace('/', '-');
 
         radio.appendChild(input);
     }
