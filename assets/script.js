@@ -1,4 +1,18 @@
 $(function() {
+    var lastTouchEnd = 0;
+    document.documentElement.addEventListener('touchend', function (event) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+    document.documentElement.addEventListener('touchstart', function (event) {
+      if (event.touches.length > 1) {
+        event.preventDefault();
+      }
+    }, false);
+
     $.when(
         $.get("https://spreadsheets.google.com/feeds/list/1ZBvqBmEYO8D8f3CxoVZMVjBbbOGqLfDQuAkDJxneTsg/1/public/values?alt=json")
     ).then(function(data) {
@@ -15,83 +29,90 @@ $(function() {
             title.innerHTML = settings['pageTitle'];
         var titleText = document.querySelector('h1');
             titleText.innerHTML = settings['pageTitle'] + '<span id="fulfilled"><br>你已消費&nbsp;$0</span>';
-        var intro = document.querySelector('#intro');
-            intro.innerHTML = settings['intro'];
+            titleText.innerHTML += '<span id="timer">｜載入中……</span>';
 
         var timer = setInterval(function() {
             var now = moment().valueOf();
             var timerText = document.querySelector('.timer');
                 timerText.innerHTML = ''
 
-            var y = settings['openYear'];
-            var m = settings['openMonth'];
-            var d = settings['openDay'];
-            var d = 1;
+            var y = parseInt(settings['openYear']);
+            var m = parseInt(settings['openMonth']);
+            var d = parseInt(settings['openDay']);
             var openTime = moment([y, m - 1, d]);
 
-            var openDiff = diff(openTime);
-
-            var y = settings['closeYear'];
-            var m = settings['closeMonth'];
-            var d = settings['closeDay'];
-            //var d = 8;
+            var y = parseInt(settings['closeYear']);
+            var m = parseInt(settings['closeMonth']);
+            var d = parseInt(settings['closeDay']);
             var closeTime = moment([y, m - 1, d + 1]);
 
+            var openDiff = diff(openTime);
             var closeDiff = diff(closeTime);
 
-            if (openDiff['diff'] <= 0 && closeDiff['diff'] > 0 ) {
-                checkTimesUp(openDiff['diff']);
-
-                function checkTimesUp(openDiff) {
-                    if(openDiff < 0){
-                        main();
-                        clearInterval(timer);
-                    }
-                }
-
-            }
-
-            if (openDiff['diff'] > 0) {
-                timerText.innerHTML += '<p>距離預購開始還有' + openDiff['text'] + '！</p>';
+            if (openDiff['diff'] <= 0 && closeDiff['diff'] > 0) {
+                timesUp(openTime, closeTime);
             } else {
-                timerText.innerHTML += '<p>真可惜，你晚了' + closeDiff['text'] + '才來！</p>';
-            }
-
-            function diff(t) {
-                var timeStart = moment().valueOf();
-                var timeEnd = t.valueOf();
-                var diff = moment.duration(timeEnd - timeStart);
-
-                var d = Math.abs(diff.days());
-                var h = Math.abs(diff.hours());
-                var m = Math.abs(diff.minutes());
-                var s = Math.abs(diff.seconds());
-
-                var diffText = ''
-                    if ((d) != 0) {
-                        diffText += d;
-                        diffText += '天';
-                    }
-                    if ((d + h) != 0) {
-                        diffText += h;
-                        diffText += '小時';
-                    }
-                    if ((d + h + m) != 0) {
-                        diffText += m;
-                        diffText += '分';
-                    }
-                    if ((d + h + m + s) != 0) {
-                        diffText += s;
-                        diffText += '秒';
-                    }
-                return {'diff': diff, 'text': diffText};
+                diffText(timerText, openDiff, closeDiff);
             }
         },'1000');
-    //main();
 
-    var pickUpDay = settings['pickUpDay'];
+function timesUp(openTime, closeTime) {
+    main(openTime, closeTime);
+    clearInterval(timer);
+}
 
-function main() {
+function diff(t) {
+    var timeStart = moment().valueOf();
+    var timeEnd = t.valueOf();
+    var diff = moment.duration(timeEnd - timeStart);
+
+    var d = Math.abs(diff.days());
+    var h = Math.abs(diff.hours());
+    var m = Math.abs(diff.minutes());
+    var s = Math.abs(diff.seconds());
+
+    var diffText = ''
+        if ((d) != 0) {
+            diffText += d;
+            diffText += ' 天 ';
+        }
+        if ((d + h) != 0) {
+            diffText += h;
+            diffText += ' 小時 ';
+        }
+        if ((d + h + m) != 0) {
+            diffText += m;
+            diffText += ' 分 ';
+        }
+        if ((d + h + m + s) != 0) {
+            diffText += s;
+            diffText += ' 秒';
+        }
+    return {'diff': diff, 'text': diffText};
+}
+
+function diffText(item, openDiff, closeDiff) {
+    if (openDiff['diff'] > 0) {
+        item.innerHTML = '再等 ' + openDiff['text'] + '，預購即將開始！';
+    } else if (closeDiff['diff'] < 0) {
+        item.innerHTML = '真可惜，你晚了 ' + closeDiff['text'] + ' 才來！';
+    } else {
+        item.innerHTML = (item.id == 'timer' ? ' ｜' : '') + '距離截止還有 ' + closeDiff['text'] + '！';
+    }
+}
+
+function updateTimer(item, openTime, closeTime) {
+    setInterval(function() {
+        var openDiff = diff(openTime);
+        var closeDiff = diff(closeTime);
+        diffText(item, openDiff, closeDiff);
+    },'1000');
+}
+
+function main(openTime, closeTime) {
+    var intro = document.querySelector('#intro');
+        intro.innerHTML = settings['intro'];
+
     document.querySelector('.wrapper').classList.add('hide');
 
     //load the drop-down list
@@ -111,6 +132,45 @@ function main() {
         //load chosen.jquery when the drop-down list were done
         loadSelectChosen();
     });
+
+    var pickUpDay = settings['pickUpDay'];
+
+    var radio = document.querySelector('.radio');
+
+    var radioRow = document.createElement('div');
+        radioRow.className = 'radioRow';
+
+    for (var i = 0; i < pickUpDay.length; i++) {
+        var dateValue = pickUpDay[i];
+        var dateUnix = moment(new Date(dateValue.split(' ')[0])).valueOf()
+        var dateText = moment(dateUnix).format('M[月]D[日]');
+        var dayNameInWeek = dateValue.split(' ')[1].replace('(', '').replace(')', '');
+        var dateBtnText = dateText + '（' + dayNameInWeek + '）';
+
+        var btn = document.createElement('button');
+            btn.className = 'dateBtn';
+            btn.name = 'dateBtn';
+            btn.type = 'button';
+            btn.value = dateValue;
+            btn.innerHTML = dateBtnText;
+
+        radioRow.appendChild(btn);
+    }
+
+    radio.appendChild(radioRow);
+
+    for (var i = 0; i < pickUpDay.length; i++) {
+        var dateValue = pickUpDay[i];
+        var input = document.createElement('input');
+            input.className = 'hide';
+            input.id = 'd' + (i+1);
+            input.name = 'date';
+            input.type = 'radio';
+            input.value = dateValue;
+
+        radio.appendChild(input);
+    }
+
     //create product list and items set
     $.get("https://spreadsheets.google.com/feeds/list/" + settings['productsList'] + "/1/public/values?alt=json", function(data) {
         var d = data.feed.entry;
@@ -135,6 +195,12 @@ function main() {
         createFixedElement();
         vaildListener(items);
         addCartSection(items);
+
+        var timer = document.querySelector('#timer');
+        var timerFixed = document.querySelector('.timer-fixed');
+        updateTimer(timer, openTime, closeTime);
+        updateTimer(timerFixed, openTime, closeTime);
+
         //Listener
         $("input").keydown(function(ev) {
             if (ev.which == 13) {
@@ -282,13 +348,13 @@ function updateCart(orderDict) {
         var tr = document.getElementById("tr-" + order);
         if (index >= Object.keys(orderDict).length - 2) {
             if (index == Object.keys(orderDict).length - 2) {
-                tr.childNodes[4].textContent = '$' + toCurrency(orderDict['total']);
+                tr.childNodes[4].innerHTML = '$' + toCurrency(orderDict['total']);
             }
         } else {
-            tr.childNodes[0].textContent = order;
-            tr.childNodes[1].textContent = '$' + toCurrency(orderDict[order]['price']);
-            tr.childNodes[2].textContent = orderDict[order]['quantity'];
-            tr.childNodes[4].textContent = '$' + toCurrency(orderDict[order]['subtotal']);
+            tr.childNodes[0].innerHTML = order.split('-')[0] + '<br>' + order.split('-')[1];
+            tr.childNodes[1].innerHTML = '$' + toCurrency(orderDict[order]['price']);
+            tr.childNodes[2].innerHTML = orderDict[order]['quantity'];
+            tr.childNodes[4].innerHTML = '$' + toCurrency(orderDict[order]['subtotal']);
             if (orderDict[order]['subtotal'] > 0) {
                 tr.className = 'tr-show';
             } else {
@@ -337,28 +403,22 @@ function updateFixedElement(orderDict, fulfilledPrice) {
 
 function dayAvailable() {
     var orders = document.querySelectorAll(".order");
-    var d1Total = true;
-    for (var i = 0; i < orders.length; i++) {
-        var quantity = orders[i].parentNode.parentNode.querySelector('.quantity').value;
-        var d1 = orders[i].parentNode.parentNode.querySelector('.d1').value;
-        if (d1 * Math.abs(quantity) < 0) {
-            d1Total = false;
-            break;
-        }
-    }
-    var d2Total = true;
-    for (var i = 0; i < orders.length; i++) {
-        var quantity = orders[i].parentNode.parentNode.querySelector('.quantity').value;
-        var d2 = orders[i].parentNode.parentNode.querySelector('.d2').value;
-        if (d2 * Math.abs(quantity) < 0) {
-            d2Total = false;
-            break;
-        }
-    }
-    /*處理禁用選項的部分*/
     var dateBtns = document.querySelectorAll('.dateBtn');
-    dateHandler(d1Total, dateBtns[0]);
-    dateHandler(d2Total, dateBtns[1]);
+
+    var dTotal = [];
+
+    for (var i = 0; i < dateBtns.length; i++) {
+        dTotal[i] = true;
+        for (var j = 0; j < orders.length; j++) {
+            var quantity = orders[j].parentNode.parentNode.querySelector('.quantity').value;
+            var d = orders[j].parentNode.parentNode.querySelector('.d' + (i+1)).value;
+            if (d * Math.abs(quantity) < 0) {
+                dTotal[i] = false;
+                break;
+            }
+        }
+    }
+
     var dateConstraints = {
         date: {
             exclusion: {
@@ -367,21 +427,20 @@ function dayAvailable() {
             },
         }
     };
-    var within = dateConstraints['date']['exclusion']['within'];
-    if (d1Total == false) {
-        within.push('2020-5-6 (三)');
-    } else {
-        if (within.indexOf('2020-5-6 (三)') != -1) {
-            within.splice(within.indexOf('2020-5-6 (三)'));
+
+    /*處理禁用選項的部分*/
+    for (var i = 0; i < dTotal.length; i++) {
+        dateHandler(dTotal[i], dateBtns[i]);
+        var within = dateConstraints['date']['exclusion']['within'];
+        if (dTotal[i] == false) {
+            within.push(dateBtns[i].value);
+        } else {
+            if (within.indexOf(dateBtns[i].value) != -1) {
+                within.splice(within.indexOf(dateBtns[i].value));
+            }
         }
     }
-    if (d2Total == false) {
-        within.push('2020-5-7 (四)');
-    } else {
-        if (within.indexOf('2020-5-7 (四)') != -1) {
-            within.splice(within.indexOf('2020-5-7 (四)'));
-        }
-    }
+    
     constraints['date']['exclusion'] = dateConstraints['date']['exclusion'];
 
     function dateHandler(dTotal, dateBtn) {
@@ -743,7 +802,7 @@ function sendMail(dict) {
         Body: mailBody,
     }).then(function(message) {
         if (message != "OK") {
-            alert("確認信寄送失敗！請洽蘭友會粉絲專頁。");
+            alert("確認信寄送失敗！請速洽蘭友會粉絲專頁。");
         } else {
             alert("訂單已送出！確認信已寄至您的電子郵件信箱！");
         }
@@ -763,7 +822,7 @@ function sendMail(dict) {
         Body: mailBodyCopy,
     }).then(function(message) {
         if (message != "OK") {
-            alert("確認信寄送失敗！請洽蘭友會粉絲專頁。");
+            alert("確認信寄送失敗！請速洽蘭友會粉絲專頁。");
         } else {
             $('[href="assets/style.css"]').removeAttr("href");
             var body = document.querySelector('body')

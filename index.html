@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-        <title>蘭陽週預購</title>
+        <title>蘭陽週預購表單</title>
         <!--jquery-->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <!--帶搜尋欄選單插件-->
@@ -47,15 +47,16 @@
     </head>
     <body>
         <div class="wrapper">
-            <div class="timer">載入中……</div>
+            <div class="timer">品項眾多，載入需時，尚請擔待</div>
         </div>
         <header class="header">
-            <h1>蘭陽週預購</h1>
+            <h1>蘭陽週預購表單</h1>
             <button id="navBtn" type="button">
                 <i class="fas fa-bars"></i>
             </button>
             <nav class="fixed-container">
                 <ul>
+                    <li class="timer-fixed">載入中……</li>
                     <li class="cart-fixed">
                         <a class="fixed bg" href="#cart" id="totalFixed">你已消費&nbsp;$0</a>
                     </li>
@@ -73,33 +74,33 @@
             </nav>
         </header>
         <main role="main">
-            <div id="intro">蘭陽週預購</div>
+            <div id="intro">蘭陽週預購表單載入中……</div>
             <form id="form" method="post" name="form" novalidate="">
                 <section id="info">
                     <p class="title">買家基本資料</p>
                     <div class="grid">
                         <div class="formRow">
                             <label for="name">姓名</label>
-                            <input autofocus="" class="infoIn" id="name" name="name" placeholder="你的名字" type="text">
+                            <input autofocus="" class="infoIn" id="name" name="name" placeholder="你的姓名" type="text">
                             <div class="messages"></div>
                         </div>
                         <div class="formRow">
                             <label for="studentID">學號</label>
-                            <input class="infoIn" id="studentID" name="studentID" placeholder="你的學號，例如" type="text">
+                            <input class="infoIn" id="studentID" name="studentID" placeholder="你的學號，例如「109101001」" type="text">
                             <div class="messages"></div>
                         </div>
                         <div class="formRow">
                             <label for="department">系級</label>
-                            <select class="chosen-select" data-placeholder="選擇系所" id="department" name="department" tabindex="-1">
-                                <option value=""></option>
+                            <select class="chosen-select" data-placeholder="你的系所" id="department" name="department" tabindex="-1">
+                                <option value="" disabled selected>（你的系所）</option>
                                 <!--系所區-->
                             </select>
                             <div class="messages"></div>
                         </div>
                         <div class="formRow">
                             <label for="grade"></label>
-                            <select class="chosen-select" data-placeholder="選擇年級" id="grade" name="grade" tabindex="-1">
-                                <option value=""></option>
+                            <select class="chosen-select" data-placeholder="你的年級" id="grade" name="grade" tabindex="-1">
+                                <option value="" disabled selected>（你的年級）</option>
                                 <option value="1-一年級">一年級</option>
                                 <option value="2-二年級">二年級</option>
                                 <option value="3-三年級">三年級</option>
@@ -112,23 +113,18 @@
                         </div>
                         <div class="formRow">
                             <label for="phoneNumber">聯絡手機</label>
-                            <input class="infoIn" id="phoneNumber" name="phoneNumber" placeholder="手機號碼，例如" type="text">
+                            <input class="infoIn" id="phoneNumber" name="phoneNumber" placeholder="你的手機號碼，格式如「09xxxxxxxx」" type="text">
                             <div class="messages"></div>
                         </div>
                         <div class="formRow">
                             <label for="email">聯絡 E-mail</label>
-                            <input class="infoIn" id="email" name="email" placeholder="E-mail，例如" type="text">
+                            <input class="infoIn" id="email" name="email" placeholder="你的E-mail，格式如「username@domain.com」" type="text">
                             <div class="messages"></div>
                         </div>
                         <div class="formRow">
                             <label>預計取貨日期</label>
                             <div class="radio">
-                                <div class="radioRow">
-                                    <button class="dateBtn" name="dateBtn" type="button" value="2020-5-6 (三)">5月6日（三）</button>
-                                    <button class="dateBtn" name="dateBtn" type="button" value="2020-5-7 (四)">5月7日（四）</button>
-                                </div>
-                                <input class="hide" id="d1" name="date" type="radio" value="2020-5-6 (三)">
-                                <input class="hide" id="d2" name="date" type="radio" value="2020-5-7 (四)">
+                                <!--dateBtns-->
                             </div>
                             <div class="messages"></div>
                         </div>
@@ -138,5 +134,6 @@
                 <!--Cart-->
             </form>
         </main>
+        <footer>國立政治大學蘭友會©2020　網頁設計｜<a href="https://www.facebook.com/z0s.rt" target="_blank">宗霖</a></footer>
     </body>
 </html>
