@@ -30,13 +30,6 @@ ul, li {
     margin: auto;
     background-color: rgba(0, 0, 0, 0.5); /*wrapper background color*/
 }
-.timer {
-    z-index: 9999;
-    padding: 1em;
-    text-align: center;
-    border-radius: 1em;
-    background-color: #ccc; /*timer background color*/
-}
 .wrapper.hide {
     z-index: -10000;
     background-color: transparent;
@@ -44,7 +37,60 @@ ul, li {
 .wrapper.hide .timer {
     display: none;
 }
-
+.timer,
+.noticeBox {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    padding: 1em;
+    text-align: center;
+    border-radius: 1em;
+    background-color: #ccc; /*timer background color*/
+    white-space:nowrap;
+}
+.noticeBox {
+    width: 50%;
+    align-items: center;
+    height: 50%;
+}
+.noticeText {
+    background-color: #FFFFFF;
+    overflow-y: scroll;
+    margin: 1em;
+    padding: 1em;
+    width: 100%;
+    height: 100%;
+    font-size: 0.8em;
+    line-height: 1.5;
+    text-align: left;
+    border-radius: 0.2em;
+    border: 0.05em #8695A3 solid;
+    white-space: normal;
+}
+.noticeText p {
+    margin-bottom: 1em;
+}
+.noticeText p:nth-last-child(1) {
+    margin-bottom: 0;
+}
+.closeBtn {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    bottom: -1em;
+    padding: 0.5em;
+    border-radius: 2em;
+    border: 0.1em #8695A3 solid; /*button border line*/
+    background-color: #DEDCD2; /*button color*/
+    color: #333333; /*button text color*/
+}
+.closeBtn:hover {
+    background-color: #264B47;
+    border: 0.1em #264B47 solid; /*button border line*/
+    color: #FFFFFF;
+}
 /*main*/
 body {
     margin: 2em;

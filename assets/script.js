@@ -60,7 +60,7 @@ $(function() {
             var h = Math.abs(diff.hours());
             var m = Math.abs(diff.minutes());
             var s = Math.abs(diff.seconds());
-            var diffText = ''
+            var diffText = ' '
             if ((d) != 0) {
                 diffText += d;
                 diffText += ' 天 ';
@@ -85,11 +85,11 @@ $(function() {
 
         function diffText(item, openDiff, closeDiff) {
             if (openDiff['diff'] > 0) {
-                item.innerHTML = '再等 ' + openDiff['text'] + '，預購即將開始！';
+                item.innerHTML = settings['BeforeMessage'].replace('%{text}', openDiff['text']);
             } else if (closeDiff['diff'] < 0) {
-                item.innerHTML = '真可惜，你晚了 ' + closeDiff['text'] + ' 才來！';
+                item.innerHTML = settings['AfterMessage'].replace('%{text}', closeDiff['text']);
             } else {
-                item.innerHTML = (item.id == 'timer' ? ' ｜' : '') + '距離截止還有 ' + closeDiff['text'] + '！';
+                item.innerHTML = (item.id == 'timer' ? ' ｜' : '') + settings['DuringMessage'].replace('%{text}', closeDiff['text']);
             }
         }
 
@@ -101,10 +101,33 @@ $(function() {
             }, '1000');
         }
 
+        function notice() {
+            var wrapper = document.querySelector('.wrapper')
+            var noticeBox = document.createElement('div');
+                noticeBox.className = 'noticeBox';
+                noticeBox.innerHTML = '請先詳閱以下訂購須知';
+            var noticeText = document.createElement('div');
+                noticeText.className = 'noticeText';
+                noticeText.innerHTML = settings['noticeText'];
+            var closeBtn = document.createElement('button');
+                closeBtn.className = 'closeBtn';
+                closeBtn.innerHTML = '我已閱讀並確認';
+                noticeBox.appendChild(closeBtn);
+                noticeBox.appendChild(noticeText);
+                wrapper.appendChild(noticeBox);
+            $('.closeBtn').on('click', function() {
+                wrapper.classList.add('hide');
+                $('.closeBtn').off('click');
+            })
+            //document.querySelector('.wrapper').classList.add('hide');
+        }
+
         function main(openTime, closeTime) {
             var intro = document.querySelector('#intro');
             intro.innerHTML = settings['intro'];
-            document.querySelector('.wrapper').classList.add('hide');
+            document.querySelector('.timer').classList.add('hide');
+            notice();
+            
             //load the drop-down list
             $.get("https://spreadsheets.google.com/feeds/list/" + settings['departmentsList'] + "/1/public/values?alt=json", function(data) {
                 var d = data.feed.entry;
@@ -493,10 +516,9 @@ $(function() {
                     var errors = validate(form, constraints);
                     // then we update the form to reflect the results
                     showIsErrors(form, errors || {});
-                    var successMessage = "表單已完成。";
                     var errorMessage = "表單內容有誤，請檢視錯誤訊息後重新輸入！";
                     if (!errors) {
-                        doSuccess(successMessage);
+                        doSuccess();
                     } else {
                         doError(errorMessage);
                     }
@@ -514,7 +536,7 @@ $(function() {
                     alert(message);
                 }
 
-                function doSuccess(message) {
+                function doSuccess() {
                     submitForm();
                 }
             }
@@ -643,6 +665,14 @@ $(function() {
             // 驗證總金額是否為0
             if (orderDict['total'] <= 0) {
                 alert("你似乎沒購買任何商品！");
+                var inputs = ($('.quantity'))
+                for (var i = 0; i < inputs.length; i++) {
+                    if ($(inputs[i]).val() == 0) {
+                        var formGroup = findParentNode(inputs[i]);
+                        resetFormGroup(formGroup);
+                    }
+                }
+                alert(message);
                 return;
             } else {
                 var fulfilledPrice = parseInt(settings['fulfilledPrice']);
@@ -652,6 +682,14 @@ $(function() {
                     var msg = '你可以參加滿額抽獎！確定要結帳？';
                 }
                 if (!confirm(msg)) {
+                    var inputs = ($('.quantity'))
+                    for (var i = 0; i < inputs.length; i++) {
+                        if ($(inputs[i]).val() == 0) {
+                            var formGroup = findParentNode(inputs[i]);
+                            resetFormGroup(formGroup);
+                        }
+                    }
+                    alert(message);
                     return;
                 }
             }
@@ -661,6 +699,14 @@ $(function() {
             var email = $('[name="email"]').val() || '未填寫';
             // confirm to post order
             if (!confirm("按下確定以送出訂單\n確認信將會寄至：" + email)) {
+                var inputs = ($('.quantity'))
+                for (var i = 0; i < inputs.length; i++) {
+                    if ($(inputs[i]).val() == 0) {
+                        var formGroup = findParentNode(inputs[i]);
+                        resetFormGroup(formGroup);
+                    }
+                }
+                alert(message);
                 return;
             }
             // prepare the post data
