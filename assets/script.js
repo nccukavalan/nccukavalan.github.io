@@ -154,27 +154,32 @@ $(function() {
             //create product list and items set
             $.get("https://spreadsheets.google.com/feeds/list/" + settings['productsList'] + "/1/public/values?alt=json", function(data) {
                 var d = data.feed.entry;
-                var items = [];
+                var items = {};
                 for (var i in d) {
-                    var item = {};
-                    item.merchant = d[i].gsx$merchant.$t;
-                    item.product = d[i].gsx$product.$t;
-                    item.price = d[i].gsx$price.$t;
-                    item.priceMember = d[i].gsx$pricemember.$t;
-                    item.d1 = d[i].gsx$d1.$t;
-                    item.d2 = d[i].gsx$d2.$t;
-                    item.upperLimit = d[i].gsx$upperlimit.$t;
-                    item.link = d[i].gsx$link.$t;
-                    item.pic = d[i].gsx$pic.$t;
-                    items.push(item);
+                    var merchant = d[i].gsx$merchant.$t;
+                    var info = d[i].gsx$info.$t;
+                    items[merchant] = {};
+                    items[merchant]['info'] = info;
                 }
-                //console.table(items);
-                //add the element
-                addProductsList(items);
+                for (var i in d) {
+                    var merchant = d[i].gsx$merchant.$t;
+                    var product = d[i].gsx$product.$t
+                    items[merchant][product] = {
+                        'price': d[i].gsx$price.$t,
+                        'priceMember': d[i].gsx$pricemember.$t,
+                        'd1': d[i].gsx$d1.$t,
+                        'd2': d[i].gsx$d2.$t,
+                        'upperLimit': d[i].gsx$upperlimit.$t,
+                        'link': d[i].gsx$link.$t,
+                        'pic': d[i].gsx$pic.$t,
+                    };
+                }
+                addProducts(items);
                 addProductConstraints(items);
-                createFixedElement();
-                vaildListener(items);
+                createFixedElement(items);
                 addCartSection(items);
+                //add the element
+                vaildListener();
                 var timer = document.querySelector('#timer');
                 var timerFixed = document.querySelector('.timer-fixed');
                 updateTimer(timer, openTime, closeTime);
@@ -186,10 +191,10 @@ $(function() {
                     }
                 });
                 $(".click-able").click(function(ev) {
-                    clicked(this, items);
+                    clicked(this);
                 });
                 $(".cartBtn").click(function(ev) {
-                    clicked(this, items);
+                    clicked(this);
                 });
                 $("#navBtn").click(function(ev) {
                     if (this.classList.contains("active")) {
@@ -234,25 +239,30 @@ $(function() {
                         }
 
                         function memberPrice(items) {
-                            for (var i = 0; i < items.length; i++) {
-                                status();
-                                var id = "container-" + items[i].merchant + "-" + items[i].product;
-                                var container = document.getElementById(id);
-                                var priceText = container.querySelector('.priceText');
-                                priceText.textContent = items[i].priceMember;
-                                var priceValue = container.querySelector('.priceValue');
-                                priceValue.value = items[i].priceMember;
+                            for (var merchant in items) {
+                                for (var product in items[merchant]) {
+                                    var fullName = merchant + '-' + product;
+                                    var container = document.getElementById('container-' + fullName);
+                                    var price = items[merchant][product].priceMember;
+                                    var priceText = container.querySelector('.priceText');
+                                        priceText.textContent = price;
+                                    var priceValue = container.querySelector('.priceValue');
+                                        priceValue.value = price;
+                                }
                             }
                         }
 
                         function normalPrice(items) {
-                            for (var i = 0; i < items.length; i++) {
-                                var id = "container-" + items[i].merchant + "-" + items[i].product;
-                                var container = document.getElementById(id);
-                                var priceText = container.querySelector('.priceText');
-                                priceText.textContent = items[i].price;
-                                var priceValue = container.querySelector('.priceValue');
-                                priceValue.value = items[i].price;
+                            for (var merchant in items) {
+                                for (var product in items[merchant]) {
+                                    var fullName = merchant + '-' + product;
+                                    var container = document.getElementById('container-' + fullName);
+                                    var price = items[merchant][product].price;
+                                    var priceText = container.querySelector('.priceText');
+                                        priceText.textContent = price;
+                                    var priceValue = container.querySelector('.priceValue');
+                                        priceValue.value = price;
+                                }
                             }
                         }
                     }
@@ -346,14 +356,16 @@ $(function() {
             var bg = document.querySelector("a.bg");
             var sectionProductsList = document.querySelectorAll('.sectionProductsList');
             if (orderDict['total'] > 0) {
-                bg.style.backgroundColor = '#CFC';
+                bg.classList.remove('zero');
+                bg.classList.add('nonZero');
                 for (var i = 0; i < sectionProductsList.length; i++) {
-                    sectionProductsList[i].style.backgroundColor = "";
+                    sectionProductsList[i].classList.remove('zero');
                 }
             } else {
-                bg.style.backgroundColor = '#FCC';
+                bg.classList.remove('nonZero');
+                bg.classList.add('zero');
                 for (var i = 0; i < sectionProductsList.length; i++) {
-                    sectionProductsList[i].style.backgroundColor = "#FCC";
+                    sectionProductsList[i].classList.add('zero');
                 }
             }
             var totalFixed = document.querySelector("#totalFixed");
@@ -441,7 +453,7 @@ $(function() {
             if (item.classList.contains("quantity")) {
                 removeEachEmpty(item);
             }
-            if ('date'in errors) {
+            if ('date' in errors) {
                 if (errors['date'][0].substring(0, 2) == constraints['date']['exclusion']['message'].substring(1, 3)) {
                     showIsErrorsForInput(document.querySelector('.radio'), errors['date']);
                 }
@@ -451,7 +463,7 @@ $(function() {
             }
         }
         //表單驗證區
-        function vaildListener(items) {
+        function vaildListener() {
             (function() {
                 // Hook up the form so we can prevent it from being posted
                 var form = document.querySelector('#form');
@@ -460,7 +472,7 @@ $(function() {
                     handleFormSubmit(form);
                 });
                 // Hook up the inputs to validate on the fly
-                var inputs = document.querySelectorAll("input, textarea, select, .dec, .inc, .remove")
+                var inputs = document.querySelectorAll("input, textarea, select, .click-able")
                 for (var i = 0; i < inputs.length; ++i) {
                     $(inputs.item(i)).on('input', function(ev) {
                         vaild(this);
@@ -503,7 +515,7 @@ $(function() {
                 }
 
                 function doSuccess(message) {
-                    submitForm(items);
+                    submitForm();
                 }
             }
             )();
@@ -576,7 +588,7 @@ $(function() {
             }
         }
         //when the count input was clicked
-        function clicked(item, items) {
+        function clicked(item) {
             if (item.classList[0] == "click-able") {
                 var quantity = item.parentNode.parentNode.querySelector('.quantity');
             } else {
@@ -624,7 +636,7 @@ $(function() {
         }
         /*submit*/
         //action for submit the form
-        function submitForm(items) {
+        function submitForm() {
             // 表單驗證成功
             // contents of submitting
             var orderDict = status();
@@ -633,7 +645,13 @@ $(function() {
                 alert("你似乎沒購買任何商品！");
                 return;
             } else {
-                if (!confirm("確定要結帳？")) {
+                var fulfilledPrice = parseInt(settings['fulfilledPrice']);
+                if (orderDict['total'] < fulfilledPrice) {
+                    var msg = '再加 $' + toCurrency(fulfilledPrice - orderDict['total']) + ' 就可以參加滿額抽獎！\n確定要現在結帳？';
+                } else {
+                    var msg = '你可以參加滿額抽獎！確定要結帳？';
+                }
+                if (!confirm(msg)) {
                     return;
                 }
             }
@@ -642,7 +660,7 @@ $(function() {
             // prepare the post data
             var email = $('[name="email"]').val() || '未填寫';
             // confirm to post order
-            if (!confirm("按下確定送出訂單\n確認信將會寄至：" + email)) {
+            if (!confirm("按下確定以送出訂單\n確認信將會寄至：" + email)) {
                 return;
             }
             // prepare the post data
@@ -853,22 +871,26 @@ $(function() {
         };
 
         function addProductConstraints(items) {
-            for (var i = 0; i < items.length; i++) {
-                var productConstraints = {
-                    presence: {
-                        message: "^您必須填寫此品項的購買數量！",
-                    },
-                    numericality: {
-                        onlyInteger: true,
-                        greaterThanOrEqualTo: 0,
-                        lessThanOrEqualTo: parseInt(items[i].upperLimit),
-                        notInteger: "^此品項購買數量只能是正整數！",
-                        notGreaterThanOrEqualTo: "^此品項購買數量只能是正整數！",
-                        notLessThanOrEqualTo: "^此品項購買數量已達本表單上限！如需訂購更多請直接向我們洽詢！",
-                    },
-                };
-                var productName = 'quantity-' + items[i].merchant + '-' + items[i].product;
-                constraints[productName] = productConstraints;
+            for (var merchant in items) {
+                for (var product in items[merchant]) {
+                    var fullName = merchant + '-' + product;
+                    var upperLimit = items[merchant][product].upperLimit;
+                    var productConstraints = {
+                        presence: {
+                            message: "^您必須填寫此品項的購買數量！",
+                        },
+                        numericality: {
+                            onlyInteger: true,
+                            greaterThanOrEqualTo: 0,
+                            lessThanOrEqualTo: parseInt(upperLimit),
+                            notInteger: "^此品項購買數量只能是正整數！",
+                            notGreaterThanOrEqualTo: "^此品項購買數量只能是正整數！",
+                            notLessThanOrEqualTo: "^此品項購買數量已達本表單上限！如需訂購更多請直接向我們洽詢！",
+                        },
+                    };
+                    var productName = 'quantity-' + fullName;
+                    constraints[productName] = productConstraints;
+                }
             }
         }
         //千分位
@@ -899,137 +921,123 @@ $(function() {
             });
         }
 
-        function createFixedElement() {
-            var fixedContainer = document.querySelector(".fixed-container");
-            var sectionProductsList = document.querySelectorAll('.sectionProductsList');
-            var fixedSectionsList = document.querySelector("#fixedSectionsList");
-            fixedSectionsList.innerHTML = '';
-            var li = document.createElement("li");
-            li.innerHTML = '<a class="bg" href="#info">買家基本資料</a>';
-            fixedSectionsList.appendChild(li);
-            for (var i = 0; i < sectionProductsList.length; i++) {
+        function createFixedElement(items) {
+            var merchantsList = document.querySelector("#merchantsList");
                 var li = document.createElement("li");
-                li.innerHTML = '<a class="bg" href="#' + sectionProductsList[i].id + '">' + sectionProductsList[i].id.substring(8) + '</a>';
-                fixedSectionsList.appendChild(li);
-            }
+                    li.innerHTML = '<a class="bg" href="#info">買家基本資料</a>';
+                merchantsList.appendChild(li);
+                for (var merchant in items) {
+                    var li = document.createElement("li");
+                        li.innerHTML = '<a class="bg" href="#section-' + merchant + '">' + merchant + '</a>';
+                    merchantsList.appendChild(li);
+                }
         }
 
         function addCartSection(items) {
             var section = document.createElement('section');
-            section.id = 'cart';
-            var p = document.createElement('p');
-            p.className = 'title';
-            p.innerHTML = '購物車';
-            var table = document.createElement('table');
-            table.id = 'cartTable';
-            var tbody = document.createElement("tbody");
-            tbody.innerHTML = '<tr id="tr-title"><th>商品</th><th>價格</th><th>數量</th><th>修改</th><th>小計</th></tr>';
-            for (var i = 0; i < items.length; i++) {
-                var order = items[i].merchant + '-' + items[i].product;
-                var tr = document.createElement("tr");
-                tr.id = 'tr-' + order;
-                tr.innerHTML += '<td>' + order + '</td>';
-                tr.innerHTML += '<td>$' + toCurrency(items[i].price) + '</td>';
-                tr.innerHTML += '<td>' + 0 + '</td>';
-                var td = document.createElement("td");
-                var div = document.createElement("div");
-                div.innerHTML += '<button type="button" class="cartBtn dec" name="' + order + '"><i class="fas fa-minus"></i></button>'
-                div.innerHTML += '<button type="button" class="cartBtn inc" name="' + order + '"><i class="fas fa-plus"></i></button>'
-                div.innerHTML += '<button type="button" class="cartBtn remove" name="' + order + '"><i class="fas fa-trash-alt"></i></button>'
-                td.appendChild(div);
-                tr.appendChild(td);
-                tr.innerHTML += '<td>$' + toCurrency(0) + '</td>';
-                tr.className = 'tr-hide'
-                tbody.appendChild(tr);
-            }
-            tbody.innerHTML += '<tr id="tr-total"><td>總計</td><td></td><td></td><td></td><td>$' + toCurrency(0) + '</td></tr>';
-            table.appendChild(tbody);
-            section.appendChild(p);
-            section.appendChild(table);
-            section.appendChild(createSubmitButton());
-            document.querySelector("form").appendChild(section);
+                section.id = 'cart';
+                var p = document.createElement('p');
+                    p.className = 'title';
+                    p.innerHTML = '購物車';
+                var table = document.createElement('table');
+                    table.id = 'cartTable';
+                    var tbody = document.createElement('tbody');
+                        tbody.innerHTML = '<tr id="tr-title"><th>商品</th><th>單價</th><th>數量</th><th>修改</th><th>小計</th></tr>';
+                        for (var merchant in items) {
+                            for (var product in items[merchant]) {
+                                var order = merchant + '-' + product;
+                                var price = items[merchant][product].price;
+                                var tr = document.createElement("tr");
+                                    tr.id = 'tr-' + order;
+                                    tr.innerHTML += '<td>' + order + '</td>';
+                                    tr.innerHTML += '<td>$' + toCurrency(price) + '</td>';
+                                    tr.innerHTML += '<td>' + 0 + '</td>';
+                                    var td = document.createElement('td');
+                                        var div = document.createElement('div');
+                                            div.innerHTML += '<button type="button" class="cartBtn dec" name="' + order + '"><i class="fas fa-minus"></i></button>'
+                                            div.innerHTML += '<button type="button" class="cartBtn inc" name="' + order + '"><i class="fas fa-plus"></i></button>'
+                                            div.innerHTML += '<button type="button" class="cartBtn remove" name="' + order + '"><i class="fas fa-trash-alt"></i></button>'
+                                        td.appendChild(div);
+                                    tr.appendChild(td);
+                                    tr.innerHTML += '<td>$' + toCurrency(0) + '</td>';
+                                    tr.className = 'tr-hide'
+                                tbody.appendChild(tr);
+                            }
+                        }
+                        tbody.innerHTML += '<tr id="tr-total"><td>總計</td><td></td><td></td><td></td><td>$' + toCurrency(0) + '</td></tr>';
+                    table.appendChild(tbody);
+                section.appendChild(p);
+                section.appendChild(table);
+                section.appendChild(createSubmitButton());
+            document.querySelector('form').appendChild(section);
         }
         //create submit button
         function createSubmitButton() {
-            var submit = document.createElement("button");
+            var submit = document.createElement('button');
             submit.type = "submit";
             submit.id = "submit";
             submit.textContent = "結帳";
             submit.value = submit.textContent;
             return submit;
         }
-        //Section of Merchant of product list
-        function addProductsList(items) {
-            var productsList = document.createDocumentFragment();
-            //resetFragment
-            var productsFragment = document.createDocumentFragment();
-            for (var i = 0; i < items.length; i++) {
-                //addEachProduct
-                productsFragment.appendChild(addEachProduct(items, i));
-                if (i != items.length - 1) {
-                    if (items[i].merchant == items[i + 1].merchant) {
-                        continue;
+        //Section of Merchant of products list
+        function addProducts(items) {
+            for (var merchant in items) {
+                var section = document.createElement("section");
+                    section.className = "sectionProductsList";
+                    section.id = "section-" + merchant;
+                    section.innerHTML = '<p class="title">' + merchant + '</p>';
+                for (var product in items[merchant]) {
+                    var fullName = merchant + '-' + product;
+                    var price = items[merchant][product].price;
+                    var d1 = items[merchant][product].d1;
+                    var d2 = items[merchant][product].d2;
+                    var upperLimit = items[merchant][product].upperLimit;
+                    var link = items[merchant][product].link;
+                    var pic = items[merchant][product].pic;
+                    if (product == 'info') {
+                        section.innerHTML += '<div class="info">' + items[merchant][product] + '</div>';
+                        delete items[merchant][product];
+                    } else {
+                        //container
+                        var container = document.createElement("div");
+                            container.className = 'container';
+                            container.id = 'container-' + fullName;
+                            //pic
+                            container.innerHTML += '<div class="pic"><img src="' + pic + '"></div>'
+                            //products name with link
+                            container.innerHTML += '<div class="goods"><a href="' + link + '" target="' + (link != "#" ? '_blank' : '') + '">' + product + '</div>'
+                            //products price
+                            container.innerHTML += '<div class="price"><span class="priceText">' + toCurrency(price) + '</span></div>'
+                            //products quantity
+                            var orderContainer = document.createElement("div");
+                                orderContainer.className = "orderContainer";
+                                var meta = document.createElement("div");
+                                    meta.className = "meta";
+                                    meta.innerHTML += '<button class="d1' + (d1 < 0 ? ' disabled' : '') + '" type="" name="d1-' + fullName + '" value="' + d1 + '" disabled="disabled">5月6日<br>取貨</button>';
+                                    meta.innerHTML += '<button class="d2' + (d2 < 0 ? ' disabled' : '') + '" type="" name="d2-' + fullName + '" value="' + d2 + '" disabled="disabled">5月7日<br>取貨</button>';
+                                    meta.innerHTML += '<button class="upperLimit" type="" name="price-' + fullName + '" value="' + upperLimit + '" disabled="disabled">上限：' + upperLimit + '</button>';
+                                var order = document.createElement("div");
+                                    order.className = "order";
+                                    order.id = fullName;
+                                    order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + fullName + '" value="' + price + '">';
+                                    //dec btn
+                                    order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
+                                    //quantity input
+                                    order.innerHTML += '<input class="quantity" type="number" name="quantity-' + fullName + '" value="0" min="0">';
+                                    //inc btn
+                                    order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
+                                    //remove btn
+                                    order.innerHTML += '<button type="button" class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
+                                orderContainer.appendChild(meta);
+                                orderContainer.appendChild(order);
+                            container.appendChild(orderContainer);
+                            container.innerHTML += '<div class="messages"></div>'
+                            section.appendChild(container);
                     }
                 }
-                //addTitle
-                var section = document.createElement("section");
-                section.className = "sectionProductsList";
-                section.id = "section-".concat(items[i].merchant);
-                section.innerHTML = '<p class="title">'.concat(items[i].merchant).concat('</p>');
-                //append
-                section.appendChild(productsFragment);
-                productsList.appendChild(section);
-                //resetFragment
-                var productsFragment = document.createDocumentFragment();
+                document.getElementById('form').appendChild(section);
             }
-            document.getElementById("form").appendChild(productsList);
-        }
-        //product list
-        function addEachProduct(items, index) {
-            var inputMerchant = items[index].merchant;
-            var inputPic = items[index].pic;
-            var inputProduct = items[index].product;
-            var inputLink = items[index].link;
-            var inputPrice = items[index].price;
-            var d1 = items[index].d1;
-            var d2 = items[index].d2;
-            var upperLimit = items[index].upperLimit;
-            var productWholeName = inputMerchant.concat("-").concat(inputProduct);
-            //container
-            var container = document.createElement("div");
-            container.className = "container";
-            container.id = "container-".concat(inputMerchant).concat("-").concat(inputProduct);
-            //pic
-            container.innerHTML += '<div class="pic"><img src="' + inputPic + '"></div>'
-            //products name with link
-            container.innerHTML += '<div class="goods"><a href="' + inputLink + '" target="' + (inputLink != "#" ? '_blank' : '') + '">' + inputProduct + '</div>'
-            //products price
-            container.innerHTML += '<div class="price"><span class="priceText">' + toCurrency(inputPrice) + '</span></div>'
-            //products quantity
-            var orderContainer = document.createElement("div");
-            orderContainer.className = "orderContainer";
-            var meta = document.createElement("div");
-            meta.className = "meta";
-            meta.innerHTML += '<button class="d1' + (d1 < 0 ? ' disabled' : '') + '" type="" name="d1-' + productWholeName + '" value="' + d1 + '" disabled="disabled">5月6日<br>取貨</button>';
-            meta.innerHTML += '<button class="d2' + (d2 < 0 ? ' disabled' : '') + '" type="" name="d2-' + productWholeName + '" value="' + d2 + '" disabled="disabled">5月7日<br>取貨</button>';
-            meta.innerHTML += '<button class="upperLimit" type="" name="price-' + productWholeName + '" value="' + upperLimit + '" disabled="disabled">上限：' + upperLimit + '</button>';
-            var order = document.createElement("div");
-            order.className = "order";
-            order.id = productWholeName;
-            order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + productWholeName + '" value="' + inputPrice + '">';
-            //dec btn
-            order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
-            //quantity input
-            order.innerHTML += '<input class="quantity" type="number" name="quantity-' + productWholeName + '" value="0" min="0">';
-            //inc btn
-            order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
-            //remove btn
-            order.innerHTML += '<button type="button" class="click-able remove"><i class="fas fa-trash-alt"></i></button>';
-            orderContainer.appendChild(meta);
-            orderContainer.appendChild(order);
-            container.appendChild(orderContainer);
-            container.innerHTML += '<div class="messages"></div>'
-            return container;
         }
     });
 });
