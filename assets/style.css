@@ -189,7 +189,8 @@ button#submit:hover {
 .info p:nth-last-child(1) {
     margin-bottom: 0;
 }
-#info > .title {
+#info > .title,
+#cart > .title {
     margin-bottom: 0.5em;
     padding: 0.5em;
     border-bottom: 0.02em #8695A3 solid; /*border line*/
@@ -413,16 +414,22 @@ table {
     margin-bottom: 3em;
     border-collapse: collapse;
 }
+tbody:nth-child(odd) {
+    background-color: #CCC;
+}
 tr {
     height: 3em;
     line-height: 3em;
     border-bottom: 0.05em #8695A3 solid;
-    background-color: #FFFFFF;
+    //background-color: #FFFFFF;
 }
 tr.tr-hide {
     display: none;
 }
-th {
+tbody.tbody-hide {
+    display: none;
+}
+thead tr {
     background-color: #264B47;
     color: #FFFFFF;
 }

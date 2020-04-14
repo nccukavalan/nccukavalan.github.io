@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-tw">
     <head>
         <meta charset="UTF-8">
         <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
@@ -141,7 +141,37 @@
                     </div>
                 </section>
                 <!--商品區-->
-                <!--Cart-->
+                <section id="cart">
+                    <p class="title">購物車</p>
+                    <div class="grid">
+                        <div class="formRow">
+                            <label for="coupon">有折扣碼嗎？</label>
+                            <input class="infoIn" id="coupon" name="coupon" placeholder="輸入您的折扣代碼" type="text">
+                            <div class="messages"></div>
+                        </div>
+                    </div>
+                    <table id="cartTable">
+                        <thead>
+                            <tr>
+                                <th>商品</th>
+                                <th>單價</th>
+                                <th>數量</th>
+                                <th>修改</th>
+                                <th>小計</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <td>總計</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>$0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <button type="submit" id="submit">結帳</button>
+                </section>
             </form>
         </main>
         <footer>

@@ -102,6 +102,7 @@ $(function() {
         }
 
         function notice() {
+            /*
             var wrapper = document.querySelector('.wrapper')
             var noticeBox = document.createElement('div');
                 noticeBox.className = 'noticeBox';
@@ -119,7 +120,8 @@ $(function() {
                 wrapper.classList.add('hide');
                 $('.closeBtn').off('click');
             })
-            //document.querySelector('.wrapper').classList.add('hide');
+            */
+            document.querySelector('.wrapper').classList.add('hide');
         }
 
         function main(openTime, closeTime) {
@@ -186,7 +188,7 @@ $(function() {
                 }
                 for (var i in d) {
                     var merchant = d[i].gsx$merchant.$t;
-                    var product = d[i].gsx$product.$t
+                    var product = d[i].gsx$product.$t.replace(/ /g,'_');
                     items[merchant][product] = {
                         'price': d[i].gsx$price.$t,
                         'priceMember': d[i].gsx$pricemember.$t,
@@ -264,8 +266,7 @@ $(function() {
                         function memberPrice(items) {
                             for (var merchant in items) {
                                 for (var product in items[merchant]) {
-                                    var fullName = merchant + '-' + product;
-                                    var container = document.getElementById('container-' + fullName);
+                                    var container = document.querySelector('#' + parseCharacter(merchant)).querySelector('#' + parseCharacter(product));
                                     var price = items[merchant][product].priceMember;
                                     var priceText = container.querySelector('.priceText');
                                         priceText.textContent = price;
@@ -278,14 +279,56 @@ $(function() {
                         function normalPrice(items) {
                             for (var merchant in items) {
                                 for (var product in items[merchant]) {
-                                    var fullName = merchant + '-' + product;
-                                    var container = document.getElementById('container-' + fullName);
+                                    var container = document.querySelector('#' + parseCharacter(merchant)).querySelector('#' + parseCharacter(product));
                                     var price = items[merchant][product].price;
                                     var priceText = container.querySelector('.priceText');
                                         priceText.textContent = price;
                                     var priceValue = container.querySelector('.priceValue');
                                         priceValue.value = price;
                                 }
+                            }
+                        }
+                    }
+                });
+                $.get("https://spreadsheets.google.com/feeds/list/" + settings['couponList'] + "/1/public/values?alt=json", function(data) {
+                    var d = data.feed.entry;
+                    var coupon = {};
+                    for (var i in d) {
+                        var c = d[i].gsx$coupon.$t
+                        coupon[c] = {};
+                        coupon[c].amount =  d[i].gsx$amount.$t
+                        coupon[c].merchant = d[i].gsx$merchant.$t
+                        coupon[c].description = d[i].gsx$description.$t
+                    }
+                    console.log(coupon)
+                    $('[name="coupon"]').on('blur', function(ev) {
+                        checkCoupon(this, items);
+                        status();
+                    });
+                    $('[name="coupon"]').on('input', function(ev) {
+                        checkCoupon(this, items);
+                        status();
+                    });
+
+                    function checkCoupon(item, items) {
+                        var value = $(item).val();
+                        var massage = item.nextElementSibling;
+                        if (members.indexOf(value) != -1) {
+                            if (!massage.innerHTML) {
+                                massage.innerHTML = '<p class="help-block error memberText">您有' + '' + '的優惠折扣！</p>';
+                                memberPrice(items);
+                            }
+                        } else {
+                            normalPrice(items);
+                        }
+
+                        function memberPrice(items) {
+                            for (var merchant in items) {
+                            }
+                        }
+
+                        function normalPrice(items) {
+                            for (var merchant in items) {
                             }
                         }
                     }
@@ -318,94 +361,134 @@ $(function() {
         }
         //即時消費情形
         function status() {
-            var orders = document.querySelectorAll(".order");
             var total = 0;
-            var output = "";
+            var output = '';
             var orderDict = {};
-            for (var i = 0; i < orders.length; i++) {
-                var productName = orders[i].id;
-                var price = orders[i].parentNode.parentNode.querySelector('.priceValue').value;
-                var quantity = orders[i].parentNode.parentNode.querySelector('.quantity').value;
-                var subtotal = price * quantity;
-                total += subtotal;
-                //message
-                if (subtotal > 0) {
-                    output += "「" + productName + " ($" + toCurrency(price) + ")」購買" + quantity + "件，小計" + toCurrency(subtotal) + "元\n";
-                }
-                //json
-                orderDict[productName] = {
-                    'price': price,
-                    'quantity': quantity,
-                    'subtotal': subtotal
-                };
-            }
+
+            var products = document.querySelectorAll('section.products');
+                products.forEach(function(productItem) {
+                    //console.log(productItem)
+                    var merchant = productItem.id;
+                    var merchantTotal = 0;
+                    orderDict[merchant] = {};
+                    var container = productItem.querySelectorAll('div.container');
+                        container.forEach(function(containerItem) {
+                            //console.log(containerItem)
+                            var product = containerItem.id;
+                            var order = containerItem.querySelector('div.order');
+                            //console.log(order)
+                            var price = parseInt(order.querySelector('input.priceValue').value);
+                            var quantity = parseInt(order.querySelector('input.quantity').value);
+                            var subtotal = price * quantity;
+                            merchantTotal += subtotal;
+                            if (subtotal > 0) {
+                                orderDict[merchant][product] = {};
+                                orderDict[merchant][product].price = price;
+                                orderDict[merchant][product].quantity = quantity;
+                                orderDict[merchant][product].subtotal = subtotal;
+                                output += "「" + merchant + '_' + product + " ($" + toCurrency(price) + ")」購買" + quantity + "件，小計" + toCurrency(subtotal) + "元\n";
+                            }
+                        });
+                    if (merchantTotal > 0) {
+                        orderDict[merchant].merchantTotal = merchantTotal;
+                        total += merchantTotal;
+                    } else {
+                        delete orderDict[merchant];
+                    }
+            });
+
             //message
             output += "總計" + toCurrency(total) + "元\n";
             //json
-            orderDict['total'] = total;
+            orderDict.total = total;
             orderDict['outputText'] = output;
-            /*滿額門檻*/
-            var fulfilledPrice = settings['fulfilledPrice'];
+
             //更新
-            updateFixedElement(orderDict, fulfilledPrice);
+            updateFixedElement(orderDict, settings['fulfilledPrice']);
             updateCart(orderDict);
             return orderDict;
         }
 
         function updateCart(orderDict) {
-            var index = 0;
-            for (var order in orderDict) {
-                var tr = document.getElementById("tr-" + order);
-                if (index >= Object.keys(orderDict).length - 2) {
-                    if (index == Object.keys(orderDict).length - 2) {
-                        tr.childNodes[4].innerHTML = '$' + toCurrency(orderDict['total']);
-                    }
-                } else {
-                    tr.childNodes[0].innerHTML = order.split('-')[0] + '<br>' + order.split('-')[1];
-                    tr.childNodes[1].innerHTML = '$' + toCurrency(orderDict[order]['price']);
-                    tr.childNodes[2].innerHTML = orderDict[order]['quantity'];
-                    tr.childNodes[4].innerHTML = '$' + toCurrency(orderDict[order]['subtotal']);
-                    if (orderDict[order]['subtotal'] > 0) {
-                        tr.className = 'tr-show';
-                    } else {
-                        tr.className = 'tr-hide'
-                    }
-                }
-                index++;
-            }
+            var orderDict = JSON.parse(JSON.stringify(orderDict));
+            delete orderDict.outputText;
+            var tbody = document.querySelectorAll('tbody');
+                tbody.forEach(function(tbodyItem) {
+                    var merchant = tbodyItem.id;
+                    var tr = tbodyItem.querySelectorAll('tr')
+                    tr.forEach(function(trItem) {
+                        if (trItem.classList.contains('tr-product')) {
+                            var product = trItem.id;
+                            if (merchant in orderDict) {
+                                if (product in orderDict[merchant]) {
+                                    var price = orderDict[merchant][product].price;
+                                    var quantity = orderDict[merchant][product].quantity;
+                                    var subtotal = orderDict[merchant][product].subtotal;
+                                    trItem.childNodes[1].innerHTML = '$' + toCurrency(price);
+                                    trItem.childNodes[2].innerHTML = quantity;
+                                    trItem.childNodes[4].innerHTML = '$' + toCurrency(subtotal);
+                                    trItem.classList.remove('tr-hide');
+                                    return;
+                                }
+                            }
+                            var price = 0;
+                            var quantity = 0;
+                            var subtotal = 0;
+                            trItem.childNodes[1].innerHTML = '$' + toCurrency(price);
+                            trItem.childNodes[2].innerHTML = quantity;
+                            trItem.childNodes[4].innerHTML = '$' + toCurrency(subtotal);
+                            trItem.classList.add('tr-hide');
+                            return;
+                        }
+                        if (trItem.classList.contains('merchantTotal')) {
+                            if (merchant in orderDict) {
+                                var merchantTotal = orderDict[merchant].merchantTotal;
+                                trItem.childNodes[4].innerHTML = '$' + toCurrency(merchantTotal);
+                                tbodyItem.classList.remove('tbody-hide');
+                                return;
+                            }
+                            var merchantTotal = 0;
+                            trItem.childNodes[4].innerHTML = '$' + toCurrency(merchantTotal);
+                            tbodyItem.classList.add('tbody-hide');
+                            return;
+                        }
+                    });
+                });
+            var total = document.querySelector('tfoot').querySelector('tr');
+            total.querySelectorAll('td')[4].innerHTML = '$' + toCurrency(orderDict.total);
         }
 
         function updateFixedElement(orderDict, fulfilledPrice) {
             var bg = document.querySelector("a.bg");
-            var sectionProductsList = document.querySelectorAll('.sectionProductsList');
-            if (orderDict['total'] > 0) {
+            var products = document.querySelectorAll('.products');
+            if (orderDict.total > 0) {
                 bg.classList.remove('zero');
                 bg.classList.add('nonZero');
-                for (var i = 0; i < sectionProductsList.length; i++) {
-                    sectionProductsList[i].classList.remove('zero');
+                for (var i = 0; i < products.length; i++) {
+                    products[i].classList.remove('zero');
                 }
             } else {
                 bg.classList.remove('nonZero');
                 bg.classList.add('zero');
-                for (var i = 0; i < sectionProductsList.length; i++) {
-                    sectionProductsList[i].classList.add('zero');
+                for (var i = 0; i < products.length; i++) {
+                    products[i].classList.add('zero');
                 }
             }
             var totalFixed = document.querySelector("#totalFixed");
-            totalFixedText = '你已消費&nbsp;$' + toCurrency(orderDict['total']);
-            if (orderDict['total'] > fulfilledPrice) {
+            totalFixedText = '你已消費&nbsp;$' + toCurrency(orderDict.total);
+            if (orderDict.total > fulfilledPrice) {
                 totalFixedText += '，可以參加滿額抽獎！'
-            } else if (orderDict['total'] > 0) {
-                totalFixedText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
+            } else if (orderDict.total > 0) {
+                totalFixedText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict.total) + '</em>&nbsp;滿額抽！';
             }
             totalFixed.innerHTML = totalFixedText;
             var fulfilled = document.querySelector("#fulfilled");
-            fulfilledText = '<br>你已消費&nbsp;$' + toCurrency(orderDict['total']);
-            if (orderDict['total'] > fulfilledPrice) {
+            fulfilledText = '<br>你已消費&nbsp;$' + toCurrency(orderDict.total);
+            if (orderDict.total > fulfilledPrice) {
                 fulfilledText += '，可以參加滿額抽獎！'
                 fulfilled.classList.add('fulfilled');
-            } else if (orderDict['total'] > 0) {
-                fulfilledText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict['total']) + '</em>&nbsp;滿額抽！';
+            } else if (orderDict.total > 0) {
+                fulfilledText += '，再加&nbsp;<em>$' + toCurrency(fulfilledPrice - orderDict.total) + '</em>&nbsp;滿額抽！';
                 fulfilled.classList.remove('fulfilled');
             } else {
                 fulfilled.classList.remove('fulfilled');
@@ -614,7 +697,7 @@ $(function() {
             if (item.classList[0] == "click-able") {
                 var quantity = item.parentNode.parentNode.querySelector('.quantity');
             } else {
-                var quantity = document.querySelector('[name="quantity-' + item.name + '"]');
+                var quantity = document.querySelector('[name="quantity_' + item.name + '"]');
             }
             var upperLimit = parseInt(quantity.parentNode.parentNode.querySelector('.upperLimit').value);
             //onclick
@@ -662,8 +745,9 @@ $(function() {
             // 表單驗證成功
             // contents of submitting
             var orderDict = status();
+                //orderDict
             // 驗證總金額是否為0
-            if (orderDict['total'] <= 0) {
+            if (orderDict.total <= 0) {
                 alert("你似乎沒購買任何商品！");
                 var inputs = ($('.quantity'))
                 for (var i = 0; i < inputs.length; i++) {
@@ -672,12 +756,11 @@ $(function() {
                         resetFormGroup(formGroup);
                     }
                 }
-                alert(message);
                 return;
             } else {
                 var fulfilledPrice = parseInt(settings['fulfilledPrice']);
-                if (orderDict['total'] < fulfilledPrice) {
-                    var msg = '再加 $' + toCurrency(fulfilledPrice - orderDict['total']) + ' 就可以參加滿額抽獎！\n確定要現在結帳？';
+                if (orderDict.total < fulfilledPrice) {
+                    var msg = '再加 $' + toCurrency(fulfilledPrice - orderDict.total) + ' 就可以參加滿額抽獎！\n確定要現在結帳？';
                 } else {
                     var msg = '你可以參加滿額抽獎！確定要結帳？';
                 }
@@ -689,7 +772,6 @@ $(function() {
                             resetFormGroup(formGroup);
                         }
                     }
-                    alert(message);
                     return;
                 }
             }
@@ -706,7 +788,6 @@ $(function() {
                         resetFormGroup(formGroup);
                     }
                 }
-                alert(message);
                 return;
             }
             // prepare the post data
@@ -726,10 +807,11 @@ $(function() {
                 }
                 return selected;
             }
-            var total = orderDict['total'];
+            var total = orderDict.total;
             // client info
             var now = moment(moment().valueOf()).format('YYYY-MM-DD HH:mm:ss');
             var href = window.location.href;
+            var orderNumber = moment(now).format('MMDDHH') + pad(settings['orderNumber'], 4)
             //create the json construction
             var dict = {
                 "timestamp": now,
@@ -741,14 +823,22 @@ $(function() {
                 "email": email,
                 "time": time(),
                 "total": total,
-                "quantity": orderDict,
+                "order": orderDict,
                 "href": href,
+                "orderNumber": orderNumber,
             };
             var postData = dict;
+            postData['jsonRaw'] = JSON.stringify(dict);
+
+            var publicDict = {
+                "timestamp": now,
+                "orderNumber": orderNumber,
+                "href": href,
+                "order": orderDict,
+            };
+            postData['jsonRawPublic'] = JSON.stringify(publicDict);
+
             postData['method'] = "write";
-            var jsonObj = [];
-            jsonObj.push(dict);
-            postData['jsonRaw'] = JSON.stringify(jsonObj);
             // do ajax submit
             $.ajax({
                 type: "post",
@@ -919,7 +1009,7 @@ $(function() {
         function addProductConstraints(items) {
             for (var merchant in items) {
                 for (var product in items[merchant]) {
-                    var fullName = merchant + '-' + product;
+                    var fullName = merchant + '_' + product;
                     var upperLimit = items[merchant][product].upperLimit;
                     var productConstraints = {
                         presence: {
@@ -934,7 +1024,7 @@ $(function() {
                             notLessThanOrEqualTo: "^此品項購買數量已達本表單上限！如需訂購更多請直接向我們洽詢！",
                         },
                     };
-                    var productName = 'quantity-' + fullName;
+                    var productName = 'quantity_' + fullName;
                     constraints[productName] = productConstraints;
                 }
             }
@@ -949,13 +1039,13 @@ $(function() {
         function setDepFragment(depList) {
             var setDepFragment = document.createDocumentFragment();
             for (var i = 0; i < depList.length; i++) {
-                var depOpt = document.createElement("option");
-                depOpt.value = depList[i].index.concat("-").concat(depList[i].department);
-                depOpt.textContent = depList[i].department.concat(" (").concat(depList[i].index).concat(")");
+                var depOpt = document.createElement('option');
+                depOpt.value = depList[i].index + '-' + depList[i].department;
+                depOpt.textContent = depList[i].department + ' (' + depList[i].index + ')';
                 depOpt.disabled = depList[i].disabled;
                 setDepFragment.appendChild(depOpt);
             }
-            document.getElementById("department").appendChild(setDepFragment);
+            document.getElementById('department').appendChild(setDepFragment);
         }
         //define the func load chosen.jquery
         function loadSelectChosen() {
@@ -974,67 +1064,59 @@ $(function() {
                 merchantsList.appendChild(li);
                 for (var merchant in items) {
                     var li = document.createElement("li");
-                        li.innerHTML = '<a class="bg" href="#section-' + merchant + '">' + merchant + '</a>';
+                        li.innerHTML = '<a class="bg" href="#' + merchant + '">' + merchant + '</a>';
                     merchantsList.appendChild(li);
                 }
         }
 
         function addCartSection(items) {
-            var section = document.createElement('section');
-                section.id = 'cart';
-                var p = document.createElement('p');
-                    p.className = 'title';
-                    p.innerHTML = '購物車';
-                var table = document.createElement('table');
-                    table.id = 'cartTable';
-                    var tbody = document.createElement('tbody');
-                        tbody.innerHTML = '<tr id="tr-title"><th>商品</th><th>單價</th><th>數量</th><th>修改</th><th>小計</th></tr>';
-                        for (var merchant in items) {
-                            for (var product in items[merchant]) {
-                                var order = merchant + '-' + product;
-                                var price = items[merchant][product].price;
-                                var tr = document.createElement("tr");
-                                    tr.id = 'tr-' + order;
-                                    tr.innerHTML += '<td>' + order + '</td>';
-                                    tr.innerHTML += '<td>$' + toCurrency(price) + '</td>';
-                                    tr.innerHTML += '<td>' + 0 + '</td>';
-                                    var td = document.createElement('td');
-                                        var div = document.createElement('div');
-                                            div.innerHTML += '<button type="button" class="cartBtn dec" name="' + order + '"><i class="fas fa-minus"></i></button>'
-                                            div.innerHTML += '<button type="button" class="cartBtn inc" name="' + order + '"><i class="fas fa-plus"></i></button>'
-                                            div.innerHTML += '<button type="button" class="cartBtn remove" name="' + order + '"><i class="fas fa-trash-alt"></i></button>'
-                                        td.appendChild(div);
-                                    tr.appendChild(td);
-                                    tr.innerHTML += '<td>$' + toCurrency(0) + '</td>';
-                                    tr.className = 'tr-hide'
-                                tbody.appendChild(tr);
-                            }
-                        }
-                        tbody.innerHTML += '<tr id="tr-total"><td>總計</td><td></td><td></td><td></td><td>$' + toCurrency(0) + '</td></tr>';
-                    table.appendChild(tbody);
-                section.appendChild(p);
-                section.appendChild(table);
-                section.appendChild(createSubmitButton());
-            document.querySelector('form').appendChild(section);
-        }
-        //create submit button
-        function createSubmitButton() {
-            var submit = document.createElement('button');
-            submit.type = "submit";
-            submit.id = "submit";
-            submit.textContent = "結帳";
-            submit.value = submit.textContent;
-            return submit;
+            var table = document.querySelector('#cartTable');
+            for (var merchant in items) {
+            var tbody = document.createElement('tbody');
+                tbody.id = merchant;
+                tbody.classList.add('tbody-hide');
+                var tr = document.createElement("tr");
+                    tr.className = 'merchantTitle';
+                    tr.innerHTML = '<th colspan="5">' + merchant + '</th>';
+                tbody.appendChild(tr);
+                for (var product in items[merchant]) {
+                    var price = items[merchant][product].price;
+                    var tr = document.createElement("tr");
+                        tr.className = 'tr-product';
+                        tr.id = product;
+                        tr.innerHTML += '<td>' + product.replace(/_/g,' ') + '</td>';
+                        tr.innerHTML += '<td>$' + toCurrency(price) + '</td>';
+                        tr.innerHTML += '<td>' + 0 + '</td>';
+                        var td = document.createElement('td');
+                            var div = document.createElement('div');
+                                div.innerHTML += '<button type="button" class="cartBtn dec" name="' + merchant + '_' + product + '"><i class="fas fa-minus"></i></button>'
+                                div.innerHTML += '<button type="button" class="cartBtn inc" name="' + merchant + '_' + product + '"><i class="fas fa-plus"></i></button>'
+                                div.innerHTML += '<button type="button" class="cartBtn remove" name="' + merchant + '_' + product + '"><i class="fas fa-trash-alt"></i></button>'
+                            td.appendChild(div);
+                        tr.appendChild(td);
+                        tr.innerHTML += '<td>$' + toCurrency(0) + '</td>';
+                        tr.classList.add('tr-hide');
+                    tbody.appendChild(tr);
+                }
+                var tr = document.createElement("tr");
+                    tr.className = 'merchantTotal';
+                    tr.innerHTML = '<td>' + merchant + '總計</td><td></td><td></td><td></td><td>$' + toCurrency(0) + '</td>';
+                tbody.appendChild(tr);
+            table.insertBefore(tbody, document.querySelector('tfoot'));
+            }
         }
         //Section of Merchant of products list
         function addProducts(items) {
+            var pickUpDay = settings['pickUpDay'];
+            var d1Text = moment(moment(new Date(pickUpDay[0].split(' ')[0])).valueOf()).format('M[月]D[日]');
+            var d2Text = moment(moment(new Date(pickUpDay[1].split(' ')[0])).valueOf()).format('M[月]D[日]');
             for (var merchant in items) {
-                var section = document.createElement("section");
-                    section.className = "sectionProductsList";
-                    section.id = "section-" + merchant;
+                var section = document.createElement('section');
+                    section.className = 'products';
+                    section.id = merchant;
                     section.innerHTML = '<p class="title">' + merchant + '</p>';
                 for (var product in items[merchant]) {
-                    var fullName = merchant + '-' + product;
+                    var fullName = merchant + '_' + product;
                     var price = items[merchant][product].price;
                     var d1 = items[merchant][product].d1;
                     var d2 = items[merchant][product].d2;
@@ -1046,31 +1128,31 @@ $(function() {
                         delete items[merchant][product];
                     } else {
                         //container
-                        var container = document.createElement("div");
+                        var container = document.createElement('div');
                             container.className = 'container';
-                            container.id = 'container-' + fullName;
+                            container.id = product;
                             //pic
                             container.innerHTML += '<div class="pic"><img src="' + pic + '"></div>'
                             //products name with link
-                            container.innerHTML += '<div class="goods"><a href="' + link + '" target="' + (link != "#" ? '_blank' : '') + '">' + product + '</div>'
+                            container.innerHTML += '<div class="goods"><a href="' + link + '" target="' + (link != "#" ? '_blank' : '') + '">' + product.replace(/_/g,' ') + '</div>'
                             //products price
                             container.innerHTML += '<div class="price"><span class="priceText">' + toCurrency(price) + '</span></div>'
                             //products quantity
-                            var orderContainer = document.createElement("div");
-                                orderContainer.className = "orderContainer";
-                                var meta = document.createElement("div");
-                                    meta.className = "meta";
-                                    meta.innerHTML += '<button class="d1' + (d1 < 0 ? ' disabled' : '') + '" type="" name="d1-' + fullName + '" value="' + d1 + '" disabled="disabled">5月6日<br>取貨</button>';
-                                    meta.innerHTML += '<button class="d2' + (d2 < 0 ? ' disabled' : '') + '" type="" name="d2-' + fullName + '" value="' + d2 + '" disabled="disabled">5月7日<br>取貨</button>';
-                                    meta.innerHTML += '<button class="upperLimit" type="" name="price-' + fullName + '" value="' + upperLimit + '" disabled="disabled">上限：' + upperLimit + '</button>';
-                                var order = document.createElement("div");
-                                    order.className = "order";
+                            var orderContainer = document.createElement('div');
+                                orderContainer.className = 'orderContainer';
+                                var meta = document.createElement('div');
+                                    meta.className = 'meta';
+                                    meta.innerHTML += '<button class="d1' + (d1 < 0 ? ' disabled' : '') + '" type="" name="d1-' + fullName + '" value="' + d1 + '" disabled="disabled">' + d1Text + '<br>取貨</button>';
+                                    meta.innerHTML += '<button class="d2' + (d2 < 0 ? ' disabled' : '') + '" type="" name="d2-' + fullName + '" value="' + d2 + '" disabled="disabled">' + d2Text + '<br>取貨</button>';
+                                    meta.innerHTML += '<button class="upperLimit" type="" name="price_' + fullName + '" value="' + upperLimit + '" disabled="disabled">上限：' + upperLimit + '</button>';
+                                var order = document.createElement('div');
+                                    order.className = 'order';
                                     order.id = fullName;
-                                    order.innerHTML += '<input class="priceValue" type="hidden" name="price-' + fullName + '" value="' + price + '">';
+                                    order.innerHTML += '<input class="priceValue" type="hidden" name="price_' + fullName + '" value="' + price + '">';
                                     //dec btn
                                     order.innerHTML += '<button type="button" class="click-able dec"><i class="fas fa-minus"></i></button>';
                                     //quantity input
-                                    order.innerHTML += '<input class="quantity" type="number" name="quantity-' + fullName + '" value="0" min="0">';
+                                    order.innerHTML += '<input class="quantity" type="number" name="quantity_' + fullName + '" value="0" min="0">';
                                     //inc btn
                                     order.innerHTML += '<button type="button" class="click-able inc"><i class="fas fa-plus"></i></button>';
                                     //remove btn
@@ -1082,8 +1164,42 @@ $(function() {
                             section.appendChild(container);
                     }
                 }
-                document.getElementById('form').appendChild(section);
+                form.insertBefore(section, document.querySelector('#cart'));
             }
+        }
+
+        function pad(str, length) {
+            if(str.length >= length) {
+                return str;
+            } else {
+                return pad('0' + str , length);
+            }
+        }
+        function parseCharacter(text) {
+            /*
+            var t = text;
+            t.replace(/!/g,'\\!');
+            t.replace(/@/g,'\\@');
+            t.replace(/\$/g,'\\$');
+            t.replace(/%/g,'\\%');
+            t.replace(/\^/g,'\\^');
+            t.replace(/&/g,'\\&');
+            t.replace(/\(/g,'\\(');
+            t.replace(/\)/g,'\\)');
+            t.replace(/_/g,'\\_');
+            t.replace(/</g,'\\<');
+            t.replace(/>/g,'\\>');
+            t.replace(/{/g,'\\{');
+            t.replace(/}/g,'\\}');
+            t.replace(/\[/g,'\\[');
+            t.replace(/\]/g,'\\]');
+            t.replace(/\?/g,'\\?');
+            t.replace(/\//g,'\\/');
+            //t.replace(/#/g,'\\#');
+            //t.replace(/\\/g,'\\\\');
+            */
+            //t.replace(/\*/g,'\\*');
+            return text.replace(/!/g,'\\!').replace(/@/g,'\\@').replace(/\$/g,'\\$').replace(/%/g,'\\%').replace(/\^/g,'\\^').replace(/&/g,'\\&').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/_/g,'\\_').replace(/</g,'\\<').replace(/>/g,'\\>').replace(/{/g,'\\{').replace(/}/g,'\\}').replace(/\[/g,'\\[').replace(/\]/g,'\\]').replace(/\?/g,'\\?').replace(/\//g,'\\/');
         }
     });
 });
