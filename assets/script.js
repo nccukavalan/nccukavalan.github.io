@@ -1,3 +1,7 @@
+function getList(dataset, callback) {
+    $.get("https://spreadsheets.google.com/feeds/list/" + dataset + "/1/public/values?alt=json").then(function(data) { callback(data); });
+}
+
 $(function() {
     var lastTouchEnd = 0;
     document.documentElement.addEventListener('touchend', function(event) {
@@ -12,7 +16,8 @@ $(function() {
             event.preventDefault();
         }
     }, false);
-    $.when($.get("https://spreadsheets.google.com/feeds/list/1ZBvqBmEYO8D8f3CxoVZMVjBbbOGqLfDQuAkDJxneTsg/1/public/values?alt=json")).then(function(data) {
+
+    getList('1ZBvqBmEYO8D8f3CxoVZMVjBbbOGqLfDQuAkDJxneTsg', function(data) {
         var d = data.feed.entry;
         var settings = {};
         for (var i in d) {
@@ -51,7 +56,6 @@ $(function() {
             main(openTime, closeTime);
             clearInterval(timer);
         }
-
         function diff(t) {
             var timeStart = moment().valueOf();
             var timeEnd = t.valueOf();
@@ -82,7 +86,6 @@ $(function() {
                 'text': diffText
             };
         }
-
         function diffText(item, openDiff, closeDiff) {
             if (openDiff['diff'] > 0) {
                 item.innerHTML = settings['BeforeMessage'].replace('%{text}', openDiff['text']);
@@ -92,7 +95,6 @@ $(function() {
                 item.innerHTML = (item.id == 'timer' ? ' ｜' : '') + settings['DuringMessage'].replace('%{text}', closeDiff['text']);
             }
         }
-
         function updateTimer(item, openTime, closeTime) {
             setInterval(function() {
                 var openDiff = diff(openTime);
@@ -124,14 +126,236 @@ $(function() {
             document.querySelector('.wrapper').classList.add('hide');
         }
 
+        var isMember = false;
+        var isCoupon = false;
+        var members = [];
+        var coupon = {};
+        var availableCode = [];
+        var studentIDValue;
+        var couponValue;
+
         function main(openTime, closeTime) {
             var intro = document.querySelector('#intro');
             intro.innerHTML = settings['intro'];
             document.querySelector('.timer').classList.add('hide');
             notice();
-            
-            //load the drop-down list
-            $.get("https://spreadsheets.google.com/feeds/list/" + settings['departmentsList'] + "/1/public/values?alt=json", function(data) {
+            getDepartmentsList(settings['departmentsList']);
+            addPickUpDay();
+            getProductsList(settings['productsList']);
+            function getProductsList(dataset) {
+                //create product list and items set
+                getList(dataset, function(data) {
+                    var d = data.feed.entry;
+                    var items = {};
+                    for (var i in d) {
+                        var merchant = d[i].gsx$merchant.$t;
+                        var info = d[i].gsx$info.$t;
+                        items[merchant] = {};
+                        items[merchant]['info'] = info;
+                    }
+                    for (var i in d) {
+                        var merchant = d[i].gsx$merchant.$t;
+                        var product = d[i].gsx$product.$t.replace(/ /g,'_');
+                        items[merchant][product] = {
+                            'price': d[i].gsx$price.$t,
+                            'priceMember': d[i].gsx$pricemember.$t,
+                            'd1': d[i].gsx$d1.$t,
+                            'd2': d[i].gsx$d2.$t,
+                            'upperLimit': d[i].gsx$upperlimit.$t,
+                            'link': d[i].gsx$link.$t,
+                            'pic': d[i].gsx$pic.$t,
+                        };
+                    }
+                    addProducts(items);
+                    addProductConstraints(items);
+                    createFixedElement(items);
+                    addCartSection(items);
+                    //add the element
+                    vaildListener();
+                    var timer = document.querySelector('#timer');
+                    var timerFixed = document.querySelector('.timer-fixed');
+                    updateTimer(timer, openTime, closeTime);
+                    updateTimer(timerFixed, openTime, closeTime);
+                    //Listener
+                    $("input").keydown(function(ev) {
+                        if (ev.which == 13) {
+                            ev.preventDefault();
+                        }
+                    });
+                    $(".click-able").click(function(ev) {
+                        clicked(this);
+                    });
+                    $(".cartBtn").click(function(ev) {
+                        clicked(this);
+                    });
+                    $("#navBtn").click(function(ev) {
+                        if (this.classList.contains("active")) {
+                            this.classList.remove("active");
+                            document.querySelector("nav").classList.remove("active");
+                        } else {
+                            this.classList.add("active");
+                            document.querySelector("nav").classList.add("active");
+                            $(document).on('click', function(ev) {
+                                document.querySelector("#navBtn").classList.remove("active");
+                                document.querySelector("nav").classList.remove("active");
+                                $("body").off('click');
+                            });
+                            ev.stopPropagation();
+                        }
+                    });
+                    /*date*/
+                    $("button.dateBtn").on('click', function(ev) {
+                        var dateBtns = this.parentNode.querySelectorAll('.dateBtn');
+                        for (var i = 0; i < dateBtns.length; i++) {
+                            if (dateBtns[i] == this) {
+                                dateBtns[i].classList.add("active");
+                                var option = document.querySelector('input[value="' + dateBtns[i].value + '"]');
+                                $(option).trigger('click');
+                            } else {
+                                dateBtns[i].classList.remove("active");
+                            }
+                        }
+                    });
+                    $('input[name="date"]').on('click', function(ev) {
+                        var dateBtn = document.querySelector('button[value="' + this.value + '"]');
+                        var dateBtns = this.parentNode.querySelectorAll('.dateBtn');
+                        for (var i = 0; i < dateBtns.length; i++) {
+                            if (dateBtns[i] == dateBtn) {
+                                dateBtns[i].classList.add("active");
+                            } else {
+                                dateBtns[i].classList.remove("active");
+                            }
+                        }
+                    });
+                    getList(settings['memberList'], function(data) {
+                        var d = data.feed.entry;
+                        for (var i in d) {
+                            members[i] = d[i].gsx$member.$t;
+                        }
+                        $('[name="studentID"]').on('blur', function(ev) {
+                            checkMemberAndCoupon();
+                            status();
+                        });
+                        $('[name="studentID"]').on('input', function(ev) {
+                            checkMemberAndCoupon();
+                            status();
+                        });
+                    });
+                    getList(settings['couponList'], function(data) {
+                        var d = data.feed.entry;
+                        for (var i in d) {
+                            var c = d[i].gsx$coupon.$t;
+                            coupon[c] = {};
+                            coupon[c].amount =  parseInt(d[i].gsx$amount.$t);
+                            coupon[c].lowerBound =  parseInt(d[i].gsx$lowerbound.$t);
+                            coupon[c].merchant = d[i].gsx$merchant.$t.split(', ');
+                            coupon[c].description = d[i].gsx$description.$t;
+                            coupon[c].activation = new Date(d[i].gsx$activation.$t);
+                            var expDay = new Date(d[i].gsx$expiration.$t)
+                            coupon[c].expiration = new Date(expDay.setDate(expDay.getDate()+1));
+                            var available = moment(coupon[c].activation) - moment() < 0 && moment(coupon[c].expiration) - moment() > 0;
+                            if (available) {
+                                availableCode.push(c);
+                            }
+                        }
+                        constraints.coupon = couponConstraints;
+                        $('[name="coupon"]').on('blur', function(ev) {
+                            checkMemberAndCoupon();
+                            status();
+                        });
+                        $('[name="coupon"]').on('input', function(ev) {
+                            checkMemberAndCoupon();
+                            status();
+                        });
+                    });
+
+                    var couponConstraints = {
+                        inclusion: {
+                            within: availableCode,
+                            message: "^無效的折扣代碼！",
+                        }
+                    };
+                    var couponConstraintsWithoutMember = {
+                        inclusion: {
+                            within: [''],
+                            message: "^會員優惠不得併用！",
+                        }
+                    };
+
+                    function checkMemberAndCoupon() {
+                        var studentIDItem = document.querySelector('[name="studentID"]');
+                        studentIDValue = studentIDItem.value;
+                        var studentIDMassage = studentIDItem.nextElementSibling;
+                        var couponItem = document.querySelector('[name="coupon"]');
+                        couponValue = couponItem.value;
+                        var couponMassage = couponItem.nextElementSibling;
+
+                        var errors = validate(form, constraints) || {};
+
+                        isMember = checkMember();
+                        isCoupon = checkCoupon();
+                        
+                        function checkMember() {
+                            if (members.indexOf(studentIDValue) != -1 && !('studentID' in errors)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        };
+
+                        function checkCoupon() {
+                            if (availableCode.indexOf(couponValue) != -1 && !('coupon' in errors)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        };
+
+                        if (isMember) {
+                            studentIDMassage.innerHTML = '<p class="help-block error memberText">您為本會會員，享有優惠折扣！</p>';
+                            memberPrice();
+                            constraints.coupon = couponConstraintsWithoutMember;
+                            vaild(couponItem);
+                        } else {
+                            normalPrice();
+                            constraints.coupon = couponConstraints;
+                            vaild(couponItem);
+                        }
+                        if (isCoupon && !isMember) {
+                            couponMassage.innerHTML = '<p class="help-block error couponText">' + coupon[couponValue].description + '</p>';
+                        }
+                            
+                    }
+                    function memberPrice() {
+                        for (var merchant in items) {
+                            for (var product in items[merchant]) {
+                                var container = document.querySelector('#' + parseCharacter(merchant)).querySelector('#' + parseCharacter(product));
+                                var price = items[merchant][product].priceMember;
+                                var priceText = container.querySelector('.priceText');
+                                    priceText.textContent = price;
+                                var priceValue = container.querySelector('.priceValue');
+                                    priceValue.value = price;
+                            }
+                        }
+                    }
+                    function normalPrice() {
+                        for (var merchant in items) {
+                            for (var product in items[merchant]) {
+                                var container = document.querySelector('#' + parseCharacter(merchant)).querySelector('#' + parseCharacter(product));
+                                var price = items[merchant][product].price;
+                                var priceText = container.querySelector('.priceText');
+                                    priceText.textContent = price;
+                                var priceValue = container.querySelector('.priceValue');
+                                    priceValue.value = price;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        //load the drop-down list
+        function getDepartmentsList(dataset) {
+            getList(dataset, function(data) {
                 var d = data.feed.entry;
                 var depList = [];
                 for (var i in d) {
@@ -147,6 +371,8 @@ $(function() {
                 //load chosen.jquery when the drop-down list were done
                 loadSelectChosen();
             });
+        }
+        function addPickUpDay() {
             var pickUpDay = settings['pickUpDay'];
             var radio = document.querySelector('.radio');
             var radioRow = document.createElement('div');
@@ -176,195 +402,13 @@ $(function() {
                 input.value = dateValue.replace('/', '-').replace('/', '-');
                 radio.appendChild(input);
             }
-            //create product list and items set
-            $.get("https://spreadsheets.google.com/feeds/list/" + settings['productsList'] + "/1/public/values?alt=json", function(data) {
-                var d = data.feed.entry;
-                var items = {};
-                for (var i in d) {
-                    var merchant = d[i].gsx$merchant.$t;
-                    var info = d[i].gsx$info.$t;
-                    items[merchant] = {};
-                    items[merchant]['info'] = info;
-                }
-                for (var i in d) {
-                    var merchant = d[i].gsx$merchant.$t;
-                    var product = d[i].gsx$product.$t.replace(/ /g,'_');
-                    items[merchant][product] = {
-                        'price': d[i].gsx$price.$t,
-                        'priceMember': d[i].gsx$pricemember.$t,
-                        'd1': d[i].gsx$d1.$t,
-                        'd2': d[i].gsx$d2.$t,
-                        'upperLimit': d[i].gsx$upperlimit.$t,
-                        'link': d[i].gsx$link.$t,
-                        'pic': d[i].gsx$pic.$t,
-                    };
-                }
-                addProducts(items);
-                addProductConstraints(items);
-                createFixedElement(items);
-                addCartSection(items);
-                //add the element
-                vaildListener();
-                var timer = document.querySelector('#timer');
-                var timerFixed = document.querySelector('.timer-fixed');
-                updateTimer(timer, openTime, closeTime);
-                updateTimer(timerFixed, openTime, closeTime);
-                //Listener
-                $("input").keydown(function(ev) {
-                    if (ev.which == 13) {
-                        ev.preventDefault();
-                    }
-                });
-                $(".click-able").click(function(ev) {
-                    clicked(this);
-                });
-                $(".cartBtn").click(function(ev) {
-                    clicked(this);
-                });
-                $("#navBtn").click(function(ev) {
-                    if (this.classList.contains("active")) {
-                        this.classList.remove("active");
-                        document.querySelector("nav").classList.remove("active");
-                    } else {
-                        this.classList.add("active");
-                        document.querySelector("nav").classList.add("active");
-                        $(document).on('click', function(ev) {
-                            document.querySelector("#navBtn").classList.remove("active");
-                            document.querySelector("nav").classList.remove("active");
-                            $("body").off('click');
-                        });
-                        ev.stopPropagation();
-                    }
-                });
-                $.get("https://spreadsheets.google.com/feeds/list/" + settings['memberList'] + "/1/public/values?alt=json", function(data) {
-                    var d = data.feed.entry;
-                    var members = [];
-                    for (var i in d) {
-                        members[i] = d[i].gsx$member.$t;
-                    }
-                    $('[name="studentID"]').on('blur', function(ev) {
-                        isMember(this, items);
-                        status();
-                    });
-                    $('[name="studentID"]').on('input', function(ev) {
-                        isMember(this, items);
-                        status();
-                    });
-
-                    function isMember(item, items) {
-                        var value = $(item).val();
-                        var massage = item.nextElementSibling;
-                        if (members.indexOf(value) != -1) {
-                            if (!massage.innerHTML) {
-                                massage.innerHTML = '<p class="help-block error memberText">您為本會會員，享有優惠折扣！</p>';
-                                memberPrice(items);
-                            }
-                        } else {
-                            normalPrice(items);
-                        }
-
-                        function memberPrice(items) {
-                            for (var merchant in items) {
-                                for (var product in items[merchant]) {
-                                    var container = document.querySelector('#' + parseCharacter(merchant)).querySelector('#' + parseCharacter(product));
-                                    var price = items[merchant][product].priceMember;
-                                    var priceText = container.querySelector('.priceText');
-                                        priceText.textContent = price;
-                                    var priceValue = container.querySelector('.priceValue');
-                                        priceValue.value = price;
-                                }
-                            }
-                        }
-
-                        function normalPrice(items) {
-                            for (var merchant in items) {
-                                for (var product in items[merchant]) {
-                                    var container = document.querySelector('#' + parseCharacter(merchant)).querySelector('#' + parseCharacter(product));
-                                    var price = items[merchant][product].price;
-                                    var priceText = container.querySelector('.priceText');
-                                        priceText.textContent = price;
-                                    var priceValue = container.querySelector('.priceValue');
-                                        priceValue.value = price;
-                                }
-                            }
-                        }
-                    }
-                });
-                $.get("https://spreadsheets.google.com/feeds/list/" + settings['couponList'] + "/1/public/values?alt=json", function(data) {
-                    var d = data.feed.entry;
-                    var coupon = {};
-                    for (var i in d) {
-                        var c = d[i].gsx$coupon.$t
-                        coupon[c] = {};
-                        coupon[c].amount =  d[i].gsx$amount.$t
-                        coupon[c].merchant = d[i].gsx$merchant.$t
-                        coupon[c].description = d[i].gsx$description.$t
-                    }
-                    console.log(coupon)
-                    $('[name="coupon"]').on('blur', function(ev) {
-                        checkCoupon(this, items);
-                        status();
-                    });
-                    $('[name="coupon"]').on('input', function(ev) {
-                        checkCoupon(this, items);
-                        status();
-                    });
-
-                    function checkCoupon(item, items) {
-                        var value = $(item).val();
-                        var massage = item.nextElementSibling;
-                        if (members.indexOf(value) != -1) {
-                            if (!massage.innerHTML) {
-                                massage.innerHTML = '<p class="help-block error memberText">您有' + '' + '的優惠折扣！</p>';
-                                memberPrice(items);
-                            }
-                        } else {
-                            normalPrice(items);
-                        }
-
-                        function memberPrice(items) {
-                            for (var merchant in items) {
-                            }
-                        }
-
-                        function normalPrice(items) {
-                            for (var merchant in items) {
-                            }
-                        }
-                    }
-                });
-                /*date*/
-                $("button.dateBtn").on('click', function(ev) {
-                    var dateBtns = this.parentNode.querySelectorAll('.dateBtn');
-                    for (var i = 0; i < dateBtns.length; i++) {
-                        if (dateBtns[i] == this) {
-                            dateBtns[i].classList.add("active");
-                            var option = document.querySelector('input[value="' + dateBtns[i].value + '"]');
-                            $(option).trigger('click');
-                        } else {
-                            dateBtns[i].classList.remove("active");
-                        }
-                    }
-                });
-                $('input[name="date"]').on('click', function(ev) {
-                    var dateBtn = document.querySelector('button[value="' + this.value + '"]');
-                    var dateBtns = this.parentNode.querySelectorAll('.dateBtn');
-                    for (var i = 0; i < dateBtns.length; i++) {
-                        if (dateBtns[i] == dateBtn) {
-                            dateBtns[i].classList.add("active");
-                        } else {
-                            dateBtns[i].classList.remove("active");
-                        }
-                    }
-                });
-            });
         }
+
+        var orderDict = {};
         //即時消費情形
         function status() {
             var total = 0;
             var output = '';
-            var orderDict = {};
-
             var products = document.querySelectorAll('section.products');
                 products.forEach(function(productItem) {
                     //console.log(productItem)
@@ -391,6 +435,7 @@ $(function() {
                         });
                     if (merchantTotal > 0) {
                         orderDict[merchant].merchantTotal = merchantTotal;
+                        orderDict[merchant].discount = 0;
                         total += merchantTotal;
                     } else {
                         delete orderDict[merchant];
@@ -399,14 +444,50 @@ $(function() {
 
             //message
             output += "總計" + toCurrency(total) + "元\n";
+
+            var totalDiscount = 0;
+            var merchantDiscount = 0;
+
             //json
-            orderDict.total = total;
+            discount();
+            orderDict.merchantDiscount = merchantDiscount;
+            orderDict.totalDiscount = totalDiscount;
+            orderDict.total = total - (totalDiscount + merchantDiscount);
+            if (orderDict.total < 0) {
+                orderDict.total = 0;
+            }
             orderDict['outputText'] = output;
 
             //更新
             updateFixedElement(orderDict, settings['fulfilledPrice']);
             updateCart(orderDict);
             return orderDict;
+
+            function discount() {
+                if (isCoupon == true && isMember == false) {
+                    var amount = coupon[couponValue].amount;
+                    var lowerBound = coupon[couponValue].lowerBound;
+                    if (coupon[couponValue].merchant == 'total') {
+                        if (total >= lowerBound) {
+                            totalDiscount = amount;
+                            return;
+                        }
+                    }
+                    coupon[couponValue].merchant.forEach(function(m) {
+                        if (m in orderDict) {
+                            if (orderDict[m].merchantTotal >= lowerBound) {
+                                orderDict[m].discount = amount;
+                                merchantDiscount += orderDict[m].discount;
+                                orderDict[m].merchantTotal -= orderDict[m].discount;
+                                if (orderDict[m].merchantTotal < 0) {
+                                    orderDict[m].merchantTotal = 0;
+                                }
+                            }
+                        }
+                    });
+                    return;
+                }
+            }
         }
 
         function updateCart(orderDict) {
@@ -452,9 +533,30 @@ $(function() {
                             tbodyItem.classList.add('tbody-hide');
                             return;
                         }
+                        if (trItem.classList.contains('merchantDiscount')) {
+                            if (merchant in orderDict) {
+                                var merchantDiscount = orderDict[merchant].discount;
+                                if (merchantDiscount > 0) {
+                                    trItem.childNodes[4].innerHTML = '$' + toCurrency(-merchantDiscount);
+                                    trItem.classList.remove('tr-hide');
+                                    return;
+                                }
+                            }
+                            var merchantDiscount = 0;
+                            trItem.childNodes[4].innerHTML = '$' + toCurrency(merchantDiscount);
+                            trItem.classList.add('tr-hide');
+                            return;
+                        }
                     });
                 });
-            var total = document.querySelector('tfoot').querySelector('tr');
+            var discount = document.querySelector('tfoot').querySelector('#totalDiscount');
+            if (orderDict.totalDiscount > 0) {
+                discount.querySelectorAll('td')[4].innerHTML = '$' + toCurrency(-orderDict.totalDiscount);
+                discount.classList.remove('tr-hide');
+            } else {
+                discount.classList.add('tr-hide');
+            }
+            var total = document.querySelector('tfoot').querySelector('#totalTotal');
             total.querySelectorAll('td')[4].innerHTML = '$' + toCurrency(orderDict.total);
         }
 
@@ -550,11 +652,12 @@ $(function() {
             }
         }
 
+        var errors = {};
         function vaild(item) {
             var form = document.querySelector('#form');
             status();
             dayAvailable();
-            var errors = validate(form, constraints) || {};
+            errors = validate(form, constraints) || {};
             showIsErrorsForInput(item, errors[item.name]);
             if (item.classList.contains("quantity")) {
                 removeEachEmpty(item);
@@ -566,6 +669,12 @@ $(function() {
             } else {
                 resetFormGroup(findParentNode(document.querySelector('.radio')));
                 showIsErrorsForInput(document.querySelector('.radio'), errors['date']);
+            }
+            if ('coupon' in errors) {
+                showIsErrorsForInput(document.querySelector('[name="coupon"]'), errors['coupon']);
+            } else {
+                resetFormGroup(findParentNode(document.querySelector('.radio')));
+                showIsErrorsForInput(document.querySelector('[name="coupon"]'), errors['coupon']);
             }
         }
         //表單驗證區
@@ -674,7 +783,17 @@ $(function() {
             formGroup.classList.remove("has-success");
             // and remove any old messages
             _.each(formGroup.querySelectorAll(".help-block.error"), function(el) {
-                el.parentNode.removeChild(el);
+                if (!(el.classList.contains('memberText') || el.classList.contains('couponText'))) {
+                    el.parentNode.removeChild(el);
+                } else {
+                    if (('studentID' in errors) && el.classList.contains('memberText')) {
+                        el.parentNode.removeChild(el);
+                    }
+                    if (('coupon' in errors) && el.classList.contains('couponText')) {
+                        el.parentNode.removeChild(el);
+                    }
+                }
+                
             });
         }
         // Adds the specified error with the following markup
@@ -1029,12 +1148,6 @@ $(function() {
                 }
             }
         }
-        //千分位
-        function toCurrency(num) {
-            var parts = num.toString().split('.');
-            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            return parts.join('.');
-        }
         //set dep drop-down list
         function setDepFragment(depList) {
             var setDepFragment = document.createDocumentFragment();
@@ -1098,6 +1211,10 @@ $(function() {
                         tr.classList.add('tr-hide');
                     tbody.appendChild(tr);
                 }
+                var tr = document.createElement("tr");
+                    tr.className = 'merchantDiscount tr-hide';
+                    tr.innerHTML = '<td>' + merchant + '折扣</td><td></td><td></td><td></td><td>$' + toCurrency(0) + '</td>';
+                tbody.appendChild(tr);
                 var tr = document.createElement("tr");
                     tr.className = 'merchantTotal';
                     tr.innerHTML = '<td>' + merchant + '總計</td><td></td><td></td><td></td><td>$' + toCurrency(0) + '</td>';
@@ -1200,6 +1317,12 @@ $(function() {
             */
             //t.replace(/\*/g,'\\*');
             return text.replace(/!/g,'\\!').replace(/@/g,'\\@').replace(/\$/g,'\\$').replace(/%/g,'\\%').replace(/\^/g,'\\^').replace(/&/g,'\\&').replace(/\*/g,'\\*').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/_/g,'\\_').replace(/</g,'\\<').replace(/>/g,'\\>').replace(/{/g,'\\{').replace(/}/g,'\\}').replace(/\[/g,'\\[').replace(/\]/g,'\\]').replace(/\?/g,'\\?').replace(/\//g,'\\/');
+        }
+        //千分位
+        function toCurrency(num) {
+            var parts = num.toString().split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            return parts.join('.');
         }
     });
 });
