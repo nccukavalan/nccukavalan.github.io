@@ -144,6 +144,13 @@ button {
     text-align: center;
     cursor: pointer;
 }
+#intro {
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+#intro p {
+    margin-bottom: 1em;
+}
 button#submit {
     width: 10em;
     height: 3em;
