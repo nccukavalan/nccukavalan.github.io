@@ -104,7 +104,6 @@ $(function() {
         }
 
         function notice() {
-            /*
             var wrapper = document.querySelector('.wrapper')
             var noticeBox = document.createElement('div');
                 noticeBox.className = 'noticeBox';
@@ -122,8 +121,7 @@ $(function() {
                 wrapper.classList.add('hide');
                 $('.closeBtn').off('click');
             })
-            */
-            document.querySelector('.wrapper').classList.add('hide');
+            //document.querySelector('.wrapper').classList.add('hide');
         }
 
         var isMember = false;
