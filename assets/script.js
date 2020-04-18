@@ -459,7 +459,6 @@ $(function() {
             //更新
             updateFixedElement(orderDict, settings['fulfilledPrice']);
             updateCart(orderDict);
-            console.log(orderDict);
             return orderDict;
 
             function discount() {
