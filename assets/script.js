@@ -455,10 +455,12 @@ $(function() {
                 orderDict.total = 0;
             }
             orderDict['outputText'] = output;
+            orderDict['coupon'] = document.querySelector('[name="coupon"]').value;
 
             //更新
             updateFixedElement(orderDict, settings['fulfilledPrice']);
             updateCart(orderDict);
+            //console.log(orderDict);
             return orderDict;
 
             function discount() {
@@ -972,6 +974,9 @@ $(function() {
         //寄信+跳轉
         function sendMail(dict) {
             var mailBody = '<div style="margin:1em; padding:1em; background-color: #FFD;">';
+            var merchantDiscount = 0;
+            var totalDiscount = 0;
+            var coupon = '';
             mailBody += '<p>';
             mailBody += dict['department'].substring(4) + dict['grade'].substring(2) + '<br />';
             mailBody += '<span style="color: #00F; font-weight: 1000; font-size: 1.5em;">' + dict['name'] + '</span>&nbsp;你好';
@@ -983,9 +988,24 @@ $(function() {
             var order = dict['order'];
             var orderKeys = Object.keys(dict['order']);
             orderKeys.forEach(function(orderKey) {
-                if (order[orderKey] != 'object') {
+                if (typeof order[orderKey] != 'object') {
+                    if (orderKey == 'merchantDiscount') {
+                        merchantDiscount = order[orderKey];
+                        return;
+                    }
+                    if (orderKey == 'totalDiscount') {
+                        totalDiscount = order[orderKey];
+                        return;
+                    }
+                    if (orderKey == 'coupon') {
+                        coupon = order[orderKey];
+                        return;
+                    }
                     return;
                 }
+                mailBody += '<span style="font-weight: 1000;">';
+                mailBody += orderKey;
+                mailBody += '</span><br />';
                 for (var product in order[orderKey]) {
                     if (typeof order[orderKey][product] != 'object') {
                         continue;
@@ -995,12 +1015,28 @@ $(function() {
                     mailBody += '</span>';
                     mailBody += '&nbsp;件';
                     mailBody += '「';
-                    mailBody += '<span style="font-weight: 1000;">' + product + '</span>' + '&nbsp;' + '($' + toCurrency(order[orderKey][product].price) + ')';
+                    mailBody += '<span style="font-weight: 1000;">' + product.replace(/_/g,' ') + '</span>' + '&nbsp;' + '($' + toCurrency(order[orderKey][product].price) + ')';
                     mailBody += '」<br />';
                 }
             });
-            mailBody += '<p style="font-size:1.5em;">';
+            if (coupon != '') {
+                mailBody += '<br />';
+                mailBody += '優惠代碼：<span style="color: #F00; font-weight: 1000;">' + coupon + '</span>' ;
+                mailBody += '<br />';
+                if (merchantDiscount > 0) {
+                    mailBody += '優惠代碼折扣<span style="color: #F00; font-weight: 1000;">&nbsp;$' + toCurrency(merchantDiscount) + '</span>';
+                    mailBody += '<br />';
+                }
+                if (totalDiscount > 0) {
+                    mailBody += '優惠代碼折扣<span style="color: #F00; font-weight: 1000;">&nbsp;$' + toCurrency(totalDiscount) + '</span>';
+                    mailBody += '<br />';
+                }
+            }
+            mailBody += '<p style="font-size: 1.5em;">';
             mailBody += '總金額為&nbsp;<span style="color: #F00; font-weight: 1000;">' + toCurrency(dict['total']) + '</span>&nbsp;元';
+            if (dict['total'] >= settings['fulfilledPrice']) {
+                mailBody += '<br /><span style="font-size:0.5em;">（恭喜獲得滿額抽獎機會，祝您幸運中獎！）</span>';
+            }
             mailBody += '</p>';
             mailBody += '<p style="border-top: 1px #000 solid; border-bottom: 1px #000 solid; line-height:2em;">';
             mailBody += "以下為領取人（您）的聯絡資料"
@@ -1029,6 +1065,8 @@ $(function() {
             mailBody += '<p style="border-bottom: 1px #000 solid; line-height:2em;">';
             mailBody += '</p>';
             mailBody += '<p style="font-size: 0.75em;">';
+            mailBody += '訂單編號：' + dict['orderNumber'];
+            mailBody += '<br />';
             mailBody += '您的訂單已於&nbsp;' + dict['timestamp'] + '&nbsp;送出';
             mailBody += '</p>';
             mailBody += '</div>';
@@ -1068,6 +1106,7 @@ $(function() {
                     $('[href="assets/style.css"]').removeAttr("href");
                     var body = document.querySelector('body')
                     body.innerHTML = mailBody;
+                    $(document).off('click');
                 }
             });
         }
