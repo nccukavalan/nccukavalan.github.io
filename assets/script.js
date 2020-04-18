@@ -459,6 +459,7 @@ $(function() {
             //更新
             updateFixedElement(orderDict, settings['fulfilledPrice']);
             updateCart(orderDict);
+            console.log(orderDict);
             return orderDict;
 
             function discount() {
@@ -980,20 +981,19 @@ $(function() {
             mailBody += '您在本次蘭陽週預購之商品訂單如下'
             mailBody += '</p>';
             //shopping cart
-            var index = 0;
-            for (var order in dict['quantity']) {
-                if (index < Object.keys(dict['quantity']).length - 2) {
-                    if (dict['quantity'][order]['subtotal'] > 0) {
-                        mailBody += '<span style="color: #F00; font-weight: 1000;">';
-                        mailBody += dict['quantity'][order]['quantity'];
-                        mailBody += '</span>';
-                        mailBody += '&nbsp;件';
-                        mailBody += '「';
-                        mailBody += '<span style="font-weight: 1000;">' + order + '</span>' + '&nbsp;' + '($' + toCurrency(dict['quantity'][order]['price']) + ')';
-                        mailBody += '」<br />';
-                    }
+            for (var merchant in dict) {
+                if (!(order == 'merchantDiscount' || order == 'totalDiscount' || order == 'total' || order == 'outputText')) {
+                    continue;
                 }
-                index++;
+                for (var order in dict[merchant]) {
+                    mailBody += '<span style="color: #F00; font-weight: 1000;">';
+                    mailBody += dict[merchant][order].quantity;
+                    mailBody += '</span>';
+                    mailBody += '&nbsp;件';
+                    mailBody += '「';
+                    mailBody += '<span style="font-weight: 1000;">' + order + '</span>' + '&nbsp;' + '($' + toCurrency(dict[merchant][order].price) + ')';
+                    mailBody += '」<br />';
+                }
             }
             mailBody += '<p style="font-size:1.5em;">';
             mailBody += '總金額為&nbsp;<span style="color: #F00; font-weight: 1000;">' + toCurrency(dict['total']) + '</span>&nbsp;元';
