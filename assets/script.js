@@ -980,20 +980,25 @@ $(function() {
             mailBody += '您在本次蘭陽週預購之商品訂單如下'
             mailBody += '</p>';
             //shopping cart
-            for (var merchant in dict) {
-                if (!(order == 'merchantDiscount' || order == 'totalDiscount' || order == 'total' || order == 'outputText')) {
-                    continue;
+            var order = dict['order'];
+            var orderKeys = Object.keys(dict['order']);
+            orderKeys.forEach(function(orderKey) {
+                if (order[orderKey] != 'object') {
+                    return;
                 }
-                for (var order in dict[merchant]) {
+                for (var product in order[orderKey]) {
+                    if (typeof order[orderKey][product] != 'object') {
+                        continue;
+                    }
                     mailBody += '<span style="color: #F00; font-weight: 1000;">';
-                    mailBody += dict[merchant][order].quantity;
+                    mailBody += order[orderKey][product].quantity;
                     mailBody += '</span>';
                     mailBody += '&nbsp;件';
                     mailBody += '「';
-                    mailBody += '<span style="font-weight: 1000;">' + order + '</span>' + '&nbsp;' + '($' + toCurrency(dict[merchant][order].price) + ')';
+                    mailBody += '<span style="font-weight: 1000;">' + product + '</span>' + '&nbsp;' + '($' + toCurrency(order[orderKey][product].price) + ')';
                     mailBody += '」<br />';
                 }
-            }
+            });
             mailBody += '<p style="font-size:1.5em;">';
             mailBody += '總金額為&nbsp;<span style="color: #F00; font-weight: 1000;">' + toCurrency(dict['total']) + '</span>&nbsp;元';
             mailBody += '</p>';
