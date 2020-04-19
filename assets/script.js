@@ -314,10 +314,14 @@ $(function() {
                             memberPrice();
                             constraints.coupon = couponConstraintsWithoutMember;
                             vaild(couponItem);
+                            isMember = checkMember();
+                            isCoupon = checkCoupon();
                         } else {
                             normalPrice();
                             constraints.coupon = couponConstraints;
                             vaild(couponItem);
+                            isMember = checkMember();
+                            isCoupon = checkCoupon();
                         }
                         if (isCoupon && !isMember) {
                             couponMassage.innerHTML = '<p class="help-block error couponText">' + coupon[couponValue].description + '</p>';
@@ -669,12 +673,6 @@ $(function() {
             } else {
                 resetFormGroup(findParentNode(document.querySelector('.radio')));
                 showIsErrorsForInput(document.querySelector('.radio'), errors['date']);
-            }
-            if ('coupon' in errors) {
-                showIsErrorsForInput(document.querySelector('[name="coupon"]'), errors['coupon']);
-            } else {
-                resetFormGroup(findParentNode(document.querySelector('.radio')));
-                showIsErrorsForInput(document.querySelector('[name="coupon"]'), errors['coupon']);
             }
         }
         //表單驗證區
