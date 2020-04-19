@@ -1021,14 +1021,18 @@ $(function() {
             });
             if (coupon != '') {
                 mailBody += '<br />';
-                mailBody += '優惠代碼：<span style="color: #F00; font-weight: 1000;">' + coupon + '</span>' ;
+                mailBody += '折扣代碼：<span style="color: #F00; font-weight: 1000;">' + coupon + '</span>' ;
                 mailBody += '<br />';
                 if (merchantDiscount > 0) {
-                    mailBody += '優惠代碼折扣<span style="color: #F00; font-weight: 1000;">&nbsp;$' + toCurrency(merchantDiscount) + '</span>';
+                    mailBody += '折扣代碼折減金額<span style="color: #F00; font-weight: 1000;">&nbsp;$' + toCurrency(merchantDiscount) + '</span>';
                     mailBody += '<br />';
                 }
                 if (totalDiscount > 0) {
-                    mailBody += '優惠代碼折扣<span style="color: #F00; font-weight: 1000;">&nbsp;$' + toCurrency(totalDiscount) + '</span>';
+                    mailBody += '折扣代碼折減金額<span style="color: #F00; font-weight: 1000;">&nbsp;$' + toCurrency(totalDiscount) + '</span>';
+                    mailBody += '<br />';
+                }
+                if (merchantDiscount + totalDiscount <= 0) {
+                    mailBody += '未達折扣門檻！';
                     mailBody += '<br />';
                 }
             }
