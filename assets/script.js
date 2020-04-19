@@ -294,6 +294,7 @@ $(function() {
                         isCoupon = checkCoupon();
                         
                         function checkMember() {
+                            errors = validate(form, constraints) || {};
                             if (members.indexOf(studentIDValue) != -1 && !('studentID' in errors)) {
                                 return true;
                             } else {
@@ -302,6 +303,7 @@ $(function() {
                         };
 
                         function checkCoupon() {
+                            errors = validate(form, constraints) || {};
                             if (availableCode.indexOf(couponValue) != -1 && !('coupon' in errors)) {
                                 return true;
                             } else {
