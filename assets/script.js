@@ -930,7 +930,7 @@ $(function() {
             // client info
             var now = moment(moment().valueOf()).format('YYYY-MM-DD HH:mm:ss');
             var href = window.location.href;
-            var orderNumber = moment(now).format('MMDDHH') + pad(settings['orderNumber'], 4)
+            var orderNumber = moment(now).format('MMDDHHmm') + pad(settings['orderNumber'], 2)
             //create the json construction
             var dict = {
                 "timestamp": now,
