@@ -1032,7 +1032,7 @@ $(function() {
                     mailBody += '<br />';
                 }
                 if (merchantDiscount + totalDiscount <= 0) {
-                    mailBody += '未達折扣門檻！';
+                    mailBody += '未達折扣門檻！（或折扣以實物方式發送）';
                     mailBody += '<br />';
                 }
             }
