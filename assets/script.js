@@ -4,8 +4,9 @@ function getList(dataset, callback) {
 
 $(function() {
 
-    if (navigator.userAgent.match(/FBIOS/i)) {
-        document.querySelector('body').innerHTML = '<div style="position: fixed; top: 0px; left: 0px; z-index: 3000; height: 100%; width: 100%; background-color: #CC3333; color: #FFF; padding: 3em; overflow: hidden; line-height: 2em; font-size: 1.2em; ">很抱歉，請使用外部瀏覽器才能正常填寫並送出預購表單！<br>連結「https://nccukavalan.github.io/」<br>政大蘭友會感謝您的支持與配合';
+    if (navigator.userAgent.match(/FBIOS/i) || navigator.userAgent.match(/MessengerLiteForiOS/i) || navigator.userAgent.match(/FBAV/i)) {
+        document.querySelector('body').innerHTML = '<div style="position: fixed; top: 0px; left: 0px; z-index: 3000; height: 100%; width: 100%; background-color: #CC3333; color: #FFF; padding: 3em; overflow: hidden; line-height: 2em; font-size: 1.2em; ">'
+        + '很抱歉，請改使用外部瀏覽器（例如Safari、Chrome）才能正常填寫並送出預購表單！<p style="font-size:2em; line-height: 3em;">https://nccukavalan.github.io/</p>政大蘭友會感謝您的支持與配合';
         return;
     }
 
