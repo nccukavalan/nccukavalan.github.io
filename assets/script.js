@@ -873,7 +873,7 @@ $(function() {
             var orderDict = status();
                 //orderDict
             // 驗證總金額是否為0
-            if (orderDict.total <= 0) {
+            if (orderDict.total <= 0 && orderDict.coupon.indexOf('恭喜你抽中') == -1) {
                 alert("你似乎沒購買任何商品！");
                 var inputs = ($('.quantity'))
                 for (var i = 0; i < inputs.length; i++) {
