@@ -453,9 +453,6 @@ $(function() {
                     }
             });
 
-            //message
-            output += "總計" + toCurrency(total) + "元\n";
-
             var totalDiscount = 0;
             var merchantDiscount = 0;
 
@@ -467,6 +464,11 @@ $(function() {
             if (orderDict.total < 0) {
                 orderDict.total = 0;
             }
+
+            //message
+            output += "折扣" + (totalDiscount + merchantDiscount) + "元\n";
+            output += "總計" + toCurrency(orderDict.total) + "元\n";
+            
             orderDict['outputText'] = output;
             orderDict['coupon'] = document.querySelector('[name="coupon"]').value;
 
