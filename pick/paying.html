@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>付款</title>
+    <!--jquery-->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!--bootstrap-->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!--時間處理插件-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script>
+        var intervals = [];
+        document.addEventListener('DOMContentLoaded', getDOM);
+
+        var list = [];
+        var paidList = [];
+
+        function timer() {
+            intervals.push(setInterval(getDOM, 1000));
+        }
+
+        var title = '';
+        var search = '';
+        var message = '';
+        var input = '';
+        var order = '';
+        var result = '';
+        var total = '';
+        var paid = '';
+        var checkout = '';
+        var change = '';
+        var sumbit = '';
+        var resetBtn = '';
+
+        function getDOM() {
+            for (var i = 0; i < intervals.length; i++) {
+                clearInterval(intervals[i]);
+            }
+            list = [];
+            paidList = [];
+            title = document.querySelector('#title');
+            search = document.querySelector('#search');
+            message = document.querySelector('#message');
+            countText = document.querySelector('#countText');
+            result = document.querySelector('#result');
+            total = document.querySelector('#total');
+            paid = document.querySelector('#paid');
+            change = document.querySelector('#change');
+            searchBtn = document.querySelector('#searchBtn');
+            checkoutBtn = document.querySelector('#checkout');
+            sumbitBtn = document.querySelector('#sumbit');
+            resetBtn = document.querySelector('#resetBtn');
+            getList();
+            return;
+        }
+        function getList() {
+            var dataset = '1ojvqvFjQff-GZbWbw10NkMhUofqDM7evGuWhgpAysns';
+            var datasetNumber = '1';
+            $.get("https://spreadsheets.google.com/feeds/list/" + dataset + "/" + datasetNumber + "/public/values?alt=json")
+            .then(function(data) { readData(data); })
+            .then(main);
+            return;
+        }
+        function readData(data) {
+            var d = data.feed.entry;
+            for (var i = 1; i < d.length; i++) {
+                var status = parseInt(d[i].gsx$status.$t);
+                var id = d[i].gsx$id.$t;
+                if (status != 0) {
+                    paidList.push(id);
+                    continue;
+                }
+                var no = parseInt(d[i].gsx$no.$t);
+                var index = d[i].gsx$index.$t;
+                var name = d[i].gsx$name.$t;
+                //var hiddenname = d[i].gsx$hiddenname.$t;
+                //var dept = d[i].gsx$dept.$t;
+                //var deptname = d[i].gsx$deptname.$t;
+                //var grade = parseInt(d[i].gsx$grade.$t);
+                var deptgrade = d[i].gsx$deptgrade.$t;
+                var phoneno = d[i].gsx$phoneno.$t;
+                var email = d[i].gsx$email.$t;
+                var pickday = new Date(d[i].gsx$pickday.$t.split(' ')[0].replace(/-/g, '/'));
+                var coupon = d[i].gsx$coupon.$t;
+                var total = parseInt(d[i].gsx$total.$t);
+                //var dis = parseInt(d[i].gsx$dis.$t);
+                //var mdis = parseInt(d[i].gsx$mdis.$t);
+                //var cost = parseInt(d[i].gsx$cost.$t);
+                var mem = (d[i].gsx$mem.$t == '是' ? true : false);
+                var pri = (d[i].gsx$pri.$t == '是' ? true : false);
+                var order = parseOrder();
+                function parseOrder() {
+                    var obj = JSON.parse(d[i].gsx$order.$t);
+                    delete obj.outputText;
+                    return obj;
+                };
+                list.push({
+                    'status': status,
+                    'no': no,
+                    'index': index,
+                    'name': name,
+                    /*'hiddenname': hiddenname,*/
+                    'id': id,
+                    /*'dept': dept,
+                    'deptname': deptname,
+                    'grade': grade,*/
+                    'deptgrade': deptgrade,
+                    'phoneno': phoneno,
+                    'email': email,
+                    'pickday': pickday,
+                    'coupon': coupon,
+                    'total': total,
+                    /*'dis': dis,
+                    'mdis': mdis,
+                    'cost': cost,*/
+                    'mem': mem,
+                    'pri': pri,
+                    'order': order
+                });
+            }
+            return;
+        }
+
+        function main() {
+            var orders = [];
+            var stdID = 0;
+            var noList = [];
+
+            search.disabled = '';
+            $(search).focus();
+
+            search.addEventListener('input', function(e){
+                var v = this.value;
+                parseResult(this, v);
+                if (orders.length > 0) {
+                    stdID = v;
+                } else {
+                    stdID = '';
+                    for (var i = 0; i < paidList.length; i++) {
+                        if (v == paidList[i]) {
+                            result.innerHTML = '已付款！';
+                        }
+                    }
+                }
+                total.value = '';
+                paid.value = '';
+                change.value = '';
+            });
+
+            searchBtn.addEventListener('click', function(e){
+                entered();
+                $(paid).trigger('focus');
+            });
+            checkoutBtn.addEventListener('click', function(e){
+                checkout();
+            });
+            sumbitBtn.addEventListener('click', function(e){
+                sumbit();
+            });
+            resetBtn.addEventListener('click', function(e){
+                reset();
+                $(search).trigger('focus');
+            });
+
+            search.addEventListener('keydown', function(e){
+                if (e.code == 'Enter' || e.code == 'NumpadEnter') {
+                $(searchBtn).trigger('click');
+                }
+            });
+            paid.addEventListener('keydown', function(e){
+                if (e.code == 'Enter' || e.code == 'NumpadEnter') {
+                    $(checkoutBtn).trigger('click');
+                }
+            });
+
+            function entered() {
+                if (orders.length <= 0) {
+                    result.innerHTML = '輸入無效！';
+                    return;
+                }
+                parseResult(this, search.value);
+                var gt = 0;
+                for (var i = 0; i < orders.length; i++) {
+                    gt += orders[i].total;
+                }
+                total.value = gt;
+                search.disabled = 'disabled';
+                paid.disabled = '';
+                resetBtn.disabled = '';
+                checkoutBtn.disabled = '';
+            }
+
+            function checkout() {
+                var c = paid.value - total.value;
+                if (c >= 0) {
+                    change.value = c;
+                    checkoutBtn.disabled = 'disabled';
+                    paid.disabled = 'disabled';
+                    sumbitBtn.disabled = '';
+                } else {
+                    sumbitBtn.disabled = 'disabled';
+                    change.value = '金額不足';
+                }
+            }
+
+            function sumbit() {
+                checkoutBtn.disabled = 'disabled';
+                resetBtn.disabled = 'disabled';
+                sumbitBtn.disabled = 'disabled';
+
+                var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');;
+                var totalv = total.value;
+                var paidv = paid.value;
+                var changev = (change.value * -1);
+
+                writePaid();
+
+                for (var i = 0; i < noList.length; i++) {
+                    writeEndPay(noList[i]);
+                }
+
+                for (var i = 0; i < noList.length; i++) {
+                    writeStartPick(noList[i]);
+                }
+
+                countText.innerHTML = '0';
+                result.innerHTML = '';
+                search.value = '';
+                total.value = '';
+                paid.value = '';
+                change.value = '';
+
+                search.disabled = '';
+                timer();
+                return;
+
+                function writePaid() {
+                    $.ajax({
+                        type: 'post',
+                        data: {
+                            'method': 'write',
+                            'timestamp': timestamp,
+                            'stdID': stdID,
+                            'total': totalv,
+                            'paid': paidv,
+                            'change': changev,
+                            'status': 1
+                        },
+                        url: 'https://script.google.com/macros/s/AKfycbxYxcllkBbQzSb5D1Ci1kxp3o41ynQdCkoJFvo9XOsxgntfscU/exec',
+                        success: function(e) {
+                            alert(e);
+                        }
+                    });
+                }
+                function writeEndPay(no) {
+                    $.ajax({
+                        type: 'post',
+                        data: {
+                            'method': 'write',
+                            'no': no,
+                            'status': 1,
+                            'timestamp': timestamp
+                        },
+                        url: 'https://script.google.com/macros/s/AKfycbyIEpRl3r5iuV55-NnhOH6vB9iU6_xd2EVe9A4EdBt0ikZzfIM/exec',
+                        success: function(e) {
+                            alert(e);
+                        }
+                    });
+                }
+                function writeStartPick(no) {
+                    $.ajax({
+                        type: 'post',
+                        data: {
+                            'method': 'paid',
+                            'no': no,
+                            'status': 1,
+                            'timestamp': timestamp
+                        },
+                        url: 'https://script.google.com/macros/s/AKfycbz3bV4zad3hJQ24DOtoYz_lG5QcaSfWsWXeTMVwdJiKUWNGwtSK/exec',
+                        success: function(e) {
+                            alert(e);
+                        }
+                    });
+                }
+            }
+
+            function parseResult(item, v) {
+                //console.table(list);
+                orders = [];
+                noList = [];
+                result.innerHTML = '';
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].id == v) {
+                        orders.push(list[i])
+                        noList.push(list[i].no)
+                        //result.innerHTML += JSON.stringify(list[i]);
+                    }
+                }
+                resultToDOM(orders, (item.id == 'searchBtn' ? 'entered' : ''));
+                if (v != '') {
+                    countText.innerHTML = orders.length;
+                }
+                return orders;
+            }
+
+            function reset() {
+                search.value = '';
+                total.value = '';
+                paid.value = '';
+                change.value = '';
+                search.disabled = '';
+                paid.disabled = 'disabled';
+                resetBtn.disabled = 'disabled';
+                checkoutBtn.disabled = 'disabled';
+                sumbitBtn.disabled = 'disabled';
+                countText.innerHTML = '0';
+                result.innerHTML = '';
+            }
+
+            function resultToDOM(orders, method) {
+                var fragment = result;
+/*************************************************/
+/*************************************************/
+/*************************************************/
+                for (var i = 0; i < orders.length; i++) {
+                    var name = orders[i].name;
+                    var id = orders[i].id;
+                    var deptgrade = orders[i].deptgrade;
+                    var pickday = moment(orders[i].pickday).format('M[ 月 ]DD[ 日]');
+                    fragment.innerHTML += '<p>姓名：' + name + '</p>';
+/*************************************************/
+/*************************************************/
+/*************************************************/
+                    if (method == 'entered') {
+                        fragment.innerHTML += '<p>學號：' + id + '</p>';
+                        fragment.innerHTML += '<p>系級：' + deptgrade + '</p>';
+                        fragment.innerHTML += '<p>取貨日期：' + pickday + '</p>';
+                        var order = orders[i].order;
+                        //fragment.innerHTML += '<p>' + JSON.stringify(order) + '</p>';
+                        for (var m in order) {
+                            if (typeof order[m] != 'object') {
+                                continue;
+                            }
+                            for (var p in order[m]) {
+                                if (typeof order[m][p] != 'object') {
+                                    continue;
+                                }
+                                fragment.innerHTML += '<p>' 
+                                + m + '／'
+                                + p + '／'
+                                + order[m][p].quantity + '／'
+                                + order[m][p].subtotal
+                                + '</p>';
+                            }
+                        }
+                    }
+/*************************************************/
+/*************************************************/
+/*************************************************/
+                }
+/*************************************************/
+/*************************************************/
+/*************************************************/
+            }
+
+
+
+
+
+        }
+    </script>
+    <style>
+        @import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
+        @import url("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css");
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="h2">「蘭不住你」付款區</div>
+        <div class="input-group mb-2 search">
+            <div class="input-group-prepend">
+                <span class="input-group-text">學號</span>
+            </div>
+            <input type="text" id="search" class="form-control" placeholder="學號" disabled>
+            <div class="input-group-append" id="btn-search">
+                <button type="button" id="searchBtn" class="btn btn-outline-primary">輸入</button>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="input-group mb-2 total">
+            <div class="input-group-prepend">
+                <span class="input-group-text">金額</span>
+            </div>
+            <input type="text" id="total" class="form-control" placeholder="金額" disabled>
+            <div class="input-group-append" id="btn-total">
+                <button type="button" id="resetBtn" class="btn btn-outline-primary" disabled>重設</button>
+            </div>
+        </div>
+        <div class="input-group mb-2 paid">
+            <div class="input-group-prepend">
+                <span class="input-group-text">收您</span>
+            </div>
+            <input type="text"id="paid" class="form-control" placeholder="實收金額" disabled aria-describedby="btn-paid">
+            <div class="input-group-append" id="btn-paid">
+                <button type="button" id="checkout" class="btn btn-outline-primary" disabled>找零</button>
+            </div>
+        </div>
+        <div class="input-group mb-2 change">
+            <div class="input-group-prepend">
+                <span class="input-group-text">找零</span>
+            </div>
+            <input type="text" id="change" class="form-control" placeholder="找零" disabled aria-describedby="btn-change">
+            <div class="input-group-append" id="btn-change">
+                <button type="button" id="sumbit" class="btn btn-outline-primary" disabled>確認</button>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div id="message" class="">
+            <div>共有&nbsp;<span id="countText">0</span>&nbsp;筆尚未付款的結果</div>
+        </div>
+        <div id="result" class="">
+        </div>
+    </div>
+</body>
+</html>

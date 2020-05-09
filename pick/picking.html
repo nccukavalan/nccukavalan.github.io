@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>取貨</title>
+    <!--jquery-->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!--bootstrap-->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!--時間處理插件-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script>
+        var intervals = [];
+        document.addEventListener('DOMContentLoaded', timer);
+
+        var list = [];
+        var noList = [];
+
+        function timer() {
+            intervals.push(setInterval(getDOM, 1000));
+        }
+
+        var confirmBtn = '';
+        var timerDiv = '';
+        var content = '';
+
+        function getDOM() {
+            for (var i = 0; i < intervals.length; i++) {
+                clearInterval(intervals[i]);
+            }
+            confirmBtn = document.querySelector('#confirm');
+            timerDiv = document.querySelector('#timer');
+            content = document.querySelector('#content');
+            getList();
+            return;
+        }
+        function getList() {
+            var dataset = '1DvkQrf5wLcMfFKcMm2btBYHui0ZtbqxsiilBVb4fy68';
+            var datasetNumber = '1';
+            $.get("https://spreadsheets.google.com/feeds/list/" + dataset + "/" + datasetNumber + "/public/values?alt=json")
+            .then(function(data) { readData(data); })
+            .then(main);
+            return;
+        }
+        function readData(data) {
+            var d = data.feed.entry;
+            for (var i = 1; i < d.length; i++) {
+                var status = parseInt(d[i].gsx$status.$t);
+                if (status != 1) {
+                    continue;
+                }
+                var no = parseInt(d[i].gsx$no.$t);
+                var index = d[i].gsx$index.$t;
+                var name = d[i].gsx$name.$t;
+                //var hiddenname = d[i].gsx$hiddenname.$t;
+                var id = d[i].gsx$id.$t;
+                //var dept = d[i].gsx$dept.$t;
+                //var deptname = d[i].gsx$deptname.$t;
+                //var grade = parseInt(d[i].gsx$grade.$t);
+                var deptgrade = d[i].gsx$deptgrade.$t;
+                var phoneno = d[i].gsx$phoneno.$t;
+                var email = d[i].gsx$email.$t;
+                var pickday = new Date(d[i].gsx$pickday.$t.split(' ')[0].replace(/-/g, '/'));
+                var order = parseOrder();
+                function parseOrder() {
+                    var obj = JSON.parse(d[i].gsx$order.$t);
+                    delete obj.outputText;
+                    return obj;
+                };
+                list.push({
+                    'status': status,
+                    'no': no,
+                    'index': index,
+                    'name': name,
+                    /*'hiddenname': hiddenname,*/
+                    'id': id,
+                    /*'dept': dept,
+                    'deptname': deptname,
+                    'grade': grade,*/
+                    'deptgrade': deptgrade,
+                    'phoneno': phoneno,
+                    'email': email,
+                    'pickday': pickday,
+                    'order': order
+                });
+                noList.push(no);
+            }
+            return;
+        }
+
+        function main() {
+            if (list.length == 0) {
+                timer();
+                return;
+            }
+            confirmBtn.disabled = '';
+            content.innerHTML = JSON.stringify(list);
+            /*
+            for (var i = 0; i < list.length; i++) {
+                content.innerHTML += list[i];
+            }
+            */
+            /*
+            //Listener
+                return;
+            */
+            confirmBtn.addEventListener('click', function(e){
+                confirm();
+                return;
+            });
+        }
+
+        function confirm() {
+            confirmBtn.disabled = 'disabled';
+
+            var timestamp = 0;
+            var status = 'OK';
+
+            for (var i = 0; i < noList.length; i++) {
+                writeEndPick(noList[i]);
+            }
+
+            list = [];
+            content.innerHTML = '';
+            timer();
+            return;
+
+            function writeEndPick(no) {
+                $.ajax({
+                    type: 'post',
+                    data: {
+                        'method': 'picked',
+                        'no': no,
+                        'status': 2,
+                        'timestamp': timestamp
+                    },
+                    url: 'https://script.google.com/macros/s/AKfycbz3bV4zad3hJQ24DOtoYz_lG5QcaSfWsWXeTMVwdJiKUWNGwtSK/exec',
+                    success: function(e) {
+                        alert(e);
+                    }
+                });
+            }
+        }
+    </script>
+    <style>
+        @import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
+        @import url("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css");
+    </style>
+</head>
+<body>
+    <div id="title">「蘭不住你」取貨區</div>
+    <button type="button" id='confirm' disabled>確定</button>
+    <div id="timer"></div>
+    <div id="content"></div>
+</body>
+</html>
