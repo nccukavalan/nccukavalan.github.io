@@ -21,16 +21,21 @@
         }
 
         var confirmBtn = '';
-        var timerDiv = '';
         var content = '';
+
+        var aDOM = [];
 
         function getDOM() {
             for (var i = 0; i < intervals.length; i++) {
                 clearInterval(intervals[i]);
+                delete intervals[i];
             }
+            intervals = [];
             confirmBtn = document.querySelector('#confirm');
-            timerDiv = document.querySelector('#timer');
             content = document.querySelector('#content');
+            for (var i = 0; i < 8; i++) {
+                aDOM.push(document.querySelector('.merchant#a' + (i+1)));
+            }
             getList();
             return;
         }
@@ -44,10 +49,18 @@
         }
         function readData(data) {
             var d = data.feed.entry;
+            var tempList = [];
+            var firstTimestamp = Infinity;
+            //console.log(firstTimestamp)
             for (var i = 1; i < d.length; i++) {
                 var status = parseInt(d[i].gsx$status.$t);
                 if (status != 1) {
                     continue;
+                }
+                var paidTimestamp = new Date(d[i].gsx$paidtimestamp.$t.replace(/-/g, '/'));
+                //console.log(paidTimestamp.valueOf())
+                if (paidTimestamp.valueOf() < firstTimestamp.valueOf()) {
+                    firstTimestamp = paidTimestamp;
                 }
                 var no = parseInt(d[i].gsx$no.$t);
                 var index = d[i].gsx$index.$t;
@@ -67,8 +80,9 @@
                     delete obj.outputText;
                     return obj;
                 };
-                list.push({
+                tempList.push({
                     'status': status,
+                    'paidTimestamp': paidTimestamp,
                     'no': no,
                     'index': index,
                     'name': name,
@@ -83,7 +97,14 @@
                     'pickday': pickday,
                     'order': order
                 });
-                noList.push(no);
+            }
+            //console.log(tempList)
+            for (var i = 0; i < tempList.length; i++) {
+                //console.log(tempList[i].paidTimestamp.valueOf() == firstTimestamp.valueOf())
+                if (tempList[i].paidTimestamp.valueOf() == firstTimestamp.valueOf()) {
+                    list.push(tempList[i]);
+                    noList.push(tempList[i].no);
+                }
             }
             return;
         }
@@ -94,34 +115,83 @@
                 return;
             }
             confirmBtn.disabled = '';
-            content.innerHTML = JSON.stringify(list);
-            /*
-            for (var i = 0; i < list.length; i++) {
-                content.innerHTML += list[i];
-            }
-            */
-            /*
-            //Listener
-                return;
-            */
-            confirmBtn.addEventListener('click', function(e){
+            ordersToDOM(list);
+            confirmBtn.addEventListener('click', confirmListener);
+            function confirmListener(e){
+                confirmBtn.removeEventListener('click', confirmListener);
                 confirm();
-                return;
-            });
+            }
+        }
+
+        function ordersToDOM(list) {
+            var merchants = {
+                '諾貝爾': {'index': 1, 'order': {}},
+                '三源行': {'index': 2, 'order': {}},
+                '宜蘭餅': {'index': 3, 'order': {}},
+                '義珍香': {'index': 4, 'order': {}},
+                '亞典蛋糕': {'index': 5, 'order': {}},
+                '蘭田穀王': {'index': 6, 'order': {}},
+                '一米特': {'index': 7, 'order': {}},
+                '奕順軒': {'index': 8, 'order': {}},
+            };
+            for (var i = 0; i < list.length; i++) {
+                var order = list[i].order;
+                for (var m in order) {
+                    if (typeof order[m] != 'object') {
+                        continue;
+                    }
+                    for (var p in order[m]) {
+                        if (typeof order[m][p] != 'object') {
+                            continue;
+                        }
+                        if (!(p in merchants[m].order)) {
+                            merchants[m].order[p] = 0;
+                        }
+                        merchants[m].order[p] += order[m][p].quantity;
+                    }
+                }
+            }
+            //console.log(merchants)
+            //console.log(aDOM)
+
+            for (var i = 0; i < aDOM.length; i++) {
+                aDOM[i].innerHTML = '';
+            }
+
+            for (var m in merchants) {
+                if (Object.keys(merchants[m].order).length != 0) {
+                    var table = document.createElement('table');
+                    var tbody = document.createElement('tbody');
+                    for (var p in merchants[m].order) {
+                        var quantity = merchants[m].order[p];
+                        tbody.innerHTML += '<tr>'
+                        + '<td>' + p 
+                        + '</td><td>' + quantity
+                        + '</td>'
+                        + '</tr>';
+                    }
+                    table.appendChild(tbody)
+                    aDOM[merchants[m].index-1].appendChild(table)
+                } else {
+                    aDOM[merchants[m].index-1].innerHTML += '-';
+                }
+            }
         }
 
         function confirm() {
             confirmBtn.disabled = 'disabled';
 
-            var timestamp = 0;
+            var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
             var status = 'OK';
 
             for (var i = 0; i < noList.length; i++) {
                 writeEndPick(noList[i]);
             }
-
             list = [];
-            content.innerHTML = '';
+            noList = [];
+            for (var i = 0; i < aDOM.length; i++) {
+                aDOM[i].innerHTML = 'Loading...';
+            }
             timer();
             return;
 
@@ -145,12 +215,47 @@
     <style>
         @import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
         @import url("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css");
+        div {
+            border: 1px #000 solid;
+        }
     </style>
 </head>
 <body>
     <div id="title">「蘭不住你」取貨區</div>
     <button type="button" id='confirm' disabled>確定</button>
-    <div id="timer"></div>
-    <div id="content"></div>
+    <div class="container" id="content">
+        <div class="row">
+            <div class="col title">諾貝爾</div>
+            <div class="col merchant" id="a1">Loading...</div>
+        </div>
+        <div class="row">
+            <div class="col title">三源行</div>
+            <div class="col merchant" id="a2">Loading...</div>
+        </div>
+        <div class="row">
+            <div class="col title">宜蘭餅</div>
+            <div class="col merchant" id="a3">Loading...</div>
+        </div>
+        <div class="row">
+            <div class="col title">義珍香</div>
+            <div class="col merchant" id="a4">Loading...</div>
+        </div>
+        <div class="row">
+            <div class="col title">亞典蛋糕</div>
+            <div class="col merchant" id="a5">Loading...</div>
+        </div>
+        <div class="row">
+            <div class="col title">蘭田穀王</div>
+            <div class="col merchant" id="a6">Loading...</div>
+        </div>
+        <div class="row">
+            <div class="col title">一米特</div>
+            <div class="col merchant" id="a7">Loading...</div>
+        </div>
+        <div class="row">
+            <div class="col title">奕順軒</div>
+            <div class="col merchant" id="a8">Loading...</div>
+        </div>
+    </div>
 </body>
 </html>

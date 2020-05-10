@@ -11,7 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
     <script>
         var intervals = [];
-        document.addEventListener('DOMContentLoaded', getDOM);
+        document.addEventListener('DOMContentLoaded', timer);
 
         var list = [];
         var paidList = [];
@@ -36,7 +36,9 @@
         function getDOM() {
             for (var i = 0; i < intervals.length; i++) {
                 clearInterval(intervals[i]);
+                delete intervals[i];
             }
+            intervals = [];
             list = [];
             paidList = [];
             title = document.querySelector('#title');
@@ -149,15 +151,13 @@
             });
 
             searchBtn.addEventListener('click', function(e){
-                entered();
+                entered(this);
                 $(paid).trigger('focus');
             });
             checkoutBtn.addEventListener('click', function(e){
                 checkout();
             });
-            sumbitBtn.addEventListener('click', function(e){
-                sumbit();
-            });
+            sumbitBtn.addEventListener('click', submitListener);
             resetBtn.addEventListener('click', function(e){
                 reset();
                 $(search).trigger('focus');
@@ -174,12 +174,17 @@
                 }
             });
 
-            function entered() {
+            function submitListener(e){
+                sumbitBtn.removeEventListener('click', submitListener);
+                sumbit();
+            }
+
+            function entered(item) {
                 if (orders.length <= 0) {
                     result.innerHTML = '輸入無效！';
                     return;
                 }
-                parseResult(this, search.value);
+                parseResult(item, search.value);
                 var gt = 0;
                 for (var i = 0; i < orders.length; i++) {
                     gt += orders[i].total;
@@ -189,6 +194,7 @@
                 paid.disabled = '';
                 resetBtn.disabled = '';
                 checkoutBtn.disabled = '';
+                s = 0;
             }
 
             function checkout() {
@@ -209,12 +215,11 @@
                 resetBtn.disabled = 'disabled';
                 sumbitBtn.disabled = 'disabled';
 
-                var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');;
+                var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
                 var totalv = total.value;
                 var paidv = paid.value;
                 var changev = (change.value * -1);
-
-                writePaid();
+                writePaid(stdID, totalv, paidv, changev);
 
                 for (var i = 0; i < noList.length; i++) {
                     writeEndPay(noList[i]);
@@ -232,10 +237,8 @@
                 change.value = '';
 
                 search.disabled = '';
-                timer();
-                return;
 
-                function writePaid() {
+                function writePaid(stdID, totalv, paidv, changev) {
                     $.ajax({
                         type: 'post',
                         data: {
@@ -283,6 +286,9 @@
                         }
                     });
                 }
+
+                timer();
+                return;
             }
 
             function parseResult(item, v) {
@@ -297,7 +303,7 @@
                         //result.innerHTML += JSON.stringify(list[i]);
                     }
                 }
-                resultToDOM(orders, (item.id == 'searchBtn' ? 'entered' : ''));
+                resultToDOM(orders, (item.id == 'searchBtn' ? 'entered' : 'inputting'));
                 if (v != '') {
                     countText.innerHTML = orders.length;
                 }
@@ -319,6 +325,7 @@
             }
 
             function resultToDOM(orders, method) {
+                //console.log(method);
                 var fragment = result;
 /*************************************************/
 /*************************************************/
@@ -328,14 +335,13 @@
                     var id = orders[i].id;
                     var deptgrade = orders[i].deptgrade;
                     var pickday = moment(orders[i].pickday).format('M[ 月 ]DD[ 日]');
-                    fragment.innerHTML += '<p>姓名：' + name + '</p>';
+                    if (method == 'inputting') {
+                        fragment.innerHTML += '<p>' + name + id + deptgrade + pickday + '</p>';
+                    }
 /*************************************************/
 /*************************************************/
 /*************************************************/
                     if (method == 'entered') {
-                        fragment.innerHTML += '<p>學號：' + id + '</p>';
-                        fragment.innerHTML += '<p>系級：' + deptgrade + '</p>';
-                        fragment.innerHTML += '<p>取貨日期：' + pickday + '</p>';
                         var order = orders[i].order;
                         //fragment.innerHTML += '<p>' + JSON.stringify(order) + '</p>';
                         for (var m in order) {
