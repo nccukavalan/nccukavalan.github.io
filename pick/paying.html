@@ -387,14 +387,18 @@
                     var pickday = moment(orders[i].pickday).format('M[ 月 ]DD[ 日]');
                     var coupon = orders[i].coupon;
                     var dayValue = parseInt(moment(orders[i].pickday).format('D'));
-                    var nowValue = parseInt(moment().format('D'));
+                    //var nowValue = parseInt(moment().format('D'));
+                    var nowValue = 13;
                     if (method == 'inputting') {
+                        console.log(dayValue)
+                        console.log(nowValue)
+                        console.log(dayValue >= nowValue)
                         div = document.createElement('div');
                         div.id = 'no-' + no;
                         div.className = 'col mb-2';
                         div.innerHTML += '<div class="input-group mb-2">'
                             + '<div class="input-group-prepend">'
-                                + '<div class="input-group-text"><input type="checkbox" name="orderCheck" ' + (dayValue == nowValue ? 'checked' : '') +' value="' + no + '" id="c"></div>'
+                                + '<div class="input-group-text"><input type="checkbox" name="orderCheck" ' + (dayValue >= nowValue ? 'checked' : '') +' value="' + no + '" id="c"></div>'
                             + '</div>'
                             + '<div class="input-group-append">'
                                 + '<span class="input-group-text" id="n">' + name + '</span>'

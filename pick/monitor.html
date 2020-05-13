@@ -161,10 +161,14 @@
                     var table = document.createElement('table');
                     var tbody = document.createElement('tbody');
                     for (var p in merchants[m].order) {
+                        var noticeP = false;
+                        if (p.match('草莓奶凍') || p.match('拿破崙')) {
+                            noticeP = true;
+                        }
                         var quantity = merchants[m].order[p];
                         tbody.innerHTML += '<tr>'
-                        + '<td class="p">' + p.replace(/_/g, ' ')
-                        + '</td><td class="q">' + quantity
+                        + '<td class="q">' + quantity
+                        + '</td><td class="p">' + (noticeP ? '<em>' : '') + p.replace(/_/g, ' ') + (noticeP ? '</em>' : '')
                         + '</td>'
                         + '</tr>';
                     }
@@ -198,19 +202,21 @@
             border: 1px #000 solid;
         }
         .merchant {
-            height: 30em;
+            height: 16em;
+            overflow-y: scroll;
         }
         table {
             width: 100%;
-        }
-        td {
-            font-size: 1em;
         }
         td.p {
             width: 85%;
         }
         td.q {
             width: 15%;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-align: right;
+            padding-right: 0.5em;
         }
         tr {
             border-bottom: 1px #000 solid;
@@ -225,11 +231,16 @@
             padding-left: 0.25em;
             padding-right: 0.25em;
         }
+        em {
+            font-style: normal;
+            font-weight: 700;
+            color: #F00;
+        }
     </style>
 </head>
 <body>
     <div class="container-fluid">
-        <div id="title" class="h2">「蘭不住你」取貨區</div>
+        <div id="title" class="h2">「蘭不住你」盤點區</div>
     </div>
     <div class="container-fluid" id="content">
         <div class="row mb-3">

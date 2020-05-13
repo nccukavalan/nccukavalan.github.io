@@ -116,6 +116,7 @@
         }
 
         function main() {
+            console.log(list)
             if (list.length == 0) {
                 timer();
                 return;
@@ -127,8 +128,11 @@
             ordersToDOM(list);
             confirmBtn.addEventListener('click', confirmListener);
             function confirmListener(e){
+                if (!confirm('請先確認對方領取品項正確與否後，再按確定。')) {
+                    return;
+                }
                 confirmBtn.removeEventListener('click', confirmListener);
-                confirm();
+                confirmAction();
             }
         }
 
@@ -172,10 +176,14 @@
                     var table = document.createElement('table');
                     var tbody = document.createElement('tbody');
                     for (var p in merchants[m].order) {
+                        var noticeP = false;
+                        if (p.match('草莓奶凍') || p.match('拿破崙')) {
+                            noticeP = true;
+                        }
                         var quantity = merchants[m].order[p];
                         tbody.innerHTML += '<tr>'
-                        + '<td class="p">' + p.replace(/_/g, ' ')
-                        + '</td><td class="q">' + quantity
+                        + '<td class="q">' + quantity
+                        + '</td><td class="p">' + (noticeP ? '<em>' : '') + p.replace(/_/g, ' ') + (noticeP ? '</em>' : '')
                         + '</td>'
                         + '</tr>';
                     }
@@ -187,7 +195,7 @@
             }
         }
 
-        function confirm() {
+        function confirmAction() {
             confirmBtn.disabled = 'disabled';
 
             var timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
@@ -233,18 +241,19 @@
         }
         .merchant {
             height: 13em;
+            overflow-y: scroll;
         }
         table {
             width: 100%;
-        }
-        td {
-            font-size: 1em;
         }
         td.p {
             width: 85%;
         }
         td.q {
             width: 15%;
+            font-size: 1.5em;
+            text-align: right;
+            padding-right: 0.5em;
         }
         tr {
             border-bottom: 1px #000 solid;
@@ -258,6 +267,11 @@
             margin-right: 0.25em;
             padding-left: 0.25em;
             padding-right: 0.25em;
+        }
+        em {
+            font-style: normal;
+            font-weight: 700;
+            color: #F00;
         }
     </style>
 </head>
