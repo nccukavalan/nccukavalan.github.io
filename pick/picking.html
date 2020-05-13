@@ -2,6 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
     <title>取貨</title>
     <!--jquery-->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -22,7 +23,9 @@
 
         var confirmBtn = '';
         var content = '';
-
+        var name = '';
+        var deptgrade = '';
+        var id = '';
         var aDOM = [];
 
         function getDOM() {
@@ -33,6 +36,9 @@
             intervals = [];
             confirmBtn = document.querySelector('#confirm');
             content = document.querySelector('#content');
+            nameDiv = document.querySelector('#name');
+            deptgrade = document.querySelector('#deptgrade');
+            id = document.querySelector('#id');
             for (var i = 0; i < 8; i++) {
                 aDOM.push(document.querySelector('.merchant#a' + (i+1)));
             }
@@ -114,6 +120,9 @@
                 timer();
                 return;
             }
+            nameDiv.innerHTML = list[0].name;
+            deptgrade.innerHTML = list[0].deptgrade;
+            id.innerHTML = list[0].id;
             confirmBtn.disabled = '';
             ordersToDOM(list);
             confirmBtn.addEventListener('click', confirmListener);
@@ -165,8 +174,8 @@
                     for (var p in merchants[m].order) {
                         var quantity = merchants[m].order[p];
                         tbody.innerHTML += '<tr>'
-                        + '<td>' + p 
-                        + '</td><td>' + quantity
+                        + '<td class="p">' + p.replace(/_/g, ' ')
+                        + '</td><td class="q">' + quantity
                         + '</td>'
                         + '</tr>';
                     }
@@ -189,9 +198,13 @@
             }
             list = [];
             noList = [];
+                aDOM[i].innerHTML = 'Loading...';
             for (var i = 0; i < aDOM.length; i++) {
                 aDOM[i].innerHTML = 'Loading...';
             }
+            nameDiv.innerHTML = 'Loading...';
+            deptgrade.innerHTML = 'Loading...';
+            id.innerHTML = 'Loading...';
             timer();
             return;
 
@@ -215,45 +228,81 @@
     <style>
         @import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
         @import url("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css");
-        div {
+        .merchant, .info {
             border: 1px #000 solid;
+        }
+        .merchant {
+            height: 13em;
+        }
+        table {
+            width: 100%;
+        }
+        td {
+            font-size: 0.8em;
+        }
+        td.p {
+            width: 90%;
+        }
+        td.q {
+            width: 10%;
+        }
+        tr {
+            border-bottom: 1px #000 solid;
+        }
+        body {
+            margin: auto;
+            width: 90%;
+        }
+        .col {
+            margin-left: 0.25em;
+            margin-right: 0.25em;
+            padding-left: 0.25em;
+            padding-right: 0.25em;
         }
     </style>
 </head>
 <body>
-    <div id="title">「蘭不住你」取貨區</div>
-    <button type="button" id='confirm' disabled>確定</button>
-    <div class="container" id="content">
-        <div class="row">
+    <div class="container-fluid">
+        <div id="title" class="h2">「蘭不住你」取貨區</div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div class="row mb-1">
+            <div class="col title">姓名</div>
+            <div class="col title">系級</div>
+            <div class="col title">學號</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col info" id="name">Loading...</div>
+            <div class="col info" id="deptgrade">Loading...</div>
+            <div class="col info" id="id">Loading...</div>
+        </div>
+        <div class="row mb-3">
+            <button type="button" id='confirm' class="btn btn-outline-primary btn-block" disabled>確定</button>
+        </div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div class="row mb-1">
             <div class="col title">諾貝爾</div>
-            <div class="col merchant" id="a1">Loading...</div>
-        </div>
-        <div class="row">
             <div class="col title">三源行</div>
-            <div class="col merchant" id="a2">Loading...</div>
-        </div>
-        <div class="row">
             <div class="col title">宜蘭餅</div>
-            <div class="col merchant" id="a3">Loading...</div>
-        </div>
-        <div class="row">
             <div class="col title">義珍香</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col merchant" id="a1">Loading...</div>
+            <div class="col merchant" id="a2">Loading...</div>
+            <div class="col merchant" id="a3">Loading...</div>
             <div class="col merchant" id="a4">Loading...</div>
         </div>
-        <div class="row">
+        <div class="row mb-1">
             <div class="col title">亞典蛋糕</div>
-            <div class="col merchant" id="a5">Loading...</div>
-        </div>
-        <div class="row">
             <div class="col title">蘭田穀王</div>
-            <div class="col merchant" id="a6">Loading...</div>
-        </div>
-        <div class="row">
             <div class="col title">一米特</div>
-            <div class="col merchant" id="a7">Loading...</div>
-        </div>
-        <div class="row">
             <div class="col title">奕順軒</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col merchant" id="a5">Loading...</div>
+            <div class="col merchant" id="a6">Loading...</div>
+            <div class="col merchant" id="a7">Loading...</div>
             <div class="col merchant" id="a8">Loading...</div>
         </div>
     </div>

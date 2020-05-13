@@ -2,6 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
     <title>付款</title>
     <!--jquery-->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -93,6 +94,7 @@
                 var pri = (d[i].gsx$pri.$t == '是' ? true : false);
                 var order = parseOrder();
                 function parseOrder() {
+                    //console.log(no, d[i].gsx$order.$t)
                     var obj = JSON.parse(d[i].gsx$order.$t);
                     delete obj.outputText;
                     return obj;
@@ -130,9 +132,11 @@
             var noList = [];
 
             search.disabled = '';
+            searchBtn.disabled = '';
             $(search).focus();
 
             search.addEventListener('input', function(e){
+                result.innerHTML = '';
                 var v = this.value;
                 parseResult(this, v);
                 if (orders.length > 0) {
@@ -162,7 +166,6 @@
                 reset();
                 $(search).trigger('focus');
             });
-
             search.addEventListener('keydown', function(e){
                 if (e.code == 'Enter' || e.code == 'NumpadEnter') {
                 $(searchBtn).trigger('click');
@@ -184,13 +187,24 @@
                     result.innerHTML = '輸入無效！';
                     return;
                 }
+                for (var i = 0; i < document.querySelectorAll('[name="orderCheck"]').length; i++) {
+                    document.querySelectorAll('[name="orderCheck"]')[i].disabled = 'disabled';
+                }
                 parseResult(item, search.value);
+                var orderCheckItemList = document.querySelectorAll('input[name="orderCheck"]');
+                for (var i = 0; i < orderCheckItemList.length; i++) {
+                    if (orderCheckItemList[i].checked === false) {
+                        noList.splice(noList.indexOf(orderCheckItemList[i]), 1);
+                        orders.splice(noList.indexOf(orderCheckItemList[i]), 1);
+                    }
+                }
                 var gt = 0;
                 for (var i = 0; i < orders.length; i++) {
                     gt += orders[i].total;
                 }
                 total.value = gt;
                 search.disabled = 'disabled';
+                searchBtn.disabled = 'disabled';
                 paid.disabled = '';
                 resetBtn.disabled = '';
                 checkoutBtn.disabled = '';
@@ -199,7 +213,7 @@
 
             function checkout() {
                 var c = paid.value - total.value;
-                if (c >= 0) {
+                if (c >= 0 && total.value > 0) {
                     change.value = c;
                     checkoutBtn.disabled = 'disabled';
                     paid.disabled = 'disabled';
@@ -211,6 +225,13 @@
             }
 
             function sumbit() {
+                var orderCheckItemList = document.querySelectorAll('#c[checked]');
+                for (var i = 0; i < orderCheckItemList.length; i++) {
+                    if (orderCheckItemList[i].checked === false) {
+                        noList.splice(noList.indexOf(orderCheckItemList[i]), 1);
+                    }
+                }
+
                 checkoutBtn.disabled = 'disabled';
                 resetBtn.disabled = 'disabled';
                 sumbitBtn.disabled = 'disabled';
@@ -219,6 +240,7 @@
                 var totalv = total.value;
                 var paidv = paid.value;
                 var changev = (change.value * -1);
+
                 writePaid(stdID, totalv, paidv, changev);
 
                 for (var i = 0; i < noList.length; i++) {
@@ -235,7 +257,6 @@
                 total.value = '';
                 paid.value = '';
                 change.value = '';
-
                 search.disabled = '';
 
                 function writePaid(stdID, totalv, paidv, changev) {
@@ -295,12 +316,10 @@
                 //console.table(list);
                 orders = [];
                 noList = [];
-                result.innerHTML = '';
                 for (var i = 0; i < list.length; i++) {
                     if (list[i].id == v) {
-                        orders.push(list[i])
-                        noList.push(list[i].no)
-                        //result.innerHTML += JSON.stringify(list[i]);
+                        orders.push(list[i]);
+                        noList.push(list[i].no);
                     }
                 }
                 resultToDOM(orders, (item.id == 'searchBtn' ? 'entered' : 'inputting'));
@@ -316,6 +335,7 @@
                 paid.value = '';
                 change.value = '';
                 search.disabled = '';
+                searchBtn.disabled = '';
                 paid.disabled = 'disabled';
                 resetBtn.disabled = 'disabled';
                 checkoutBtn.disabled = 'disabled';
@@ -325,25 +345,44 @@
             }
 
             function resultToDOM(orders, method) {
-                //console.log(method);
                 var fragment = result;
-/*************************************************/
-/*************************************************/
-/*************************************************/
                 for (var i = 0; i < orders.length; i++) {
+                    var div = '';
+                    var no =  orders[i].no;
                     var name = orders[i].name;
                     var id = orders[i].id;
                     var deptgrade = orders[i].deptgrade;
                     var pickday = moment(orders[i].pickday).format('M[ 月 ]DD[ 日]');
+                    var dayValue = parseInt(moment(orders[i].pickday).format('D'));
+                    var nowValue = parseInt(moment().format('D'));
                     if (method == 'inputting') {
-                        fragment.innerHTML += '<p>' + name + id + deptgrade + pickday + '</p>';
+                        div = document.createElement('div');
+                        div.id = 'no-' + no;
+                        div.className = 'col mb-2';
+                        div.innerHTML += '<div class="input-group mb-2">'
+                            + '<div class="input-group-prepend">'
+                                + '<div class="input-group-text"><input type="checkbox" name="orderCheck" ' + (dayValue == nowValue ? 'checked' : '') +' value="' + no + '" id="c"></div>'
+                            + '</div>'
+                            + '<div class="input-group-append">'
+                                + '<span class="input-group-text" id="n">' + name + '</span>'
+                                + '<span class="input-group-text" id="i">' + id + '</span>'
+                                + '<span class="input-group-text" id="d">' + deptgrade + '</span>'
+                                + '<span class="input-group-text" id="p">' + pickday + '</span>'
+                            + '</div>'
+                        + '</div>';
+                        fragment.appendChild(div);
                     }
-/*************************************************/
-/*************************************************/
-/*************************************************/
                     if (method == 'entered') {
+                        div = document.querySelector('#no-' + no);
+                        div.querySelector('#c').value = no;
+                        div.querySelector('#n').innerHTML = name;
+                        div.querySelector('#i').innerHTML = id;
+                        div.querySelector('#d').innerHTML = deptgrade;
+                        div.querySelector('#p').innerHTML = pickday;
                         var order = orders[i].order;
-                        //fragment.innerHTML += '<p>' + JSON.stringify(order) + '</p>';
+                        var orderTable = document.createElement('table');
+                        orderTable.className = 'md-2';
+                        var orderTbody = document.createElement('tbody');
                         for (var m in order) {
                             if (typeof order[m] != 'object') {
                                 continue;
@@ -352,37 +391,41 @@
                                 if (typeof order[m][p] != 'object') {
                                     continue;
                                 }
-                                fragment.innerHTML += '<p>' 
-                                + m + '／'
-                                + p + '／'
-                                + order[m][p].quantity + '／'
-                                + order[m][p].subtotal
-                                + '</p>';
+                                orderTbody.innerHTML += '<tr>'
+                                + '<td>' + m
+                                + '</td><td>' + p
+                                + '</td><td>' + order[m][p].quantity
+                                + '</td><td>' + order[m][p].subtotal
+                                + '</td>'
+                                + '</tr>';
                             }
                         }
+                        orderTable.appendChild(orderTbody);
+                        div.appendChild(orderTable);
                     }
-/*************************************************/
-/*************************************************/
-/*************************************************/
                 }
-/*************************************************/
-/*************************************************/
-/*************************************************/
             }
-
-
-
-
-
         }
     </script>
     <style>
         @import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
         @import url("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css");
+        td:nth-of-type(1) {
+            width: 6em;
+        }
+        td:nth-of-type(2) {
+            width: 15em;
+        }
+        td:nth-of-type(3) {
+            width: 2em;
+        }
+        td:nth-of-type(4) {
+            width: 2em;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container-fluid">
         <div id="title" class="h2">「蘭不住你」付款區</div>
         <div class="input-group mb-2 search">
             <div class="input-group-prepend">
@@ -394,7 +437,7 @@
             </div>
         </div>
     </div>
-    <div class="container">
+    <div class="container-fluid">
         <div class="input-group mb-2 total">
             <div class="input-group-prepend">
                 <span class="input-group-text">金額</span>
@@ -423,8 +466,8 @@
             </div>
         </div>
     </div>
-    <div class="container">
-        <div id="message" class="">
+    <div class="container-fluid">
+        <div id="message" class="mb-2">
             <div>共有&nbsp;<span id="countText">0</span>&nbsp;筆尚未付款的結果</div>
         </div>
         <div id="result" class="">
