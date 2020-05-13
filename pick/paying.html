@@ -207,15 +207,31 @@
                 }
                 parseResult(item, search.value);
                 var orderCheckItemList = document.querySelectorAll('input[name="orderCheck"]');
+                var orderCheckItemValueList = [];
                 for (var i = 0; i < orderCheckItemList.length; i++) {
                     if (orderCheckItemList[i].checked === false) {
                         noList.splice(noList.indexOf(orderCheckItemList[i]), 1);
-                        orders.splice(noList.indexOf(orderCheckItemList[i]), 1);
+                        //orders.splice(noList.indexOf(orderCheckItemList[i]), 1);
+                    } else {
+                        orderCheckItemValueList.push(parseInt(orderCheckItemList[i].value))
+                    }
+                }
+                for (var i = 0; i < orders.length; i++) {
+                    if (orderCheckItemValueList.indexOf(orders[i].no) == -1) {
+                        delete orders[i];
+                    }
+                }
+                for (var i = 0; i < orders.length; i++) {
+                    if (orders[i] ==  null) {
+                      orders.splice(i, 1);
+                      i--;
                     }
                 }
                 var gt = 0;
-                for (var i = 0; i < orders.length; i++) {
-                    gt += orders[i].total;
+                if (orders.length > 0) {
+                    for (var i = 0; i < orders.length; i++) {
+                        gt += orders[i].total;
+                    }
                 }
                 total.value = gt;
                 search.disabled = 'disabled';
@@ -369,6 +385,7 @@
                     var id = orders[i].id;
                     var deptgrade = orders[i].deptgrade;
                     var pickday = moment(orders[i].pickday).format('M[ 月 ]DD[ 日]');
+                    var coupon = orders[i].coupon;
                     var dayValue = parseInt(moment(orders[i].pickday).format('D'));
                     var nowValue = parseInt(moment().format('D'));
                     if (method == 'inputting') {
@@ -384,6 +401,8 @@
                                 + '<span class="input-group-text" id="i">' + id + '</span>'
                                 + '<span class="input-group-text" id="d">' + deptgrade + '</span>'
                                 + '<span class="input-group-text" id="p">' + pickday + '</span>'
+                                + '<span class="input-group-text" id="p">' + '折扣碼➡' + '</span>'
+                                + '<span class="input-group-text" id="p">' + coupon + '</span>'
                             + '</div>'
                         + '</div>';
                         fragment.appendChild(div);
