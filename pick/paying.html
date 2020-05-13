@@ -213,7 +213,7 @@
 
             function checkout() {
                 var c = paid.value - total.value;
-                if (c >= 0 && total.value > 0) {
+                if (c >= 0) {
                     change.value = c;
                     checkoutBtn.disabled = 'disabled';
                     paid.disabled = 'disabled';
@@ -381,7 +381,7 @@
                         div.querySelector('#p').innerHTML = pickday;
                         var order = orders[i].order;
                         var orderTable = document.createElement('table');
-                        orderTable.className = 'md-2';
+                            orderTable.className = 'mb-2';
                         var orderTbody = document.createElement('tbody');
                         for (var m in order) {
                             if (typeof order[m] != 'object') {
@@ -401,6 +401,7 @@
                             }
                         }
                         orderTable.appendChild(orderTbody);
+                        console.log(orderTable);
                         div.appendChild(orderTable);
                     }
                 }
