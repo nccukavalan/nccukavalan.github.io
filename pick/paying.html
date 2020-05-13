@@ -213,7 +213,7 @@
 
             function checkout() {
                 var c = paid.value - total.value;
-                if (c >= 0) {
+                if (c >= 0 || (c == 0 && total.value == 0)) {
                     change.value = c;
                     checkoutBtn.disabled = 'disabled';
                     paid.disabled = 'disabled';
