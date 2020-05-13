@@ -154,31 +154,46 @@
                 change.value = '';
             });
 
-            searchBtn.addEventListener('click', function(e){
+            searchBtn.addEventListener('click', searchBtnListener);
+            checkoutBtn.addEventListener('click', checkoutBtnListener);
+            sumbitBtn.addEventListener('click', submitListener);
+            resetBtn.addEventListener('click', resetBtnListener);
+            search.addEventListener('keydown', searchListener);
+            paid.addEventListener('keydown', paidListener);
+
+            function searchBtnListener(e){
                 entered(this);
                 $(paid).trigger('focus');
-            });
-            checkoutBtn.addEventListener('click', function(e){
+            }
+
+            function checkoutBtnListener(e){
                 checkout();
-            });
-            sumbitBtn.addEventListener('click', submitListener);
-            resetBtn.addEventListener('click', function(e){
+            }
+
+            function resetBtnListener(e){
                 reset();
                 $(search).trigger('focus');
-            });
-            search.addEventListener('keydown', function(e){
+            }
+
+            function searchListener(e){
                 if (e.code == 'Enter' || e.code == 'NumpadEnter') {
                 $(searchBtn).trigger('click');
                 }
-            });
-            paid.addEventListener('keydown', function(e){
+            }
+
+            function paidListener(e){
                 if (e.code == 'Enter' || e.code == 'NumpadEnter') {
                     $(checkoutBtn).trigger('click');
                 }
-            });
+            }
 
             function submitListener(e){
+                searchBtn.removeEventListener('click', searchBtnListener);
+                checkoutBtn.removeEventListener('click', checkoutBtnListener);
                 sumbitBtn.removeEventListener('click', submitListener);
+                resetBtn.removeEventListener('click', resetBtnListener);
+                search.removeEventListener('keydown', searchListener);
+                paid.removeEventListener('keydown', paidListener);
                 sumbit();
             }
 
@@ -346,6 +361,7 @@
 
             function resultToDOM(orders, method) {
                 var fragment = result;
+                //console.log(orders);
                 for (var i = 0; i < orders.length; i++) {
                     var div = '';
                     var no =  orders[i].no;
@@ -401,8 +417,9 @@
                             }
                         }
                         orderTable.appendChild(orderTbody);
-                        console.log(orderTable);
+                        //console.log(orderTable);
                         div.appendChild(orderTable);
+                        //console.log(div);
                     }
                 }
             }
