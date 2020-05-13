@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+    <title>取貨</title>
+    <!--jquery-->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!--bootstrap-->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <!--時間處理插件-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script>
+        var intervals = [];
+        document.addEventListener('DOMContentLoaded', timer);
+
+        var list = [];
+        var noList = [];
+
+        function timer() {
+            intervals.push(setInterval(getDOM, 1000));
+        }
+
+        var confirmBtn = '';
+        var content = '';
+        var name = '';
+        var deptgrade = '';
+        var id = '';
+        var aDOM = [];
+        var lookupStatus = 0;
+
+        function getDOM() {
+            //console.log(lookupStatus)
+            for (var i = 0; i < intervals.length; i++) {
+                clearInterval(intervals[i]);
+                delete intervals[i];
+            }
+            intervals = [];
+            confirmBtn = document.querySelectorAll('.confirm');
+            content = document.querySelector('#content');
+            nameDiv = document.querySelector('#name');
+            deptgrade = document.querySelector('#deptgrade');
+            id = document.querySelector('#id');
+            for (var i = 0; i < 8; i++) {
+                aDOM.push(document.querySelector('.merchant#a' + (i+1)));
+            }
+            getList();
+            return;
+        }
+        function getList() {
+            var dataset = '1DvkQrf5wLcMfFKcMm2btBYHui0ZtbqxsiilBVb4fy68';
+            var datasetNumber = '1';
+            $.get("https://spreadsheets.google.com/feeds/list/" + dataset + "/" + datasetNumber + "/public/values?alt=json")
+            .then(function(data) { readData(data); })
+            .then(main);
+            return;
+        }
+        function readData(data) {
+            var d = data.feed.entry;
+            var tempList = [];
+            var firstTimestamp = Infinity;
+            //console.log(firstTimestamp)
+            for (var i = 1; i < d.length; i++) {
+                var status = parseInt(d[i].gsx$status.$t);
+                if (status != lookupStatus) {
+                    continue;
+                }
+                var paidTimestamp = new Date(d[i].gsx$paidtimestamp.$t.replace(/-/g, '/'));
+                //console.log(paidTimestamp.valueOf())
+                if (paidTimestamp.valueOf() < firstTimestamp.valueOf()) {
+                    firstTimestamp = paidTimestamp;
+                }
+                var no = parseInt(d[i].gsx$no.$t);
+                var index = d[i].gsx$index.$t;
+                var name = d[i].gsx$name.$t;
+                //var hiddenname = d[i].gsx$hiddenname.$t;
+                var id = d[i].gsx$id.$t;
+                //var dept = d[i].gsx$dept.$t;
+                //var deptname = d[i].gsx$deptname.$t;
+                //var grade = parseInt(d[i].gsx$grade.$t);
+                var deptgrade = d[i].gsx$deptgrade.$t;
+                var phoneno = d[i].gsx$phoneno.$t;
+                var email = d[i].gsx$email.$t;
+                var pickday = new Date(d[i].gsx$pickday.$t.split(' ')[0].replace(/-/g, '/'));
+                var order = parseOrder();
+                function parseOrder() {
+                    var obj = JSON.parse(d[i].gsx$order.$t);
+                    delete obj.outputText;
+                    return obj;
+                }
+                list.push({
+                    'status': status,
+                    'paidTimestamp': paidTimestamp,
+                    'no': no,
+                    'index': index,
+                    'name': name,
+                    /*'hiddenname': hiddenname,*/
+                    'id': id,
+                    /*'dept': dept,
+                    'deptname': deptname,
+                    'grade': grade,*/
+                    'deptgrade': deptgrade,
+                    'phoneno': phoneno,
+                    'email': email,
+                    'pickday': pickday,
+                    'order': order
+                });
+            }
+        }
+
+        function main() {
+            ordersToDOM(list);
+            for (var i = 0; i < confirmBtn.length; i++) {
+                confirmBtn[i].disabled = '';
+                confirmBtn[i].addEventListener('click', confirmListener);
+            }
+            function confirmListener(e){
+                for (var i = 0; i < confirmBtn.length; i++) {
+                    confirmBtn[i].removeEventListener('click', confirmListener);
+                }
+                confirm(this.value);
+            }
+        }
+
+        function ordersToDOM(list) {
+            //console.log(list)
+            var merchants = {
+                '諾貝爾': {'index': 1, 'order': {}},
+                '三源行': {'index': 2, 'order': {}},
+                '宜蘭餅': {'index': 3, 'order': {}},
+                '義珍香': {'index': 4, 'order': {}},
+                '亞典蛋糕': {'index': 5, 'order': {}},
+                '蘭田穀王': {'index': 6, 'order': {}},
+                '一米特': {'index': 7, 'order': {}},
+                '奕順軒': {'index': 8, 'order': {}},
+            };
+            for (var i = 0; i < list.length; i++) {
+                var order = list[i].order;
+                for (var m in order) {
+                    if (typeof order[m] != 'object') {
+                        continue;
+                    }
+                    for (var p in order[m]) {
+                        if (typeof order[m][p] != 'object') {
+                            continue;
+                        }
+                        if (!(p in merchants[m].order)) {
+                            merchants[m].order[p] = 0;
+                        }
+                        merchants[m].order[p] += order[m][p].quantity;
+                    }
+                }
+            }
+
+            for (var i = 0; i < aDOM.length; i++) {
+                aDOM[i].innerHTML = '';
+            }
+
+            for (var m in merchants) {
+                if (Object.keys(merchants[m].order).length != 0) {
+                    var table = document.createElement('table');
+                    var tbody = document.createElement('tbody');
+                    for (var p in merchants[m].order) {
+                        var quantity = merchants[m].order[p];
+                        tbody.innerHTML += '<tr>'
+                        + '<td class="p">' + p.replace(/_/g, ' ')
+                        + '</td><td class="q">' + quantity
+                        + '</td>'
+                        + '</tr>';
+                    }
+                    table.appendChild(tbody)
+                    aDOM[merchants[m].index-1].appendChild(table)
+                } else {
+                    aDOM[merchants[m].index-1].innerHTML += '-';
+                }
+            }
+        }
+
+        function confirm(lookup) {
+            lookupStatus = parseInt(lookup);
+            for (var i = 0; i < confirmBtn.length; i++) {
+                confirmBtn[i].disabled = 'disabled';
+            }
+            list = [];
+            noList = [];
+            for (var i = 0; i < aDOM.length; i++) {
+                aDOM[i].innerHTML = 'Loading...';
+            }
+            timer();
+            return;
+        }
+
+    </script>
+    <style>
+        @import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
+        @import url("https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css");
+        .merchant, .info {
+            border: 1px #000 solid;
+        }
+        .merchant {
+            height: 30em;
+        }
+        table {
+            width: 100%;
+        }
+        td {
+            font-size: 1em;
+        }
+        td.p {
+            width: 85%;
+        }
+        td.q {
+            width: 15%;
+        }
+        tr {
+            border-bottom: 1px #000 solid;
+        }
+        body {
+            margin: auto;
+            width: 90%;
+        }
+        .col {
+            margin-left: 0.25em;
+            margin-right: 0.25em;
+            padding-left: 0.25em;
+            padding-right: 0.25em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div id="title" class="h2">「蘭不住你」取貨區</div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div class="row mb-3">
+            <div class="col">
+                <button type="button" class="confirm btn btn-outline-primary btn-block" value="0" disabled>未取貨</button>
+            </div>
+            <div class="col">
+                <button type="button" class="confirm btn btn-outline-primary btn-block" value="1" disabled>正在取貨</button>
+            </div>
+            <div class="col">
+                <button type="button" class="confirm btn btn-outline-primary btn-block" value="2" disabled>已取貨</button>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div class="row mb-1">
+            <div class="col title">諾貝爾</div>
+            <div class="col title">三源行</div>
+            <div class="col title">宜蘭餅</div>
+            <div class="col title">義珍香</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col merchant" id="a1">Loading...</div>
+            <div class="col merchant" id="a2">Loading...</div>
+            <div class="col merchant" id="a3">Loading...</div>
+            <div class="col merchant" id="a4">Loading...</div>
+        </div>
+        <div class="row mb-1">
+            <div class="col title">亞典蛋糕</div>
+            <div class="col title">蘭田穀王</div>
+            <div class="col title">一米特</div>
+            <div class="col title">奕順軒</div>
+        </div>
+        <div class="row mb-3">
+            <div class="col merchant" id="a5">Loading...</div>
+            <div class="col merchant" id="a6">Loading...</div>
+            <div class="col merchant" id="a7">Loading...</div>
+            <div class="col merchant" id="a8">Loading...</div>
+        </div>
+    </div>
+</body>
+</html>
