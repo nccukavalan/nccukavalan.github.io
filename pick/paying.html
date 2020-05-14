@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-    <title>付款</title>
-    <!--jquery-->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <!--bootstrap-->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
-    <!--時間處理插件-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <title>付款</title><!--jquery-->
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js">
+    </script><!--bootstrap-->
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js">
+    </script><!--時間處理插件-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js">
+    </script>
     <script>
         var intervals = [];
         document.addEventListener('DOMContentLoaded', timer);
@@ -398,17 +401,17 @@
                         div.className = 'col mb-2';
                         div.innerHTML += '<div class="input-group mb-2">'
                             + '<div class="input-group-prepend">'
-                                + '<div class="input-group-text"><input type="checkbox" name="orderCheck" ' + (dayValue >= nowValue ? 'checked' : '') +' value="' + no + '" id="c"></div>'
-                            + '</div>'
+                                + '<div class="input-group-text"><input type="checkbox" name="orderCheck" ' + (dayValue >= nowValue ? 'checked' : '') +' value="' + no + '" id="c"><\/div>'
+                            + '<\/div>'
                             + '<div class="input-group-append">'
-                                + '<span class="input-group-text" id="n">' + name + '</span>'
-                                + '<span class="input-group-text" id="i">' + id + '</span>'
-                                + '<span class="input-group-text" id="d">' + deptgrade + '</span>'
-                                + '<span class="input-group-text" id="p">' + pickday + '</span>'
-                                + '<span class="input-group-text" id="p">' + '折扣碼➡' + '</span>'
-                                + '<span class="input-group-text" id="p">' + coupon + '</span>'
-                            + '</div>'
-                        + '</div>';
+                                + '<span class="input-group-text" id="n">' + name + '<\/span>'
+                                + '<span class="input-group-text" id="i">' + id + '<\/span>'
+                                + '<span class="input-group-text" id="d">' + deptgrade + '<\/span>'
+                                + '<span class="input-group-text" id="p">' + pickday + '<\/span>'
+                                + '<span class="input-group-text" id="p">' + '折扣碼➡' + '<\/span>'
+                                + '<span class="input-group-text" id="p">' + coupon + '<\/span>'
+                            + '<\/div>'
+                        + '<\/div>';
                         fragment.appendChild(div);
                     }
                     if (method == 'entered') {
@@ -432,11 +435,11 @@
                                 }
                                 orderTbody.innerHTML += '<tr>'
                                 + '<td>' + m
-                                + '</td><td>' + p
-                                + '</td><td>' + order[m][p].quantity
-                                + '</td><td>' + order[m][p].subtotal
-                                + '</td>'
-                                + '</tr>';
+                                + '<\/td><td>' + p
+                                + '<\/td><td>' + order[m][p].quantity
+                                + '<\/td><td>' + order[m][p].subtotal
+                                + '<\/td>'
+                                + '<\/tr>';
                             }
                         }
                         orderTable.appendChild(orderTbody);
@@ -467,14 +470,15 @@
 </head>
 <body>
     <div class="container-fluid">
-        <div id="title" class="h2">「蘭不住你」付款區</div>
+        <div class="h2" id="title">
+            「蘭不住你」付款區
+        </div>
         <div class="input-group mb-2 search">
             <div class="input-group-prepend">
                 <span class="input-group-text">學號</span>
-            </div>
-            <input type="text" id="search" class="form-control" placeholder="學號" disabled>
+            </div><input class="form-control" disabled id="search" placeholder="學號" type="text">
             <div class="input-group-append" id="btn-search">
-                <button type="button" id="searchBtn" class="btn btn-outline-primary">輸入</button>
+                <button class="btn btn-outline-primary" id="searchBtn" type="button">輸入</button>
             </div>
         </div>
     </div>
@@ -482,37 +486,35 @@
         <div class="input-group mb-2 total">
             <div class="input-group-prepend">
                 <span class="input-group-text">金額</span>
-            </div>
-            <input type="text" id="total" class="form-control" placeholder="金額" disabled>
+            </div><input class="form-control" disabled id="total" placeholder="金額" type="text">
             <div class="input-group-append" id="btn-total">
-                <button type="button" id="resetBtn" class="btn btn-outline-primary" disabled>重設</button>
+                <button class="btn btn-outline-primary" disabled id="resetBtn" type="button">重設</button>
             </div>
         </div>
         <div class="input-group mb-2 paid">
             <div class="input-group-prepend">
                 <span class="input-group-text">收您</span>
-            </div>
-            <input type="text"id="paid" class="form-control" placeholder="實收金額" disabled aria-describedby="btn-paid">
+            </div><input aria-describedby="btn-paid" class="form-control" disabled id="paid" placeholder="實收金額" type="text">
             <div class="input-group-append" id="btn-paid">
-                <button type="button" id="checkout" class="btn btn-outline-primary" disabled>找零</button>
+                <button class="btn btn-outline-primary" disabled id="checkout" type="button">找零</button>
             </div>
         </div>
         <div class="input-group mb-2 change">
             <div class="input-group-prepend">
                 <span class="input-group-text">找零</span>
-            </div>
-            <input type="text" id="change" class="form-control" placeholder="找零" disabled aria-describedby="btn-change">
+            </div><input aria-describedby="btn-change" class="form-control" disabled id="change" placeholder="找零" type="text">
             <div class="input-group-append" id="btn-change">
-                <button type="button" id="sumbit" class="btn btn-outline-primary" disabled>確認</button>
+                <button class="btn btn-outline-primary" disabled id="sumbit" type="button">確認</button>
             </div>
         </div>
     </div>
     <div class="container-fluid">
-        <div id="message" class="mb-2">
-            <div>共有&nbsp;<span id="countText">0</span>&nbsp;筆尚未付款的結果</div>
+        <div class="mb-2" id="message">
+            <div>
+                共有&nbsp;<span id="countText">0</span>&nbsp;筆尚未付款的結果
+            </div>
         </div>
-        <div id="result" class="">
-        </div>
+        <div class="" id="result"></div>
     </div>
 </body>
 </html>
