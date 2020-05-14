@@ -162,13 +162,23 @@
                     var tbody = document.createElement('tbody');
                     for (var p in merchants[m].order) {
                         var noticeP = false;
-                        if (p.match('草莓奶凍') || p.match('拿破崙')) {
+                        var noticePClass = '';
+                        if (p.match('草莓奶凍') || p.match('派．巧克')) {
                             noticeP = true;
+                            noticePClass = 'aaa';
+                        }
+                        if (p.match('純')) {
+                            noticeP = true;
+                            noticePClass = 'bbb';
+                        }
+                        if (p.match('輕')) {
+                            noticeP = true;
+                            noticePClass = 'ccc';
                         }
                         var quantity = merchants[m].order[p];
                         tbody.innerHTML += '<tr>'
                         + '<td class="q">' + quantity
-                        + '</td><td class="p">' + (noticeP ? '<em>' : '') + p.replace(/_/g, ' ') + (noticeP ? '</em>' : '')
+                        + '</td><td class="p">' + (noticeP ? '<em class="' + noticePClass + '">' : '') + p.replace(/_/g, ' ') + (noticeP ? '</em>' : '')
                         + '</td>'
                         + '</tr>';
                     }
@@ -231,10 +241,20 @@
             padding-left: 0.25em;
             padding-right: 0.25em;
         }
-        em {
+        em.aaa {
             font-style: normal;
             font-weight: 700;
             color: #F00;
+        }
+        em.bbb {
+            font-style: normal;
+            font-weight: 700;
+            color: #090;
+        }
+        em.ccc {
+            font-style: normal;
+            font-weight: 700;
+            color: #00F;
         }
     </style>
 </head>
