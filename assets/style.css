@@ -37,8 +37,12 @@ ul, li {
 .wrapper.hide .timer {
     display: none;
 }
+.wrapper.hide .confirmBox {
+    display: none;
+}
 .timer,
-.noticeBox {
+.noticeBox,
+.confirmBox {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -50,12 +54,20 @@ ul, li {
     white-space:nowrap;
     box-shadow: 0px 0px 5px 2px #33333380;
 }
-.noticeBox {
+
+.timer {
+    position: absolute;
+    z-index: 10000;
+}
+
+.noticeBox,
+.confirmBox {
     width: 75%;
     align-items: center;
     height: 75%;
 }
-.noticeText {
+.noticeText,
+.confirmText {
     background-color: #FFFFFF;
     overflow-y: scroll;
     margin: 1em;
@@ -70,22 +82,23 @@ ul, li {
     border: 0.05em #8695A3 solid;
     white-space: normal;
 }
-.noticeText p {
+.noticeText.init-notice p,
+.confirmText.init-notice p {
     margin-bottom: 1em;
     text-indent: -1em;
 }
-.noticeText p:nth-last-child(1) {
+.noticeText.init-notice p:nth-last-child(1),
+.confirmText.init-notice p:nth-last-child(1) {
     margin-bottom: 0;
 }
-.noticeText p::before {
+.noticeText.init-notice p::before,
+.confirmText.init-notice p::before {
     content: '👉';
 }
-.closeBtn {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    bottom: -1em;
+.closeBtn,
+.submitBtn,
+.yBtn,
+.nBtn {
     padding: 0.5em;
     border-radius: 2em;
     border: 0.1em #8695A3 solid; /*button border line*/
@@ -93,7 +106,50 @@ ul, li {
     color: #333333; /*button text color*/
     box-shadow: 0px 0px 5px 2px #F4F29B80;
 }
-.closeBtn:hover {
+.submitBtn {
+    background-color: #516F6B; /*button color*/
+    color: #FFFFFF; /*button text color*/
+}
+.yBtn,
+.nBtn {
+    position: absolute;
+    //display: flex;
+    //justify-content: center;
+    //align-items: center;
+    bottom: -1em;
+    width: 6em;
+}
+
+.yBtn {
+    //left: 30%;
+}
+.nBtn {
+    //right: 30%;
+}
+
+.closeBtn, .submitBtn {
+    position: absolute;
+    display: flex;
+    bottom: -1em;
+}
+
+.closeBtn {
+    justify-content: center;
+    align-items: center;
+    right: calc(50%-3em);
+    left: calc(50%-3em);
+}
+
+.submitBtn.checkout {
+    margin-left: 1em; 
+    left: 50%;
+}
+.closeBtn.checkout {
+    margin-right: 1em; 
+    right: 50%;
+}
+
+.closeBtn:hover, .submitBtn:hover {
     background-color: #264B47;
     border: 0.1em #264B47 solid; /*button border line*/
     color: #FFFFFF;
@@ -178,7 +234,7 @@ button {
     margin-bottom: 2em;
 
 }
-button#submit {
+button#checkout {
     width: 10em;
     height: 3em;
     font-size: 1.2em;
@@ -188,10 +244,22 @@ button#submit {
     background-color: #DEDCD2; /*button color*/
     color: #65707A; /*button text color*/
 }
-button#submit:hover {
+button#checkout:hover {
     border: 0.05em #264B47 solid; /*button border line -hover*/
     background-color: #264B47; /*button color -hover*/
     color: #FFFFFF; /*button text color -hover*/
+}
+button#checkout[disabled] {
+    border: 0.2em #8695A3 solid; /*button border line*/
+    background-color: #DEDCD2; /*button color*/
+    opacity: 0.3;
+    color: #65707A;
+    cursor: default;
+}
+button#checkout[disabled]:hover {
+    border: 0.2em #8695A3 solid; /*button border line*/
+    background-color: #DEDCD2; /*button color*/
+    color: #65707A; /*button text color*/
 }
 .hide {
     display: none;
@@ -339,6 +407,9 @@ button#submit:hover {
     width: 100%;
     margin-bottom: 0.5em;
 }
+.container .orderContainer .meta.upper {
+    margin-bottom: 0em;
+}
 .container .orderContainer .meta>* {
     font-size: 0.75em;
     height: 3em;
@@ -458,10 +529,6 @@ tr {
     border-bottom: 0.05em #8695A3 solid;
     //background-color: #FFFFFF;
 }
-tr.tr-hide,
-tbody.tbody-hide {
-    display: none;
-}
 thead tr {
     background-color: #264B47;
     color: #FFFFFF;
@@ -501,7 +568,7 @@ tr td div>* {
     content: '｜點我跳到結帳區';
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 769px) {
     #fulfilled {
         display: none;
     }
@@ -594,7 +661,7 @@ tr td div>* {
         width: 100%;
     }
 }
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 769px) {
     #timer,
     #navBtn {
         display: none;
