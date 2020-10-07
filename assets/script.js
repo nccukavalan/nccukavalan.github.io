@@ -187,7 +187,7 @@ function main() {
                 btn.type = 'button';
                 btn.name = moment(dateValue).format('YYYY-MM-DD');
                 btn.value = moment(dateValue).format('YYYY-MM-DD') + ' ' + available[i].period[j];
-                btn.innerHTML = moment(dateValue).format('M[月]D[日]') + '（' + week[dateValue.getUTCDay()] + '）' + available[i].period[j];
+                btn.innerHTML = moment(dateValue).format('M[月]D[日]') + '（' + week[dateValue.getDay()] + '）' + available[i].period[j];
                 radioRow.appendChild(btn);
                 radio.appendChild(radioRow);
             }
